@@ -46,7 +46,7 @@ export function BottomNav() {
   const { pathname } = useLocation();
 
   return (
-    <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-100">
+    <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-terminal-bg border-t border-terminal-border">
       <div className="flex">
         {navItems.map((item) => {
           const active = pathname === item.href;
@@ -57,15 +57,17 @@ export function BottomNav() {
               className={cn(
                 "flex-1 flex flex-col items-center gap-1 py-3 transition-colors",
                 active
-                  ? "text-lime-600"
-                  : "text-slate-400 hover:text-slate-600",
+                  ? "text-amber-glow"
+                  : "text-terminal-muted hover:text-terminal-secondary",
               )}
             >
               {item.icon(active)}
               <span
                 className={cn(
                   "text-xs font-medium",
-                  active ? "text-lime-600" : "",
+                  active
+                    ? "text-amber-glow font-mono text-[9px] tracking-[0.15em]"
+                    : "font-mono text-[9px] tracking-[0.15em]",
                 )}
               >
                 {item.label}

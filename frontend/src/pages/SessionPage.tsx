@@ -91,50 +91,54 @@ const filters: { label: string; value: Filter }[] = [
 ];
 
 function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  });
+  return new Date(dateStr)
+    .toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    })
+    .toUpperCase();
 }
 
 function SessionCard({ session }: { session: Session }) {
   const isMatch = session.type === "match";
-  const accentColor = isMatch
+  const accentBar = isMatch
     ? session.result === "win"
-      ? "bg-emerald-400"
-      : "bg-rose-400"
-    : "bg-lime-400";
+      ? "bg-phosphor-green"
+      : "bg-phosphor-red"
+    : "bg-amber-glow";
 
   return (
-    <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex gap-3 active:scale-[0.99] transition-transform cursor-pointer">
-      {/* Colored left accent bar */}
-      <div
-        className={cn(
-          "mt-0.5 w-1.5 self-stretch rounded-full shrink-0",
-          accentColor,
-        )}
-      />
+    <div className="bg-terminal-surface border border-terminal-border rounded active:scale-[0.995] transition-transform cursor-pointer overflow-hidden flex">
+      {/* Status accent bar */}
+      <div className={cn("w-0.75 shrink-0", accentBar)} />
 
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <span
-              className={cn(
-                "inline-block text-xs font-semibold px-2 py-0.5 rounded-full mb-1.5",
-                isMatch
-                  ? "bg-orange-50 text-orange-600"
-                  : "bg-lime-50 text-lime-700",
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="text-[10px] font-mono tracking-[0.15em] text-amber-glow">
+                {isMatch ? "MATCH" : "TRAIN"}
+              </span>
+              {session.result && (
+                <span
+                  className={cn(
+                    "text-[10px] font-mono tracking-[0.15em]",
+                    session.result === "win"
+                      ? "text-phosphor-green"
+                      : "text-phosphor-red",
+                  )}
+                >
+                  · {session.result.toUpperCase()}
+                </span>
               )}
-            >
-              {isMatch ? "Match" : "Training"}
-            </span>
-            <h3 className="font-semibold text-slate-900 text-sm leading-snug">
+            </div>
+            <h3 className="font-medium text-terminal-fg text-sm leading-snug">
               {session.title}
             </h3>
             {session.opponent && (
-              <p className="text-xs text-slate-500 mt-0.5">
-                vs. {session.opponent}
+              <p className="text-xs font-mono text-terminal-secondary mt-0.5">
+                vs {session.opponent}
               </p>
             )}
           </div>
@@ -143,26 +147,28 @@ function SessionCard({ session }: { session: Session }) {
             {session.score && (
               <p
                 className={cn(
-                  "text-sm font-semibold tabular-nums",
+                  "text-sm font-mono font-medium tabular-nums",
                   session.result === "win"
-                    ? "text-emerald-600"
-                    : "text-rose-500",
+                    ? "text-phosphor-green"
+                    : "text-phosphor-red",
                 )}
               >
                 {session.score}
               </p>
             )}
-            <p className="text-xs text-slate-400 mt-0.5">{session.duration}</p>
+            <p className="text-xs font-mono text-terminal-muted mt-0.5">
+              {session.duration}
+            </p>
           </div>
         </div>
 
         {session.notes && (
-          <p className="text-xs text-slate-500 mt-2 line-clamp-2 leading-relaxed">
+          <p className="text-xs text-terminal-secondary mt-3 line-clamp-2 leading-relaxed border-t border-terminal-border pt-2.5">
             {session.notes}
           </p>
         )}
 
-        <p className="text-xs text-slate-400 mt-2">
+        <p className="text-[10px] font-mono tracking-widest text-terminal-muted mt-2.5">
           {formatDate(session.date)}
         </p>
       </div>
@@ -180,51 +186,51 @@ export function SessionPage() {
   return (
     <div>
       {/* Page header */}
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+          <p className="text-[10px] font-mono tracking-[0.2em] text-terminal-muted mb-1">
+            SESSION LOG
+          </p>
+          <h1 className="text-2xl font-semibold text-terminal-fg tracking-tight">
             Sessions
           </h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            {sessions.length} sessions logged
-          </p>
         </div>
         <button
           type="button"
-          className="bg-lime-400 hover:bg-lime-500 active:bg-lime-600 text-slate-900 font-semibold text-sm px-4 py-2 rounded-full transition-colors"
+          className="border border-amber-glow text-amber-glow font-mono text-xs tracking-widest px-4 py-2 hover:bg-amber-glow/10 active:bg-amber-glow/20 transition-colors"
         >
-          + New
+          + NEW
         </button>
       </div>
 
       {/* Filter tabs */}
-      <div className="flex gap-2 mb-5">
+      <div className="flex gap-0 mb-5 border-b border-terminal-border">
         {filters.map((f) => (
           <button
             key={f.value}
             type="button"
             onClick={() => setFilter(f.value)}
             className={cn(
-              "px-4 py-1.5 rounded-full text-sm font-medium transition-colors",
+              "px-4 py-2 font-mono text-xs tracking-[0.15em] transition-colors border-b-2 -mb-px",
               filter === f.value
-                ? "bg-slate-900 text-white"
-                : "bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:bg-slate-50",
+                ? "text-amber-glow border-amber-glow"
+                : "text-terminal-muted border-transparent hover:text-terminal-secondary",
             )}
           >
-            {f.label}
+            {f.label.toUpperCase()}
           </button>
         ))}
       </div>
 
       {/* Session list */}
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2">
         {filtered.length > 0 ? (
           filtered.map((session) => (
             <SessionCard key={session.id} session={session} />
           ))
         ) : (
-          <p className="text-center text-slate-400 text-sm py-12">
-            No sessions found.
+          <p className="text-center font-mono text-terminal-muted text-xs py-12 tracking-widest">
+            NO SESSIONS FOUND
           </p>
         )}
       </div>
