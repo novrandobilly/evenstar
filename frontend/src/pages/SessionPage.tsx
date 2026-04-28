@@ -1,237 +1,280 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { EvenStarButton } from "@/components/EvenStarButton";
+import { EvenStarText } from "@/components/EvenStarText";
 import { cn } from "@/lib/utils";
-
-type SessionType = "training" | "match";
-type Filter = "all" | SessionType;
-
-interface Session {
-  id: string;
-  type: SessionType;
-  title: string;
-  date: string;
-  duration: string;
-  notes?: string;
-  score?: string;
-  result?: "win" | "loss";
-  opponent?: string;
-}
-
-const sessions: Session[] = [
-  {
-    id: "1",
-    type: "match",
-    title: "Singles Match",
-    date: "2025-04-24",
-    duration: "1h 40m",
-    opponent: "Marcus Hill",
-    score: "6-3, 4-6, 7-5",
-    result: "win",
-  },
-  {
-    id: "2",
-    type: "training",
-    title: "Baseline Drills",
-    date: "2025-04-22",
-    duration: "1h 30m",
-    notes: "Focused on cross-court backhands and topspin approach shots.",
-  },
-  {
-    id: "3",
-    type: "training",
-    title: "Serve & Volley",
-    date: "2025-04-20",
-    duration: "1h 15m",
-    notes:
-      "First-serve percentage improved to 68%. Needs more work on kick serve placement.",
-  },
-  {
-    id: "4",
-    type: "match",
-    title: "Club League Match",
-    date: "2025-04-17",
-    duration: "2h 05m",
-    opponent: "Sara Kovac",
-    score: "3-6, 5-7",
-    result: "loss",
-  },
-  {
-    id: "5",
-    type: "training",
-    title: "Fitness & Footwork",
-    date: "2025-04-14",
-    duration: "45m",
-    notes:
-      "Ladder drills, split-step timing, and short-court sprinting circuits.",
-  },
-  {
-    id: "6",
-    type: "match",
-    title: "Doubles Match",
-    date: "2025-04-10",
-    duration: "1h 20m",
-    opponent: "Chen / Park",
-    score: "6-4, 6-2",
-    result: "win",
-  },
-  {
-    id: "7",
-    type: "training",
-    title: "Mental Toughness",
-    date: "2025-04-07",
-    duration: "1h",
-    notes:
-      "Practiced tiebreak situations and pressure points with coach. Strong finish.",
-  },
-];
-
-const filters: { label: string; value: Filter }[] = [
-  { label: "All", value: "all" },
-  { label: "Training", value: "training" },
-  { label: "Match", value: "match" },
-];
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr)
-    .toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-    })
-    .toUpperCase();
-}
+import {
+  filters,
+  formatDate,
+  formatSets,
+  getMatchSubsessions,
+  getTrainingSubsessions,
+  hasMatches,
+  hasTraining,
+  isMatchSubsession,
+  sessions,
+  summarizeRecord,
+  type Filter,
+  type Session,
+} from "@/data/sessions";
 
 function SessionCard({ session }: { session: Session }) {
-  const isMatch = session.type === "match";
-  const accentBar = isMatch
-    ? session.result === "win"
-      ? "bg-phosphor-green"
-      : "bg-phosphor-red"
-    : "bg-amber-glow";
+  const navigate = useNavigate();
+  const trainingCount = getTrainingSubsessions(session).length;
+  const matchCount = getMatchSubsessions(session).length;
+  const mixed = trainingCount > 0 && matchCount > 0;
+  const typeLabel = mixed
+    ? "Training + Match"
+    : trainingCount > 0
+      ? "Training"
+      : "Match";
 
   return (
-    <div className="bg-terminal-surface border border-terminal-border rounded active:scale-[0.995] transition-transform cursor-pointer overflow-hidden flex">
-      {/* Status accent bar */}
-      <div className={cn("w-0.75 shrink-0", accentBar)} />
+    <button
+      type="button"
+      onClick={() => navigate(`/sessions/${session.id}`)}
+      className="group relative w-full cursor-pointer overflow-hidden rounded-xl border border-ivory-rule/90 bg-linear-to-b from-ivory to-ivory-dark/40 px-4 py-3 mt-3 first:mt-0 text-left shadow-[0_1px_0_rgba(29,61,42,0.08)] transition-all hover:-translate-y-px hover:shadow-[0_6px_16px_rgba(29,61,42,0.08)]"
+    >
+      {/* Header Row: Type label, Duration/Date/Chevron */}
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <EvenStarText
+          as="span"
+          variant="label"
+          tone="accent"
+          caps
+          className="font-semibold rounded-sm border border-gold/35 bg-gold-faint/60 px-2 py-0.5 shrink-0"
+        >
+          {typeLabel}
+        </EvenStarText>
 
-      <div className="flex-1 min-w-0 p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-[10px] font-mono tracking-[0.15em] text-amber-glow">
-                {isMatch ? "MATCH" : "TRAIN"}
-              </span>
-              {session.result && (
-                <span
-                  className={cn(
-                    "text-[10px] font-mono tracking-[0.15em]",
-                    session.result === "win"
-                      ? "text-phosphor-green"
-                      : "text-phosphor-red",
-                  )}
-                >
-                  · {session.result.toUpperCase()}
-                </span>
-              )}
-            </div>
-            <h3 className="font-medium text-terminal-fg text-sm leading-snug">
-              {session.title}
-            </h3>
-            {session.opponent && (
-              <p className="text-xs font-mono text-terminal-secondary mt-0.5">
-                vs {session.opponent}
-              </p>
-            )}
-          </div>
-
-          <div className="text-right shrink-0">
-            {session.score && (
-              <p
-                className={cn(
-                  "text-sm font-mono font-medium tabular-nums",
-                  session.result === "win"
-                    ? "text-phosphor-green"
-                    : "text-phosphor-red",
-                )}
-              >
-                {session.score}
-              </p>
-            )}
-            <p className="text-xs font-mono text-terminal-muted mt-0.5">
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="text-right">
+            <EvenStarText
+              as="p"
+              variant="meta"
+              tone="muted"
+              numeric
+              className="text-[11px]"
+            >
               {session.duration}
-            </p>
+            </EvenStarText>
+            <EvenStarText
+              as="p"
+              variant="label"
+              tone="accent"
+              caps
+              className="text-[10px] text-gold/75 tracking-widest"
+            >
+              {formatDate(session.date)}
+            </EvenStarText>
           </div>
+          {/* Chevron indicator */}
+          <svg
+            className="w-4 h-4 text-club-green/60 group-hover:translate-x-1 transition-transform"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
         </div>
-
-        {session.notes && (
-          <p className="text-xs text-terminal-secondary mt-3 line-clamp-2 leading-relaxed border-t border-terminal-border pt-2.5">
-            {session.notes}
-          </p>
-        )}
-
-        <p className="text-[10px] font-mono tracking-widest text-terminal-muted mt-2.5">
-          {formatDate(session.date)}
-        </p>
       </div>
-    </div>
+
+      {/* Session Title */}
+      <EvenStarText
+        as="h3"
+        variant="title"
+        className="text-[13px] leading-snug font-semibold text-club-green/85 mb-3"
+      >
+        {session.title}
+      </EvenStarText>
+      {matchCount > 0 && (
+        <div className="mb-3">
+          <EvenStarText
+            as="span"
+            variant="label"
+            tone="muted"
+            caps
+            className="font-semibold rounded-sm border border-ivory-rule bg-ivory/70 px-2 py-0.5 inline-block"
+          >
+            {summarizeRecord(getMatchSubsessions(session))}
+          </EvenStarText>
+        </div>
+      )}
+
+      {/* Subsessions: Full width */}
+      <div className="space-y-2">
+        {session.subsessions.map((subsession) => (
+          <div
+            key={subsession.id}
+            className={cn(
+              "rounded-lg border border-ivory-rule/80 border-l-4 p-2.5 bg-ivory/75",
+              isMatchSubsession(subsession)
+                ? "border-l-club-green-mid"
+                : "border-l-gold",
+            )}
+          >
+            {isMatchSubsession(subsession) ? (
+              <>
+                <div className="flex items-center justify-between gap-3 mb-1">
+                  <EvenStarText
+                    as="p"
+                    variant="label"
+                    tone="muted"
+                    caps
+                    className="truncate font-semibold"
+                  >
+                    {subsession.event ?? "Match"}
+                  </EvenStarText>
+                  <EvenStarText
+                    as="p"
+                    variant="label"
+                    caps
+                    className={cn(
+                      "font-semibold rounded-sm px-2 py-0.5 border shrink-0",
+                      subsession.result === "win"
+                        ? "text-win border-win/25 bg-win/8"
+                        : subsession.result === "loss"
+                          ? "text-loss border-loss/25 bg-loss/8"
+                          : "text-gold border-gold/25 bg-gold/8",
+                    )}
+                  >
+                    {subsession.result}
+                  </EvenStarText>
+                </div>
+                <EvenStarText
+                  as="p"
+                  variant="meta"
+                  tone="muted"
+                  className="text-[11px] mb-0.5"
+                >
+                  You
+                  {subsession.event === "Doubles" &&
+                  subsession.opponent.yourPartner
+                    ? ` / ${subsession.opponent.yourPartner}`
+                    : ""}{" "}
+                  vs {subsession.opponent.opponentNames.join(" / ")}
+                </EvenStarText>
+                <EvenStarText
+                  as="p"
+                  variant="title"
+                  tone="primary"
+                  numeric
+                  className="text-sm font-semibold tracking-wide"
+                >
+                  {formatSets(subsession.sets)}
+                </EvenStarText>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <EvenStarText
+                    as="p"
+                    variant="label"
+                    tone="accent"
+                    caps
+                    className="font-semibold"
+                  >
+                    {subsession.title ?? "Training"}
+                  </EvenStarText>
+                  <EvenStarText
+                    as="p"
+                    variant="meta"
+                    tone="muted"
+                    className="text-[11px]"
+                  >
+                    {subsession.metrics.length} metric(s)
+                  </EvenStarText>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {subsession.metrics.map((metric) => (
+                    <span
+                      key={`${subsession.id}-${metric.label}`}
+                      className="inline-flex items-center rounded-md border border-gold/35 bg-ivory px-2.5 py-1 text-[10px] font-medium tracking-[0.08em] uppercase text-club-green"
+                    >
+                      {metric.label} {metric.percentage}%
+                    </span>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+    </button>
   );
 }
 
 export function SessionPage() {
   const [filter, setFilter] = useState<Filter>("all");
 
-  const filtered = sessions.filter(
-    (s) => filter === "all" || s.type === filter,
-  );
+  const filtered = sessions.filter((session) => {
+    if (filter === "all") {
+      return true;
+    }
+    if (filter === "training") {
+      return hasTraining(session);
+    }
+    return hasMatches(session);
+  });
 
   return (
     <div>
-      {/* Page header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-end justify-between mb-6 pb-4 border-b-2 border-club-green">
         <div>
-          <p className="text-[10px] font-mono tracking-[0.2em] text-terminal-muted mb-1">
-            SESSION LOG
-          </p>
-          <h1 className="text-2xl font-semibold text-terminal-fg tracking-tight">
+          <EvenStarText as="h1" variant="display">
             Sessions
-          </h1>
+          </EvenStarText>
+          <EvenStarText
+            as="p"
+            variant="label"
+            tone="accent"
+            caps
+            className="mt-1.5"
+          >
+            {sessions.length} entries
+          </EvenStarText>
         </div>
-        <button
-          type="button"
-          className="border border-amber-glow text-amber-glow font-mono text-xs tracking-widest px-4 py-2 hover:bg-amber-glow/10 active:bg-amber-glow/20 transition-colors"
-        >
-          + NEW
-        </button>
+        <EvenStarButton variant="solid" size="md">
+          + Add
+        </EvenStarButton>
       </div>
 
-      {/* Filter tabs */}
-      <div className="flex gap-0 mb-5 border-b border-terminal-border">
+      <div className="flex gap-5 mb-5">
         {filters.map((f) => (
-          <button
+          <EvenStarButton
             key={f.value}
-            type="button"
             onClick={() => setFilter(f.value)}
-            className={cn(
-              "px-4 py-2 font-mono text-xs tracking-[0.15em] transition-colors border-b-2 -mb-px",
-              filter === f.value
-                ? "text-amber-glow border-amber-glow"
-                : "text-terminal-muted border-transparent hover:text-terminal-secondary",
-            )}
+            variant="tab"
+            size="sm"
+            active={filter === f.value}
+            className="px-0"
           >
-            {f.label.toUpperCase()}
-          </button>
+            {f.label}
+          </EvenStarButton>
         ))}
       </div>
 
-      {/* Session list */}
-      <div className="flex flex-col gap-2">
+      <div>
         {filtered.length > 0 ? (
           filtered.map((session) => (
             <SessionCard key={session.id} session={session} />
           ))
         ) : (
-          <p className="text-center font-mono text-terminal-muted text-xs py-12 tracking-widest">
-            NO SESSIONS FOUND
-          </p>
+          <EvenStarText
+            as="p"
+            variant="label"
+            tone="accent"
+            caps
+            className="text-center text-gold/60 py-12"
+          >
+            No entries found
+          </EvenStarText>
         )}
       </div>
     </div>

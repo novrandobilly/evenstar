@@ -1,28 +1,32 @@
-@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap");
 
 @import "tailwindcss";
 
 @theme {
   /* Fonts */
-  --font-sans: "Space Grotesk", system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", "Menlo", monospace;
+  --font-serif:  "Source Serif 4", Georgia, serif;
+  --font-sans:   "Manrope", system-ui, sans-serif;
 
-  /* Terminal backgrounds */
-  --color-terminal-bg:       #070910;
-  --color-terminal-surface:  #0f1117;
-  --color-terminal-border:   #1c2030;
+  /* Ivory base */
+  --color-ivory:        #f7f2e8;
+  --color-ivory-dark:   #ede6d5;
+  --color-ivory-rule:   #d6ccb6;
 
-  /* Terminal text */
-  --color-terminal-fg:        #dde1eb;
-  --color-terminal-secondary: #8892a4;
-  --color-terminal-muted:     #4a5266;
+  /* Forest green — primary */
+  --color-club-green:        #1d3d2a;
+  --color-club-green-mid:    #2a5239;
+  --color-club-green-light:  #3a6b4c;
+  --color-club-green-muted:  #5c7d69;
+  --color-club-green-faint:  #d2e0d8;
 
-  /* Amber — primary accent (active states, logo, CTA) */
-  --color-amber-glow:  #e8a422;
+  /* Aged gold accent */
+  --color-gold:       #a6853a;
+  --color-gold-light: #c4a24d;
+  --color-gold-faint: #ecdeb8;
 
-  /* Phosphor — win / loss signal colors */
-  --color-phosphor-green: #3ecf8e;
-  --color-phosphor-red:   #e05c6a;
+  /* Win / loss */
+  --color-win:   #2a5239;
+  --color-loss:  #7a3030;
 }
 
 *,
@@ -39,18 +43,21 @@ body {
 
 body {
   font-family: var(--font-sans);
+  font-weight: 400;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  background-color: #070910;
-  /* Subtle dot grid — adds depth without noise */
-  background-image: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.025) 1px,
-    transparent 1px
-  );
-  background-size: 22px 22px;
-  color: #dde1eb;
+  background-color: #f7f2e8;
+  /* Aged paper texture — fine linen weave */
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 23px,
+      rgba(166, 133, 58, 0.06) 23px,
+      rgba(166, 133, 58, 0.06) 24px
+    );
+  color: #1d3d2a;
   min-height: 100svh;
 }
 

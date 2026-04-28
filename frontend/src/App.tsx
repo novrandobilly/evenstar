@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { SessionPage } from "@/pages/SessionPage";
+import { SessionDetailPage } from "@/pages/SessionDetailPage";
 import { ProfilePage } from "@/pages/ProfilePage";
 
 function App() {
@@ -12,6 +13,14 @@ function App() {
           element={
             <Layout>
               <SessionPage />
+            </Layout>
+          }
+        />
+        <Route
+          path="/sessions/:sessionId"
+          element={
+            <Layout>
+              <SessionDetailPage />
             </Layout>
           }
         />
