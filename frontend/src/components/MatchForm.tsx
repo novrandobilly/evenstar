@@ -11,7 +11,9 @@ interface SetRow {
 }
 
 function computeResult(sets: SetRow[]): MatchResult | null {
-  const complete = sets.filter((s) => s.ours !== "" && s.theirs !== "");
+  const complete = sets.filter(
+    (s) => s.ours !== "" && s.theirs !== "" && !isNaN(Number(s.ours)) && !isNaN(Number(s.theirs))
+  );
   if (complete.length === 0) return null;
   const won = complete.filter((s) => Number(s.ours) > Number(s.theirs)).length;
   const lost = complete.filter((s) => Number(s.ours) < Number(s.theirs)).length;
@@ -51,6 +53,7 @@ export function MatchForm({ sessionId, onAdd, onCancel }: MatchFormProps) {
     setOpponent1("");
     setOpponent2("");
     setPartner("");
+    setSets([{ ours: "", theirs: "" }]);
   };
 
   const hasOpponent =
@@ -77,7 +80,7 @@ export function MatchForm({ sessionId, onAdd, onCancel }: MatchFormProps) {
       },
       result,
       sets: sets
-        .filter((s) => s.ours !== "" && s.theirs !== "")
+        .filter((s) => s.ours !== "" && s.theirs !== "" && !isNaN(Number(s.ours)) && !isNaN(Number(s.theirs)))
         .map((s) => ({ ours: Number(s.ours), theirs: Number(s.theirs) })),
     };
     onAdd(subsession);
