@@ -7,21 +7,20 @@ import {
   formatDate,
   formatSets,
   getMatchSubsessions,
-  getSessionById,
   getTrainingSubsessions,
   isMatchSubsession,
 } from "@/data/sessions";
+import { useSessions } from "@/hooks/useSessions";
 
 export function SessionDetailPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
+  const { sessions } = useSessions();
 
   const session = useMemo(() => {
-    if (!sessionId) {
-      return undefined;
-    }
-    return getSessionById(sessionId);
-  }, [sessionId]);
+    if (!sessionId) return undefined;
+    return sessions.find((s) => s.id === sessionId);
+  }, [sessionId, sessions]);
 
   if (!session) {
     return (
