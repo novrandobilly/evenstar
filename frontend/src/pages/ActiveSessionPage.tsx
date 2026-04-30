@@ -12,7 +12,9 @@ import { isMatchSubsession, formatSets, type Subsession } from "@/data/sessions"
 import type { Session } from "@/data/sessions";
 
 function formatDuration(startedAt: number): string {
+  if (!Number.isFinite(startedAt) || startedAt <= 0) return "0m";
   const ms = Date.now() - startedAt;
+  if (ms < 0) return "0m";
   const totalMinutes = Math.floor(ms / 60000);
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
