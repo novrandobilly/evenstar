@@ -12,11 +12,11 @@ import {
   hasMatches,
   hasTraining,
   isMatchSubsession,
-  sessions,
   summarizeRecord,
   type Filter,
   type Session,
 } from "@/data/sessions";
+import { useSessions } from "@/hooks/useSessions";
 
 function SessionCard({ session }: { session: Session }) {
   const navigate = useNavigate();
@@ -211,15 +211,13 @@ function SessionCard({ session }: { session: Session }) {
 }
 
 export function SessionPage() {
+  const navigate = useNavigate();
+  const { sessions } = useSessions();
   const [filter, setFilter] = useState<Filter>("all");
 
   const filtered = sessions.filter((session) => {
-    if (filter === "all") {
-      return true;
-    }
-    if (filter === "training") {
-      return hasTraining(session);
-    }
+    if (filter === "all") return true;
+    if (filter === "training") return hasTraining(session);
     return hasMatches(session);
   });
 
@@ -240,7 +238,11 @@ export function SessionPage() {
             {sessions.length} entries
           </EvenStarText>
         </div>
-        <EvenStarButton variant="solid" size="md">
+        <EvenStarButton
+          variant="solid"
+          size="md"
+          onClick={() => navigate("/sessions/new")}
+        >
           + Add
         </EvenStarButton>
       </div>
