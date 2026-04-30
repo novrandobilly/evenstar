@@ -20,10 +20,14 @@ export function useActiveSession() {
     });
 
   useEffect(() => {
-    if (activeSession) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(activeSession));
-    } else {
-      localStorage.removeItem(STORAGE_KEY);
+    try {
+      if (activeSession) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(activeSession));
+      } else {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    } catch {
+      // Silently fail if localStorage quota is exceeded or storage is unavailable
     }
   }, [activeSession]);
 

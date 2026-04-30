@@ -12,7 +12,7 @@ interface SetRow {
 
 function computeResult(sets: SetRow[]): MatchResult | null {
   const complete = sets.filter(
-    (s) => s.ours !== "" && s.theirs !== "" && !isNaN(Number(s.ours)) && !isNaN(Number(s.theirs))
+    (s) => s.ours !== "" && s.theirs !== "" && !isNaN(Number(s.ours)) && !isNaN(Number(s.theirs)) && Number(s.ours) >= 0 && Number(s.theirs) >= 0
   );
   if (complete.length === 0) return null;
   const won = complete.filter((s) => Number(s.ours) > Number(s.theirs)).length;
@@ -66,7 +66,7 @@ export function MatchForm({ sessionId, onAdd, onCancel }: MatchFormProps) {
   const handleAdd = () => {
     if (!canAdd || !result) return;
     const subsession: MatchSubsession = {
-      id: `${sessionId}-s${Date.now()}`,
+      id: `${sessionId}-s${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       type: "match",
       event,
       opponent: {
@@ -80,7 +80,7 @@ export function MatchForm({ sessionId, onAdd, onCancel }: MatchFormProps) {
       },
       result,
       sets: sets
-        .filter((s) => s.ours !== "" && s.theirs !== "" && !isNaN(Number(s.ours)) && !isNaN(Number(s.theirs)))
+        .filter((s) => s.ours !== "" && s.theirs !== "" && !isNaN(Number(s.ours)) && !isNaN(Number(s.theirs)) && Number(s.ours) >= 0 && Number(s.theirs) >= 0)
         .map((s) => ({ ours: Number(s.ours), theirs: Number(s.theirs) })),
     };
     onAdd(subsession);

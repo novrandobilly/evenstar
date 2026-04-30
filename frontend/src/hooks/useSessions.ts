@@ -15,7 +15,11 @@ export function useSessions() {
   });
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+    } catch {
+      // Silently fail if localStorage quota is exceeded or storage is unavailable
+    }
   }, [sessions]);
 
   const addSession = (session: Session) => {

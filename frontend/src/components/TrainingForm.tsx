@@ -41,7 +41,7 @@ export function TrainingForm({ sessionId, onAdd, onCancel }: TrainingFormProps) 
   const handleAdd = () => {
     if (!canAdd) return;
     const subsession: TrainingSubsession = {
-      id: `${sessionId}-s${Date.now()}`,
+      id: `${sessionId}-s${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       type: "training",
       ...(title.trim() ? { title: title.trim() } : {}),
       metrics: validMetrics.map((m) => ({
