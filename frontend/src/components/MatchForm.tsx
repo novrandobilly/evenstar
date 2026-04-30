@@ -10,6 +10,11 @@ interface SetRow {
   theirs: string;
 }
 
+type PlayerKey = "opponent1" | "opponent2" | "partner";
+type AnonMap = Record<PlayerKey, boolean>;
+
+const ANON_RESET: AnonMap = { opponent1: false, opponent2: false, partner: false };
+
 function computeResult(sets: SetRow[]): MatchResult | null {
   const complete = sets.filter(
     (s) => s.ours !== "" && s.theirs !== "" && !isNaN(Number(s.ours)) && !isNaN(Number(s.theirs)) && Number(s.ours) >= 0 && Number(s.theirs) >= 0
@@ -33,9 +38,13 @@ export function MatchForm({ sessionId, onAdd, onCancel }: MatchFormProps) {
   const [opponent1, setOpponent1] = useState("");
   const [opponent2, setOpponent2] = useState("");
   const [partner, setPartner] = useState("");
+  const [anon, setAnon] = useState<AnonMap>(ANON_RESET);
   const [sets, setSets] = useState<SetRow[]>([{ ours: "", theirs: "" }]);
 
   const result = useMemo(() => computeResult(sets), [sets]);
+
+  const toggleAnon = (key: PlayerKey) =>
+    setAnon((prev) => ({ ...prev, [key]: !prev[key] }));
 
   const updateSet = (index: number, field: keyof SetRow, value: string) => {
     setSets((prev) =>
@@ -53,13 +62,15 @@ export function MatchForm({ sessionId, onAdd, onCancel }: MatchFormProps) {
     setOpponent1("");
     setOpponent2("");
     setPartner("");
+    setAnon(ANON_RESET);
     setSets([{ ours: "", theirs: "" }]);
   };
 
   const hasOpponent =
     event === "Singles"
-      ? opponent1.trim() !== ""
-      : opponent1.trim() !== "" && opponent2.trim() !== "";
+      ? anon.opponent1 || opponent1.trim() !== ""
+      : (anon.opponent1 || opponent1.trim() !== "") &&
+        (anon.opponent2 || opponent2.trim() !== "");
   const hasCompleteSet = sets.some((s) => s.ours !== "" && s.theirs !== "");
   const canAdd = hasOpponent && hasCompleteSet && result !== null;
 
@@ -72,10 +83,13 @@ export function MatchForm({ sessionId, onAdd, onCancel }: MatchFormProps) {
       opponent: {
         opponentNames:
           event === "Singles"
-            ? [opponent1.trim()]
-            : [opponent1.trim(), opponent2.trim()],
-        ...(event === "Doubles" && partner.trim()
-          ? { yourPartner: partner.trim() }
+            ? [anon.opponent1 ? "Anonymous" : opponent1.trim()]
+            : [
+                anon.opponent1 ? "Anonymous" : opponent1.trim(),
+                anon.opponent2 ? "Anonymous" : opponent2.trim(),
+              ],
+        ...(event === "Doubles" && (anon.partner || partner.trim())
+          ? { yourPartner: anon.partner ? "Anonymous" : partner.trim() }
           : {}),
       },
       result,
@@ -88,6 +102,23 @@ export function MatchForm({ sessionId, onAdd, onCancel }: MatchFormProps) {
 
   const inputClass =
     "w-full rounded-md border border-ivory-rule bg-white px-3 py-2 text-sm text-club-green placeholder:text-club-green-muted/50 outline-none focus:border-gold transition-colors";
+  const anonInputClass =
+    "w-full rounded-md border border-dashed border-ivory-rule/80 bg-ivory-dark px-3 py-2 text-sm text-club-green-muted/60 italic";
+
+  const AnonPill = ({ playerKey }: { playerKey: PlayerKey }) => (
+    <button
+      type="button"
+      onClick={() => toggleAnon(playerKey)}
+      className={cn(
+        "text-[10px] uppercase tracking-[0.1em] rounded-full px-2.5 py-0.5 border transition-colors",
+        anon[playerKey]
+          ? "border-gold/60 bg-gold/10 text-gold font-semibold"
+          : "border-ivory-rule text-club-green-muted/70 hover:border-gold/50 hover:text-gold"
+      )}
+    >
+      {anon[playerKey] ? "✓ Anonymous" : "Anonymous"}
+    </button>
+  );
 
   return (
     <div className="rounded-xl border border-club-green/20 bg-ivory p-4 mb-4">
@@ -120,49 +151,64 @@ export function MatchForm({ sessionId, onAdd, onCancel }: MatchFormProps) {
       </div>
 
       {/* Name fields */}
-      <div className="mb-3">
+      <div className="mb-3 space-y-2">
         {event === "Singles" ? (
-          <>
-            <EvenStarText as="label" variant="meta" tone="muted" caps className="block mb-1.5">
-              Opponent
-            </EvenStarText>
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <EvenStarText as="label" variant="meta" tone="muted" caps>Opponent</EvenStarText>
+              <AnonPill playerKey="opponent1" />
+            </div>
             <input
               type="text"
-              value={opponent1}
+              value={anon.opponent1 ? "Anonymous" : opponent1}
               onChange={(e) => setOpponent1(e.target.value)}
               placeholder="Opponent name"
-              className={inputClass}
+              disabled={anon.opponent1}
+              className={anon.opponent1 ? anonInputClass : inputClass}
             />
-          </>
+          </div>
         ) : (
           <>
-            <EvenStarText as="label" variant="meta" tone="muted" caps className="block mb-1.5">
-              Your Partner
-            </EvenStarText>
-            <input
-              type="text"
-              value={partner}
-              onChange={(e) => setPartner(e.target.value)}
-              placeholder="Partner name (optional)"
-              className={cn(inputClass, "mb-2")}
-            />
-            <EvenStarText as="label" variant="meta" tone="muted" caps className="block mb-1.5">
-              Opponents
-            </EvenStarText>
-            <div className="flex gap-2">
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <EvenStarText as="label" variant="meta" tone="muted" caps>Your Partner</EvenStarText>
+                <AnonPill playerKey="partner" />
+              </div>
               <input
                 type="text"
-                value={opponent1}
-                onChange={(e) => setOpponent1(e.target.value)}
-                placeholder="Opponent 1"
-                className="flex-1 rounded-md border border-ivory-rule bg-white px-3 py-2 text-sm text-club-green placeholder:text-club-green-muted/50 outline-none focus:border-gold transition-colors"
+                value={anon.partner ? "Anonymous" : partner}
+                onChange={(e) => setPartner(e.target.value)}
+                placeholder="Partner name (optional)"
+                disabled={anon.partner}
+                className={anon.partner ? anonInputClass : inputClass}
               />
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <EvenStarText as="label" variant="meta" tone="muted" caps>Opponent 1</EvenStarText>
+                <AnonPill playerKey="opponent1" />
+              </div>
               <input
                 type="text"
-                value={opponent2}
+                value={anon.opponent1 ? "Anonymous" : opponent1}
+                onChange={(e) => setOpponent1(e.target.value)}
+                placeholder="Opponent 1 name"
+                disabled={anon.opponent1}
+                className={anon.opponent1 ? anonInputClass : inputClass}
+              />
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <EvenStarText as="label" variant="meta" tone="muted" caps>Opponent 2</EvenStarText>
+                <AnonPill playerKey="opponent2" />
+              </div>
+              <input
+                type="text"
+                value={anon.opponent2 ? "Anonymous" : opponent2}
                 onChange={(e) => setOpponent2(e.target.value)}
-                placeholder="Opponent 2"
-                className="flex-1 rounded-md border border-ivory-rule bg-white px-3 py-2 text-sm text-club-green placeholder:text-club-green-muted/50 outline-none focus:border-gold transition-colors"
+                placeholder="Opponent 2 name"
+                disabled={anon.opponent2}
+                className={anon.opponent2 ? anonInputClass : inputClass}
               />
             </div>
           </>

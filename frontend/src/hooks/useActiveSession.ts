@@ -46,7 +46,7 @@ export function useActiveSession() {
   };
 
   const updateSession = (
-    fields: Partial<Pick<ActiveSessionDraft, "title" | "date">>
+    fields: Partial<Pick<ActiveSessionDraft, "title" | "date" | "duration">>
   ) => {
     setActiveSession((prev) => (prev ? { ...prev, ...fields } : prev));
   };
