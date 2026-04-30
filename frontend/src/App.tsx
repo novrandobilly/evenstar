@@ -1,8 +1,10 @@
+// frontend/src/App.tsx
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { SessionPage } from "@/pages/SessionPage";
 import { SessionDetailPage } from "@/pages/SessionDetailPage";
 import { ProfilePage } from "@/pages/ProfilePage";
+import { ActiveSessionPage } from "@/pages/ActiveSessionPage";
 
 function App() {
   return (
@@ -13,6 +15,14 @@ function App() {
           element={
             <Layout>
               <SessionPage />
+            </Layout>
+          }
+        />
+        <Route
+          path="/sessions/new"
+          element={
+            <Layout>
+              <ActiveSessionPage />
             </Layout>
           }
         />

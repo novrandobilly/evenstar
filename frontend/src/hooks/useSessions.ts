@@ -8,7 +8,9 @@ export function useSessions() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) return JSON.parse(stored) as Session[];
-    } catch {}
+    } catch {
+      // Silently fail if localStorage is unavailable or parse fails
+    }
     return mockSessions;
   });
 
