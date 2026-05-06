@@ -3,14 +3,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import { EvenStarButton } from "@/components/EvenStarButton";
 import { EvenStarText } from "@/components/EvenStarText";
 import { cn } from "@/lib/utils";
-import {
-  formatDate,
-  formatSets,
-  getMatchSubsessions,
-  getTrainingSubsessions,
-  isMatchSubsession,
-} from "@/data/sessions";
+import { formatDate, formatSets, isMatchSubsession } from "@/data/sessions";
 import { useSessions } from "@/hooks/useSessions";
+import { getTrainingSubsessions } from "../tools/getTrainingSubsessions";
+import { getMatchSubsessions } from "../tools/getMatchSubsessions";
 
 export function SessionDetailPage() {
   const { sessionId } = useParams<{ sessionId: string }>();

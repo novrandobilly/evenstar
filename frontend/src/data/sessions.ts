@@ -212,22 +212,6 @@ export function isMatchSubsession(
   return subsession.type === "match";
 }
 
-export function getTrainingSubsessions(session: Session) {
-  return session.subsessions.filter(isTrainingSubsession);
-}
-
-export function getMatchSubsessions(session: Session) {
-  return session.subsessions.filter(isMatchSubsession);
-}
-
-export function hasTraining(session: Session) {
-  return getTrainingSubsessions(session).length > 0;
-}
-
-export function hasMatches(session: Session) {
-  return getMatchSubsessions(session).length > 0;
-}
-
 export function summarizeRecord(matches: MatchSubsession[]) {
   const wins = matches.filter((match) => match.result === "win").length;
   const losses = matches.filter((match) => match.result === "loss").length;
