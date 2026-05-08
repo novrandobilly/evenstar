@@ -29,19 +29,20 @@ export const EvenStarButton = forwardRef<
     ref,
   ) => {
     const sizeStyles = {
-      sm: "px-3 py-1.5 text-[10px]",
-      md: "px-4 py-2 text-xs",
+      sm: "min-h-[44px] px-4 text-xs",
+      md: "min-h-[44px] px-5 text-sm",
     };
 
     const variantStyles = {
       solid:
-        "text-ivory bg-club-green hover:bg-club-green-mid active:bg-club-green-light border border-club-green",
+        "bg-ace text-surface font-bold hover:bg-ace-mid active:bg-ace-mid/80 border border-ace shadow-sm",
       outline:
-        "text-club-green-muted border border-ivory-rule hover:border-gold hover:text-gold bg-transparent",
-      ghost: "text-club-green-muted hover:text-club-green bg-transparent",
+        "text-ink-2 border border-edge hover:border-ace hover:text-ace bg-transparent",
+      ghost:
+        "text-ink-2 hover:text-ink bg-transparent",
       tab: active
-        ? "text-club-green border-gold font-medium"
-        : "text-club-green-muted border-transparent hover:text-club-green",
+        ? "text-ace border-b-2 border-ace font-bold"
+        : "text-ink-2 border-b-2 border-transparent hover:text-ink",
     };
 
     return (
@@ -49,8 +50,8 @@ export const EvenStarButton = forwardRef<
         ref={ref}
         type={type}
         className={cn(
-          "inline-flex items-center justify-center uppercase tracking-[0.2em] transition-colors disabled:cursor-not-allowed disabled:opacity-50",
-          variant === "tab" ? "border-b pb-1" : "",
+          "inline-flex items-center justify-center font-semibold uppercase tracking-[0.08em] transition-colors disabled:cursor-not-allowed disabled:opacity-40",
+          variant === "tab" ? "rounded-none" : variant === "ghost" ? "rounded-xl" : "rounded-full",
           sizeStyles[size],
           variantStyles[variant],
           fullWidth ? "w-full" : "",

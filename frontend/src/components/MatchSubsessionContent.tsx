@@ -8,54 +8,41 @@ export const MatchSubsessionContent = ({
   subsession: MatchSubsession;
 }) => {
   return (
-    <div className="flex-1 min-w-0">
-      <div className="flex items-center justify-between gap-3 mb-1">
+    <div className="flex items-center gap-3">
+      <span
+        className={cn(
+          "shrink-0 inline-flex items-center justify-center rounded-full w-8 h-8 text-[11px] font-bold border",
+          subsession.result === "win"
+            ? "bg-win/15 text-win border-win/30"
+            : subsession.result === "loss"
+              ? "bg-loss/15 text-loss border-loss/30"
+              : "bg-draw/15 text-draw border-draw/30",
+        )}
+      >
+        {subsession.result === "win" ? "W" : subsession.result === "loss" ? "L" : "D"}
+      </span>
+      <div className="flex-1 min-w-0">
         <EvenStarText
           as="p"
-          variant="label"
+          variant="meta"
           tone="muted"
-          caps
-          className="truncate font-semibold"
+          className="text-[11px] truncate mb-0.5"
         >
-          {subsession.event ?? "Match"}
+          {subsession.event} · vs {subsession.opponent.opponentNames.join(" / ")}
+          {subsession.event === "Doubles" && subsession.opponent.yourPartner
+            ? ` (w/ ${subsession.opponent.yourPartner})`
+            : ""}
         </EvenStarText>
         <EvenStarText
           as="p"
-          variant="label"
-          caps
-          className={cn(
-            "font-semibold rounded-sm px-2 py-0.5 border shrink-0",
-            subsession.result === "win"
-              ? "text-win border-win/25 bg-win/8"
-              : subsession.result === "loss"
-                ? "text-loss border-loss/25 bg-loss/8"
-                : "text-gold border-gold/25 bg-gold/8",
-          )}
+          variant="title"
+          numeric
+          className="text-sm font-bold font-mono"
+          style={{ fontFamily: "var(--font-mono)" }}
         >
-          {subsession.result}
+          {formatSets(subsession.sets)}
         </EvenStarText>
       </div>
-      <EvenStarText
-        as="p"
-        variant="meta"
-        tone="muted"
-        className="text-[11px] mb-0.5"
-      >
-        You
-        {subsession.event === "Doubles" && subsession.opponent.yourPartner
-          ? ` / ${subsession.opponent.yourPartner}`
-          : ""}{" "}
-        vs {subsession.opponent.opponentNames.join(" / ")}
-      </EvenStarText>
-      <EvenStarText
-        as="p"
-        variant="title"
-        tone="primary"
-        numeric
-        className="text-sm font-semibold tracking-wide"
-      >
-        {formatSets(subsession.sets)}
-      </EvenStarText>
     </div>
   );
 };

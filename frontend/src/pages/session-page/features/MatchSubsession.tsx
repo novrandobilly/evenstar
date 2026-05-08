@@ -7,7 +7,7 @@ export const MatchSubsession = ({
   subsession: MatchSubsessionData;
 }) => {
   return (
-    <div className="rounded-lg border border-ivory-rule/80 border-l-4 border-l-club-green-mid p-2.5 bg-ivory/75">
+    <div className="rounded-xl bg-surface border border-line px-3 py-2">
       <MatchSubsessionContent subsession={subsession} />
     </div>
   );

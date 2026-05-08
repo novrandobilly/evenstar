@@ -46,8 +46,8 @@ export function BottomNav() {
   const { pathname } = useLocation();
 
   return (
-    <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-club-green border-t-2 border-gold">
-      <div className="flex">
+    <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-panel/95 backdrop-blur-sm border-t border-line">
+      <div className="flex px-4 py-2 gap-2">
         {navItems.map((item) => {
           const active = pathname === item.href;
           return (
@@ -55,21 +55,12 @@ export function BottomNav() {
               key={item.href}
               to={item.href}
               className={cn(
-                "flex-1 flex flex-col items-center gap-1 py-3 transition-colors",
-                active
-                  ? "text-gold-light"
-                  : "text-ivory/40 hover:text-ivory/70",
+                "flex-1 flex flex-col items-center gap-1 py-2 rounded-2xl transition-colors",
+                active ? "bg-ace/10 text-ace" : "text-ink-3 hover:text-ink-2",
               )}
             >
               {item.icon(active)}
-              <span
-                className={cn(
-                  "text-xs font-medium",
-                  active
-                    ? "text-gold-light text-[10px] tracking-[0.18em] uppercase"
-                    : "text-[10px] tracking-[0.18em] uppercase",
-                )}
-              >
+              <span className="text-[10px] font-bold uppercase tracking-[0.12em]">
                 {item.label}
               </span>
             </Link>

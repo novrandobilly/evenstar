@@ -12,9 +12,11 @@ type EvenStarTextVariant =
 type EvenStarTextTone =
   | "primary"
   | "muted"
+  | "faint"
   | "accent"
   | "win"
   | "loss"
+  | "draw"
   | "inverse";
 
 export interface EvenStarTextProps extends HTMLAttributes<HTMLElement> {
@@ -41,21 +43,23 @@ export function EvenStarText({
   const Component = as ?? "p";
 
   const variantStyles = {
-    display: "font-sans text-3xl font-semibold leading-none tracking-tight",
-    headline: "font-sans text-xl font-semibold leading-tight",
-    title: "text-sm",
-    body: "text-sm",
-    label: "text-[10px] tracking-[0.22em]",
-    meta: "text-xs",
+    display:  "font-display text-[2.25rem] font-bold leading-none tracking-tight",
+    headline: "font-display text-xl font-bold leading-tight",
+    title:    "text-sm font-semibold",
+    body:     "text-sm leading-relaxed",
+    label:    "text-xs font-semibold",
+    meta:     "text-xs",
   };
 
   const toneStyles = {
-    primary: "text-club-green",
-    muted: "text-club-green-muted",
-    accent: "text-gold",
-    win: "text-win",
-    loss: "text-loss",
-    inverse: "text-ivory",
+    primary: "text-ink",
+    muted:   "text-ink-2",
+    faint:   "text-ink-3",
+    accent:  "text-ace",
+    win:     "text-win",
+    loss:    "text-loss",
+    draw:    "text-draw",
+    inverse: "text-surface",
   };
 
   return (
@@ -63,8 +67,8 @@ export function EvenStarText({
       className={cn(
         variantStyles[variant],
         toneStyles[tone],
-        caps ? "uppercase" : "",
-        italic ? "italic" : "",
+        caps    ? "uppercase tracking-[0.1em]" : "",
+        italic  ? "italic" : "",
         numeric ? "tabular-nums" : "",
         className,
       )}

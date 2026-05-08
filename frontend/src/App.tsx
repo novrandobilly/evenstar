@@ -1,10 +1,10 @@
 // frontend/src/App.tsx
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "@/components/Layout";
-import { SessionPage } from "@/pages/SessionPage";
-import { SessionDetailPage } from "@/pages/SessionDetailPage";
-import { ProfilePage } from "@/pages/ProfilePage";
-import { ActiveSessionPage } from "@/pages/ActiveSessionPage";
+import { SessionPage } from "@/pages/session-page";
+import { SessionDetailPage } from "@/pages/session-detail-page";
+import { ProfilePage } from "@/pages/profile-page";
+import { ActiveSessionPage } from "@/pages/active-session-page";
 
 function App() {
   return (

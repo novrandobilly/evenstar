@@ -1,32 +1,37 @@
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Libre+Baskerville:ital,wght@0,700;1,400;1,700&family=DM+Mono:wght@400;500&display=swap");
 
 @import "tailwindcss";
 
 @theme {
-  /* Fonts */
-  --font-serif:  "Source Serif 4", Georgia, serif;
-  --font-sans:   "Manrope", system-ui, sans-serif;
+  --font-sans:    "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-display: "Libre Baskerville", Georgia, serif;
+  --font-mono:    "DM Mono", "Courier New", monospace;
 
-  /* Ivory base */
-  --color-ivory:        #f7f2e8;
-  --color-ivory-dark:   #ede6d5;
-  --color-ivory-rule:   #d6ccb6;
+  /* Golden Hour — warm cream surfaces */
+  --color-surface:   oklch(97.5% 0.012 75);
+  --color-panel:     oklch(95.5% 0.016 72);
+  --color-raised:    oklch(99.5% 0.005 75);
+  --color-line:      oklch(89.5% 0.020 72);
+  --color-edge:      oklch(77% 0.028 68);
 
-  /* Forest green — primary */
-  --color-club-green:        #1d3d2a;
-  --color-club-green-mid:    #2a5239;
-  --color-club-green-light:  #3a6b4c;
-  --color-club-green-muted:  #5c7d69;
-  --color-club-green-faint:  #d2e0d8;
+  /* Ace — sunset amber-orange */
+  --color-ace:       oklch(60% 0.175 40);
+  --color-ace-mid:   oklch(54% 0.162 38);
+  --color-ace-pale:  oklch(95.5% 0.038 72);
 
-  /* Aged gold accent */
-  --color-gold:       #a6853a;
-  --color-gold-light: #c4a24d;
-  --color-gold-faint: #ecdeb8;
+  /* Vine — forest green (training) */
+  --color-vine:      oklch(40% 0.12 158);
+  --color-vine-pale: oklch(93% 0.045 158);
 
-  /* Win / loss */
-  --color-win:   #2a5239;
-  --color-loss:  #7a3030;
+  /* Ink — warm brown text */
+  --color-ink:       oklch(22% 0.030 52);
+  --color-ink-2:     oklch(42% 0.035 58);
+  --color-ink-3:     oklch(62% 0.028 65);
+
+  /* State */
+  --color-win:       oklch(46% 0.17 145);
+  --color-loss:      oklch(52% 0.18 18);
+  --color-draw:      oklch(57% 0.14 72);
 }
 
 *,
@@ -47,18 +52,25 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  background-color: #f7f2e8;
-  /* Aged paper texture — fine linen weave */
-  background-image:
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 23px,
-      rgba(166, 133, 58, 0.06) 23px,
-      rgba(166, 133, 58, 0.06) 24px
-    );
-  color: #1d3d2a;
+  background-color: oklch(97.5% 0.012 75);
+  color: oklch(22% 0.030 52);
   min-height: 100svh;
+}
+
+:root {
+  --gradient-hero: linear-gradient(
+    160deg,
+    oklch(60% 0.175 40) 0%,
+    oklch(70% 0.160 47) 38%,
+    oklch(87% 0.075 62) 68%,
+    oklch(97.5% 0.012 75) 100%
+  );
+  --gradient-hero-glow-bg: radial-gradient(
+    circle,
+    oklch(93% 0.13 83) 20%,
+    oklch(75% 0.155 52) 100%
+  );
+  --gradient-hero-glow-shadow: 0 0 28px 10px oklch(70% 0.160 47 / 0.35);
 }
 
 #root {

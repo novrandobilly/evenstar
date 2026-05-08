@@ -33,6 +33,29 @@ export interface MatchFormProps {
   onCancel: () => void;
 }
 
+interface AnonPillProps {
+  playerKey: PlayerKey;
+  active: boolean;
+  onToggle: (key: PlayerKey) => void;
+}
+
+function AnonPill({ playerKey, active, onToggle }: AnonPillProps) {
+  return (
+    <button
+      type="button"
+      onClick={() => onToggle(playerKey)}
+      className={cn(
+        "text-[10px] uppercase tracking-[0.1em] rounded-full px-2.5 py-0.5 border transition-colors",
+        active
+          ? "border-ace/60 bg-ace/10 text-ace font-semibold"
+          : "border-line text-ink-3 hover:border-edge hover:text-ink-2"
+      )}
+    >
+      {active ? "✓ Anonymous" : "Anonymous"}
+    </button>
+  );
+}
+
 export function MatchForm({ sessionId, onAdd, onCancel }: MatchFormProps) {
   const [event, setEvent] = useState<"Singles" | "Doubles">("Singles");
   const [opponent1, setOpponent1] = useState("");
@@ -101,27 +124,12 @@ export function MatchForm({ sessionId, onAdd, onCancel }: MatchFormProps) {
   };
 
   const inputClass =
-    "w-full rounded-md border border-ivory-rule bg-white px-3 py-2 text-sm text-club-green placeholder:text-club-green-muted/50 outline-none focus:border-gold transition-colors";
+    "w-full rounded-lg border border-line bg-raised px-3 py-2 text-sm text-ink placeholder:text-ink-3 outline-none focus:border-ace transition-colors";
   const anonInputClass =
-    "w-full rounded-md border border-dashed border-ivory-rule/80 bg-ivory-dark px-3 py-2 text-sm text-club-green-muted/60 italic";
-
-  const AnonPill = ({ playerKey }: { playerKey: PlayerKey }) => (
-    <button
-      type="button"
-      onClick={() => toggleAnon(playerKey)}
-      className={cn(
-        "text-[10px] uppercase tracking-[0.1em] rounded-full px-2.5 py-0.5 border transition-colors",
-        anon[playerKey]
-          ? "border-gold/60 bg-gold/10 text-gold font-semibold"
-          : "border-ivory-rule text-club-green-muted/70 hover:border-gold/50 hover:text-gold"
-      )}
-    >
-      {anon[playerKey] ? "✓ Anonymous" : "Anonymous"}
-    </button>
-  );
+    "w-full rounded-lg border border-dashed border-line bg-surface px-3 py-2 text-sm text-ink-3 italic";
 
   return (
-    <div className="rounded-xl border border-club-green/20 bg-ivory p-4 mb-4">
+    <div className="rounded-2xl border border-line bg-raised p-4 mb-4">
       <EvenStarText as="p" variant="label" tone="accent" caps className="font-semibold mb-3">
         New Match
       </EvenStarText>
@@ -131,17 +139,17 @@ export function MatchForm({ sessionId, onAdd, onCancel }: MatchFormProps) {
         <EvenStarText as="p" variant="meta" tone="muted" caps className="mb-1.5">
           Match Type
         </EvenStarText>
-        <div className="flex gap-2">
+        <div className="flex gap-1 p-1 bg-raised rounded-xl border border-line">
           {(["Singles", "Doubles"] as const).map((type) => (
             <button
               key={type}
               type="button"
               onClick={() => handleEventChange(type)}
               className={cn(
-                "flex-1 rounded-md border py-2 text-xs font-semibold uppercase tracking-[0.18em] transition-colors",
+                "flex-1 rounded-lg py-2 text-xs font-bold uppercase tracking-[0.08em] transition-colors",
                 event === type
-                  ? "border-club-green bg-club-green text-ivory"
-                  : "border-ivory-rule text-club-green-muted hover:border-gold hover:text-gold"
+                  ? "bg-ace text-surface"
+                  : "text-ink-2 hover:text-ink"
               )}
             >
               {type}
@@ -156,7 +164,7 @@ export function MatchForm({ sessionId, onAdd, onCancel }: MatchFormProps) {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <EvenStarText as="label" variant="meta" tone="muted" caps>Opponent</EvenStarText>
-              <AnonPill playerKey="opponent1" />
+              <AnonPill playerKey="opponent1" active={anon.opponent1} onToggle={toggleAnon} />
             </div>
             <input
               type="text"
@@ -172,7 +180,7 @@ export function MatchForm({ sessionId, onAdd, onCancel }: MatchFormProps) {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <EvenStarText as="label" variant="meta" tone="muted" caps>Your Partner</EvenStarText>
-                <AnonPill playerKey="partner" />
+                <AnonPill playerKey="partner" active={anon.partner} onToggle={toggleAnon} />
               </div>
               <input
                 type="text"
@@ -186,7 +194,7 @@ export function MatchForm({ sessionId, onAdd, onCancel }: MatchFormProps) {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <EvenStarText as="label" variant="meta" tone="muted" caps>Opponent 1</EvenStarText>
-                <AnonPill playerKey="opponent1" />
+                <AnonPill playerKey="opponent1" active={anon.opponent1} onToggle={toggleAnon} />
               </div>
               <input
                 type="text"
@@ -200,7 +208,7 @@ export function MatchForm({ sessionId, onAdd, onCancel }: MatchFormProps) {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <EvenStarText as="label" variant="meta" tone="muted" caps>Opponent 2</EvenStarText>
-                <AnonPill playerKey="opponent2" />
+                <AnonPill playerKey="opponent2" active={anon.opponent2} onToggle={toggleAnon} />
               </div>
               <input
                 type="text"
@@ -232,16 +240,18 @@ export function MatchForm({ sessionId, onAdd, onCancel }: MatchFormProps) {
                 onChange={(e) => updateSet(i, "ours", e.target.value)}
                 min={0}
                 placeholder="0"
-                className="w-14 rounded-md border border-ivory-rule bg-white px-2 py-2 text-sm font-semibold text-center text-club-green outline-none focus:border-gold transition-colors"
+                aria-label={`Set ${i + 1} your score`}
+                className="w-14 rounded-lg border border-line bg-raised px-2 py-2 text-sm font-bold text-center text-ink outline-none focus:border-ace transition-colors"
               />
-              <span className="text-club-green-muted font-semibold">–</span>
+              <span className="text-ink-3 font-bold">–</span>
               <input
                 type="number"
                 value={set.theirs}
                 onChange={(e) => updateSet(i, "theirs", e.target.value)}
                 min={0}
                 placeholder="0"
-                className="w-14 rounded-md border border-ivory-rule bg-white px-2 py-2 text-sm font-semibold text-center text-club-green outline-none focus:border-gold transition-colors"
+                aria-label={`Set ${i + 1} opponent score`}
+                className="w-14 rounded-lg border border-line bg-raised px-2 py-2 text-sm font-bold text-center text-ink outline-none focus:border-ace transition-colors"
               />
               <button
                 type="button"
@@ -258,7 +268,7 @@ export function MatchForm({ sessionId, onAdd, onCancel }: MatchFormProps) {
         <button
           type="button"
           onClick={addSetRow}
-          className="mt-2 w-full rounded-md border border-dashed border-ivory-rule py-1.5 text-[10px] uppercase tracking-[0.18em] text-gold hover:border-gold transition-colors"
+          className="mt-2 w-full rounded-lg border border-dashed border-line py-1.5 text-[10px] uppercase tracking-[0.18em] text-ink-3 hover:border-ace hover:text-ace transition-colors"
         >
           + Add Set
         </button>
@@ -267,14 +277,14 @@ export function MatchForm({ sessionId, onAdd, onCancel }: MatchFormProps) {
       {/* Auto result */}
       <div
         className={cn(
-          "rounded-md border px-3 py-2 mb-3 flex items-center justify-between",
+          "rounded-lg border px-3 py-2 mb-3 flex items-center justify-between",
           result === "win"
             ? "border-win/30 bg-win/8"
             : result === "loss"
               ? "border-loss/30 bg-loss/8"
               : result === "draw"
-                ? "border-gold/30 bg-gold/8"
-                : "border-ivory-rule bg-ivory"
+                ? "border-draw/30 bg-draw/8"
+                : "border-line bg-raised"
         )}
       >
         <EvenStarText as="span" variant="meta" tone="muted" caps>
@@ -291,7 +301,7 @@ export function MatchForm({ sessionId, onAdd, onCancel }: MatchFormProps) {
                 ? "text-win"
                 : result === "loss"
                   ? "text-loss"
-                  : "text-gold"
+                  : "text-draw"
             )}
           >
             {result}

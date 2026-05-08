@@ -47,7 +47,7 @@ export function TrainingForm({ sessionId, onAdd, onCancel }: TrainingFormProps) 
   };
 
   return (
-    <div className="rounded-xl border border-club-green/20 bg-ivory p-4 mb-4">
+    <div className="rounded-2xl border border-line bg-raised p-4 mb-4">
       <EvenStarText as="p" variant="label" tone="accent" caps className="font-semibold mb-3">
         New Training Block
       </EvenStarText>
@@ -60,7 +60,7 @@ export function TrainingForm({ sessionId, onAdd, onCancel }: TrainingFormProps) 
         <div className="space-y-2">
           {TRAINING_GROUPS.map((group) => (
             <div key={group.label}>
-              <p className="text-[9px] font-bold uppercase tracking-[0.13em] text-gold mb-1.5">
+              <p className="text-[11px] font-bold uppercase tracking-[0.13em] text-vine mb-1.5">
                 {group.label}
               </p>
               <div className="flex flex-wrap gap-1.5">
@@ -70,10 +70,10 @@ export function TrainingForm({ sessionId, onAdd, onCancel }: TrainingFormProps) 
                     type="button"
                     onClick={() => handlePresetSelect(preset)}
                     className={cn(
-                      "rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors",
+                      "rounded-full border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors",
                       titlePreset === preset
-                        ? "border-club-green bg-club-green text-ivory"
-                        : "border-ivory-rule text-club-green-muted hover:border-gold hover:text-gold"
+                        ? "border-ace bg-ace text-surface"
+                        : "border-line text-ink-2 hover:border-edge hover:text-ink"
                     )}
                   >
                     {preset}
@@ -90,7 +90,7 @@ export function TrainingForm({ sessionId, onAdd, onCancel }: TrainingFormProps) 
             onChange={(e) => setTitleCustom(e.target.value)}
             placeholder="Describe your focus…"
             autoFocus
-            className="mt-2 w-full rounded-md border border-ivory-rule bg-white px-3 py-2 text-sm text-club-green placeholder:text-club-green-muted/50 outline-none focus:border-gold transition-colors"
+            className="mt-2 w-full rounded-lg border border-line bg-raised px-3 py-2 text-sm text-ink placeholder:text-ink-3 outline-none focus:border-ace transition-colors"
           />
         )}
       </div>
@@ -101,7 +101,7 @@ export function TrainingForm({ sessionId, onAdd, onCancel }: TrainingFormProps) 
           <EvenStarText as="p" variant="meta" tone="muted" caps>
             Accuracy
           </EvenStarText>
-          <EvenStarText as="span" variant="label" tone="accent" caps className="font-semibold tabular-nums text-gold">
+          <EvenStarText as="span" variant="label" tone="accent" caps className="font-semibold tabular-nums text-ace">
             {accuracy}%
           </EvenStarText>
         </div>
@@ -112,7 +112,7 @@ export function TrainingForm({ sessionId, onAdd, onCancel }: TrainingFormProps) 
           value={accuracy}
           onChange={(e) => setAccuracy(Number(e.target.value))}
           className="w-full cursor-pointer"
-          style={{ accentColor: "#a6853a" }}
+          style={{ accentColor: "var(--color-ace)" }}
           aria-label="Accuracy percentage"
         />
         <div className="flex justify-between mt-0.5">

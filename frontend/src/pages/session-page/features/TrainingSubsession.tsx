@@ -7,7 +7,7 @@ export const TrainingSubsession = ({
   subsession: TrainingSubsessionData;
 }) => {
   return (
-    <div className="rounded-lg border border-ivory-rule/80 border-l-4 border-l-gold p-2.5 bg-ivory/75">
+    <div className="rounded-xl bg-surface border border-line px-3 py-2">
       <TrainingSubsessionContent subsession={subsession} />
     </div>
   );
