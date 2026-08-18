@@ -7,6 +7,8 @@ import { filters, summarizeRecord, type Filter } from "@/data/sessions";
 import { getMatchSubsessions } from "@/tools/getMatchSubsessions";
 
 import { useSessions } from "@/hooks/useSessions";
+import { usePWAInstall } from "@/hooks/usePWAInstall";
+import { IOSInstallModal } from "@/components/IOSInstallModal";
 import { SessionCard } from "./features/SessionCard";
 import { hasTraining } from "./helper/hasTraining";
 import { hasMatches } from "./helper/hasMatches";
@@ -15,6 +17,8 @@ export const SessionPage = () => {
   const navigate = useNavigate();
   const { sessions } = useSessions();
   const [filter, setFilter] = useState<Filter>("all");
+  const { canInstall, showIOSModal, setShowIOSModal, installPWA } =
+    usePWAInstall();
 
   const allMatches = sessions.flatMap((s) => getMatchSubsessions(s));
   const record = allMatches.length > 0 ? summarizeRecord(allMatches) : null;
@@ -70,6 +74,40 @@ export const SessionPage = () => {
           </p>
         </div>
       </div>
+
+      {canInstall && (
+        <div className="mb-4">
+          <EvenStarButton
+            variant="outline"
+            fullWidth
+            onClick={installPWA}
+            className="flex items-center justify-center gap-2 border-line bg-raised hover:bg-panel text-ink py-2.5 text-xs font-semibold shadow-xs"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-ace"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Download PWA
+          </EvenStarButton>
+        </div>
+      )}
+
+      <IOSInstallModal
+        isOpen={showIOSModal}
+        onClose={() => setShowIOSModal(false)}
+      />
 
       {/* Filter segment control */}
       <div className="flex gap-1 mb-5 p-1 bg-raised rounded-2xl border border-line">
