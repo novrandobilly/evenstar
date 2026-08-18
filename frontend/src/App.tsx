@@ -1,49 +1,9 @@
-// frontend/src/App.tsx
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Layout } from "@/components/Layout";
-import { SessionPage } from "@/pages/session-page";
-import { SessionDetailPage } from "@/pages/session-detail-page";
-import { ProfilePage } from "@/pages/profile-page";
-import { ActiveSessionPage } from "@/pages/active-session-page";
-
-function App() {
+export function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <Layout>
-              <SessionPage />
-            </Layout>
-          }
-        />
-        <Route
-          path="/sessions/new"
-          element={
-            <Layout>
-              <ActiveSessionPage />
-            </Layout>
-          }
-        />
-        <Route
-          path="/sessions/:sessionId"
-          element={
-            <Layout>
-              <SessionDetailPage />
-            </Layout>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <Layout>
-              <ProfilePage />
-            </Layout>
-          }
-        />
-      </Routes>
-    </BrowserRouter>
+    <main className="flex min-h-screen flex-col items-center justify-center p-6 text-center">
+      <h1 className="text-3xl font-bold tracking-tight">Evenstar</h1>
+      <p className="mt-2 text-neutral-500">Clean slate ready for your tennis app.</p>
+    </main>
   );
 }
 
