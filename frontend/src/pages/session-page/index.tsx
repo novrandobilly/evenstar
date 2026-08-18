@@ -44,7 +44,10 @@ export const SessionPage = () => {
           <div className="flex items-end justify-between gap-3">
             <h1
               className="font-display italic text-[2rem] font-bold leading-none tracking-normal"
-              style={{ fontFamily: "var(--font-display)", color: "oklch(99.5% 0.005 75)" }}
+              style={{
+                fontFamily: "var(--font-display)",
+                color: "oklch(99.5% 0.005 75)",
+              }}
             >
               Evenstar
             </h1>
@@ -61,8 +64,8 @@ export const SessionPage = () => {
             className="text-[11px] mt-2 font-medium"
             style={{ color: "oklch(99.5% 0.005 75)" }}
           >
-            {sessions.length}{" "}
-            {sessions.length === 1 ? "session" : "sessions"} logged
+            {sessions.length} {sessions.length === 1 ? "session" : "sessions"}{" "}
+            logged
             {record && <span> · {record}</span>}
           </p>
         </div>
@@ -76,7 +79,7 @@ export const SessionPage = () => {
             type="button"
             onClick={() => setFilter(f.value)}
             className={cn(
-              "flex-1 min-h-[44px] py-2 rounded-xl text-[11px] font-bold uppercase tracking-[0.08em] transition-colors",
+              "flex-1 min-h-11 py-2 rounded-xl text-[11px] font-bold uppercase tracking-[0.08em] transition-colors",
               filter === f.value
                 ? "bg-ace text-surface shadow-sm"
                 : "text-ink-2 hover:text-ink",
