@@ -1,9 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '../../context/SessionContext';
 import { useModal } from '../../context/modal';
 import { calculateStandings } from '../../utils/standings';
 import { StandingsTable } from '../../components/StandingsTable';
+import { generateShareText } from './shareText';
 import { shareStandingsAsImage } from '../../utils/shareImage';
 
 export const SessionSummaryFeature: React.FC = () => {
@@ -11,11 +12,8 @@ export const SessionSummaryFeature: React.FC = () => {
   const { session, resetSession } = useSession();
   const { showModal } = useModal();
   const [showMatchHistory, setShowMatchHistory] = useState(false);
-  const [copiedNotification, setCopiedNotification] = useState<string | null>(null);
-  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
-
-  // Ref to the entire standings & podium card container for image snapshots
-  const shareCardRef = useRef<HTMLDivElement>(null);
+  const [notification, setNotification] = useState<string | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
 
   const standings = calculateStandings(session.players, session.matches);
   const isDoubles = session.matchFormat === 'doubles';
@@ -25,27 +23,7 @@ export const SessionSummaryFeature: React.FC = () => {
   const secondPlace = standings[1];
   const thirdPlace = standings[2];
 
-  // Clean, professional WhatsApp text summary
-  const generateTextSummary = () => {
-    const lines = [
-      `🎾 *${session.title || 'Tennis Session'}* 🏆`,
-      `Match Format: ${formatLabel} · ${session.players.length} Players`,
-      ``,
-      `🏆 *FINAL STANDINGS*`,
-    ];
-
-    standings.forEach((s) => {
-      const medal = s.rank === 1 ? '🥇' : s.rank === 2 ? '🥈' : s.rank === 3 ? '🥉' : `${s.rank}.`;
-      const diffFormatted = s.diff > 0 ? `+${s.diff}` : `${s.diff}`;
-      lines.push(`${medal} ${s.player.name} — ${s.gamesWon} pts (${s.matchWins}-${s.matchLosses}, diff: ${diffFormatted})`);
-    });
-
-    lines.push(``);
-    lines.push(`Hosted with Evenstar Tennis 🎾`);
-    return lines.join('\n');
-  };
-
-  // Robust clipboard copy with fallback
+  // Clipboard copy helper
   const copyToClipboard = async (text: string): Promise<boolean> => {
     if (navigator.clipboard && window.isSecureContext) {
       try {
@@ -72,38 +50,48 @@ export const SessionSummaryFeature: React.FC = () => {
     }
   };
 
+  /**
+   * SHARE STANDINGS AS IMAGE:
+   * Dynamically renders the standings table into a clean PNG image and shares natively:
+   * - iOS / Android / macOS Safari: Opens native OS Share Sheet with the image file
+   * - Desktop macOS/Windows browsers: Copies image directly to clipboard or downloads PNG
+   */
   const handleShareImage = async () => {
-    if (isGeneratingImage) return;
-
-    setIsGeneratingImage(true);
-    const sessionSlug = (session.title || 'tennis-session')
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-');
-
-    const result = await shareStandingsAsImage(
-      session.title || 'Tennis Session Results',
-      formatLabel,
-      standings,
-      `${sessionSlug}-standings.png`
-    );
-
-    setIsGeneratingImage(false);
-
-    if (result.message) {
-      setCopiedNotification(result.message);
-      setTimeout(() => setCopiedNotification(null), 3000);
+    if (isSharing) return;
+    setIsSharing(true);
+    try {
+      const result = await shareStandingsAsImage(
+        session.title || 'Tennis Session Results',
+        formatLabel,
+        standings
+      );
+      if (result.message) {
+        setNotification(result.message);
+        setTimeout(() => setNotification(null), 3000);
+      }
+    } catch (err) {
+      console.error('Failed to share standings image:', err);
+      setNotification('Failed to share standings image');
+      setTimeout(() => setNotification(null), 3000);
+    } finally {
+      setIsSharing(false);
     }
   };
 
   const handleCopyText = async () => {
-    const text = generateTextSummary();
-    const success = await copyToClipboard(text);
+    const textSummary = generateShareText(
+      session.title || 'Tennis Session',
+      formatLabel,
+      session.players.length,
+      standings
+    );
+    const success = await copyToClipboard(textSummary);
     if (success) {
-      setCopiedNotification('Copied leaderboard to clipboard!');
-      setTimeout(() => setCopiedNotification(null), 2500);
+      setNotification('Copied leaderboard to clipboard!');
+      setTimeout(() => setNotification(null), 2500);
     } else {
-      setCopiedNotification('Failed to copy to clipboard');
-      setTimeout(() => setCopiedNotification(null), 2500);
+      setNotification('Failed to copy to clipboard');
+      setTimeout(() => setNotification(null), 2500);
     }
   };
 
@@ -143,31 +131,54 @@ export const SessionSummaryFeature: React.FC = () => {
 
         {/* Social Share & Copy Buttons */}
         <div className="grid grid-cols-2 gap-2.5">
-          {/* Primary Share Image Action (Instagram Stories / WhatsApp / AirDrop) */}
+          {/* Native Image Share Button (iOS / Android / macOS native share sheet & desktop fallback) */}
           <button
             type="button"
             onClick={handleShareImage}
-            disabled={isGeneratingImage}
-            className="flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-3.5 text-xs font-bold text-white shadow-md hover:bg-slate-800 active:scale-[0.98] transition disabled:opacity-60"
+            disabled={isSharing}
+            className="flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-3.5 text-xs font-bold text-white shadow-md hover:bg-slate-800 disabled:opacity-60 active:scale-[0.98] transition cursor-pointer"
           >
-            {isGeneratingImage ? (
-              <span className="animate-spin text-xs">⏳</span>
+            {isSharing ? (
+              <>
+                <svg
+                  className="w-4 h-4 animate-spin text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                <span>Generating...</span>
+              </>
             ) : (
-              <svg
-                className="w-4 h-4 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2.5}
-                  d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-                />
-              </svg>
+              <>
+                <svg
+                  className="w-4 h-4 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2.5}
+                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                  />
+                </svg>
+                <span>Share Image</span>
+              </>
             )}
-            <span>{isGeneratingImage ? 'Creating Image...' : 'Share Image'}</span>
           </button>
 
           {/* Secondary Copy Text Action */}
@@ -194,91 +205,88 @@ export const SessionSummaryFeature: React.FC = () => {
         </div>
 
         {/* Feedback Notification Toast */}
-        {copiedNotification && (
+        {notification && (
           <div className="rounded-xl bg-emerald-700 text-white text-xs font-bold py-2.5 px-3 text-center shadow-lg animate-fade-in flex items-center justify-center gap-2">
             <span>✓</span>
-            <span>{copiedNotification}</span>
+            <span>{notification}</span>
           </div>
         )}
 
-        {/* Shareable Card Area (Captured for Image Generation) */}
-        <div ref={shareCardRef} className="space-y-4 bg-slate-50 p-1 rounded-3xl">
-          {/* Top 3 Podium Cards */}
-          {firstPlace && (
-            <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-xs">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block text-center mb-3">
-                Podium Finishers
-              </span>
-              <div className="grid grid-cols-3 gap-2 items-end pt-2 pb-1">
-                {/* 2nd Place (Left) */}
-                <div className="flex flex-col items-center text-center">
-                  {secondPlace ? (
-                    <>
-                      <span className="text-xl mb-1">🥈</span>
-                      <span className="text-xs font-bold text-slate-900 truncate w-full px-1">
-                        {secondPlace.player.name}
-                      </span>
-                      <span className="text-[11px] font-semibold text-slate-500">
-                        {secondPlace.gamesWon} pts
-                      </span>
-                      <div className="w-full h-14 bg-slate-100 rounded-t-xl mt-2 flex items-center justify-center font-black text-slate-400 text-sm">
-                        2
-                      </div>
-                    </>
-                  ) : (
-                    <div className="w-full h-14 bg-slate-50 rounded-t-xl mt-2" />
-                  )}
-                </div>
+        {/* Top 3 Podium Cards */}
+        {firstPlace && (
+          <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-xs">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block text-center mb-3">
+              Podium Finishers
+            </span>
+            <div className="grid grid-cols-3 gap-2 items-end pt-2 pb-1">
+              {/* 2nd Place (Left) */}
+              <div className="flex flex-col items-center text-center">
+                {secondPlace ? (
+                  <>
+                    <span className="text-xl mb-1">🥈</span>
+                    <span className="text-xs font-bold text-slate-900 truncate w-full px-1">
+                      {secondPlace.player.name}
+                    </span>
+                    <span className="text-[11px] font-semibold text-slate-500">
+                      {secondPlace.gamesWon} pts
+                    </span>
+                    <div className="w-full h-14 bg-slate-100 rounded-t-xl mt-2 flex items-center justify-center font-black text-slate-400 text-sm">
+                      2
+                    </div>
+                  </>
+                ) : (
+                  <div className="w-full h-14 bg-slate-50 rounded-t-xl mt-2" />
+                )}
+              </div>
 
-                {/* 1st Place (Center - Elevated) */}
-                <div className="flex flex-col items-center text-center">
-                  <span className="text-2xl mb-1 animate-bounce">🥇</span>
-                  <span className="text-xs font-extrabold text-slate-900 truncate w-full px-1">
-                    {firstPlace.player.name}
-                  </span>
-                  <span className="text-xs font-black text-emerald-600">
-                    {firstPlace.gamesWon} pts
-                  </span>
-                  <div className="w-full h-20 bg-amber-400/20 border-t-2 border-amber-400 rounded-t-xl mt-2 flex items-center justify-center font-black text-amber-700 text-base shadow-xs">
-                    1
-                  </div>
-                </div>
-
-                {/* 3rd Place (Right) */}
-                <div className="flex flex-col items-center text-center">
-                  {thirdPlace ? (
-                    <>
-                      <span className="text-xl mb-1">🥉</span>
-                      <span className="text-xs font-bold text-slate-900 truncate w-full px-1">
-                        {thirdPlace.player.name}
-                      </span>
-                      <span className="text-[11px] font-semibold text-slate-500">
-                        {thirdPlace.gamesWon} pts
-                      </span>
-                      <div className="w-full h-10 bg-amber-100/50 rounded-t-xl mt-2 flex items-center justify-center font-black text-amber-800 text-sm">
-                        3
-                      </div>
-                    </>
-                  ) : (
-                    <div className="w-full h-10 bg-slate-50 rounded-t-xl mt-2" />
-                  )}
+              {/* 1st Place (Center - Elevated) */}
+              <div className="flex flex-col items-center text-center">
+                <span className="text-2xl mb-1 animate-bounce">🥇</span>
+                <span className="text-xs font-extrabold text-slate-900 truncate w-full px-1">
+                  {firstPlace.player.name}
+                </span>
+                <span className="text-xs font-black text-emerald-600">
+                  {firstPlace.gamesWon} pts
+                </span>
+                <div className="w-full h-20 bg-amber-400/20 border-t-2 border-amber-400 rounded-t-xl mt-2 flex items-center justify-center font-black text-amber-700 text-base shadow-xs">
+                  1
                 </div>
               </div>
-            </div>
-          )}
 
-          {/* Full Final Standings Table */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between px-1">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                Complete Standings
-              </span>
-              <span className="text-[10px] font-semibold text-slate-400">
-                {session.title || 'Evenstar Tennis'}
-              </span>
+              {/* 3rd Place (Right) */}
+              <div className="flex flex-col items-center text-center">
+                {thirdPlace ? (
+                  <>
+                    <span className="text-xl mb-1">🥉</span>
+                    <span className="text-xs font-bold text-slate-900 truncate w-full px-1">
+                      {thirdPlace.player.name}
+                    </span>
+                    <span className="text-[11px] font-semibold text-slate-500">
+                      {thirdPlace.gamesWon} pts
+                    </span>
+                    <div className="w-full h-10 bg-amber-100/50 rounded-t-xl mt-2 flex items-center justify-center font-black text-amber-800 text-sm">
+                      3
+                    </div>
+                  </>
+                ) : (
+                  <div className="w-full h-10 bg-slate-50 rounded-t-xl mt-2" />
+                )}
+              </div>
             </div>
-            <StandingsTable standings={standings} isFinal={true} />
           </div>
+        )}
+
+        {/* Full Final Standings Table */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              Complete Standings
+            </span>
+            <span className="text-[10px] font-semibold text-slate-400">
+              {session.title || 'Evenstar Tennis'}
+            </span>
+          </div>
+          <StandingsTable standings={standings} isFinal={true} />
         </div>
 
         {/* Collapsible Match History Breakdown */}
