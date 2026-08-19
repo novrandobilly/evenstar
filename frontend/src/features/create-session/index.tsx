@@ -200,8 +200,8 @@ export const CreateSessionFeature: React.FC = () => {
               </div>
             </div>
 
-            {/* Dynamic Player Inputs */}
-            <div className="space-y-2 max-h-[38vh] overflow-y-auto pr-1">
+            {/* Dynamic Player Inputs (Natural full list without inner scrollbar) */}
+            <div className="space-y-2">
               {session.players.map((player, index) => {
                 const isFilled = player.name.trim().length > 0;
                 const canRemove = playerCount > minRequired;

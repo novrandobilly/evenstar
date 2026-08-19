@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { SessionConfig } from '../types/session';
 
 interface RunningSessionScreenProps {
   session: SessionConfig;
   onUpdateScore: (matchId: string, scoreA: string, scoreB: string) => void;
   onToggleCompleted: (matchId: string) => void;
+  onReorderMatches: (fromIndex: number, toIndex: number) => void;
   onEndSession: () => void;
 }
 
@@ -12,6 +13,7 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
   session,
   onUpdateScore,
   onToggleCompleted,
+  onReorderMatches,
   onEndSession,
 }) => {
   const isDoubles = session.matchFormat === 'doubles';
@@ -19,8 +21,40 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
   const completedCount = session.matches.filter((m) => m.isCompleted).length;
   const totalCount = session.matches.length;
 
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
   const formatTeam = (team: { name: string }[]) => {
     return team.map((p) => p.name).join(' / ');
+  };
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    // Set transparent drag ghost or data
+    e.dataTransfer.setData('text/plain', `${index}`);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragOverIndex !== index) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex !== null && draggedIndex !== targetIndex) {
+      onReorderMatches(draggedIndex, targetIndex);
+    }
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
   };
 
   return (
@@ -63,16 +97,24 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
           </div>
         </div>
 
-        {/* Match List (One match per row like a to-do list) */}
-        <div className="space-y-2 max-h-[65vh] overflow-y-auto pr-0.5">
-          {session.matches.map((match) => {
+        {/* Match List (Full natural page layout with draggable handle on each row) */}
+        <div className="space-y-2 pb-4">
+          {session.matches.map((match, index) => {
             const teamAName = formatTeam(match.teamA);
             const teamBName = formatTeam(match.teamB);
+            const isBeingDragged = draggedIndex === index;
+            const isTargeted = dragOverIndex === index;
 
             return (
               <div
                 key={match.id}
-                className={`flex items-center justify-between gap-2 p-3 rounded-2xl border transition ${
+                onDragOver={(e) => handleDragOver(e, index)}
+                onDrop={(e) => handleDrop(e, index)}
+                className={`flex items-center justify-between gap-2 p-3 rounded-2xl border transition-all ${
+                  isBeingDragged ? 'opacity-40 scale-[0.98]' : ''
+                } ${
+                  isTargeted ? 'border-emerald-500 ring-2 ring-emerald-500/20' : ''
+                } ${
                   match.isCompleted
                     ? 'border-emerald-200 bg-emerald-50/30'
                     : 'border-slate-200 bg-white shadow-2xs'
@@ -89,7 +131,7 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
                       : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
                   }`}
                 >
-                  {match.isCompleted ? '✓' : match.matchNumber}
+                  {match.isCompleted ? '✓' : index + 1}
                 </button>
 
                 {/* Team A */}
@@ -140,6 +182,23 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
                     {teamBName}
                   </span>
                 </div>
+
+                {/* Drag Handle (Right side) */}
+                <div
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, index)}
+                  onDragEnd={handleDragEnd}
+                  title="Drag to reorder match"
+                  className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-600 select-none px-1 py-1"
+                >
+                  <svg
+                    className="w-3.5 h-3.5"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm8-12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" />
+                  </svg>
+                </div>
               </div>
             );
           })}
@@ -147,7 +206,7 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
       </div>
 
       {/* Footer Finish CTA */}
-      <div className="pt-4 border-t border-slate-100 mt-2">
+      <div className="pt-4 border-t border-slate-100 mt-2 sticky bottom-0 bg-slate-50 py-3">
         <button
           type="button"
           onClick={onEndSession}

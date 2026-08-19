@@ -5,7 +5,7 @@ import { RunningSessionScreen } from '../../components/RunningSessionScreen';
 
 export const InSessionFeature: React.FC = () => {
   const navigate = useNavigate();
-  const { session, updateMatchScore, toggleMatchCompleted, resetSession } = useSession();
+  const { session, updateMatchScore, toggleMatchCompleted, reorderMatches, resetSession } = useSession();
 
   const handleEndSession = () => {
     if (confirm('End this session and return to home?')) {
@@ -39,6 +39,7 @@ export const InSessionFeature: React.FC = () => {
         session={session}
         onUpdateScore={updateMatchScore}
         onToggleCompleted={toggleMatchCompleted}
+        onReorderMatches={reorderMatches}
         onEndSession={handleEndSession}
       />
     </div>

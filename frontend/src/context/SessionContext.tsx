@@ -27,6 +27,7 @@ interface SessionContextType {
   startSession: () => void;
   updateMatchScore: (matchId: string, scoreA: string, scoreB: string) => void;
   toggleMatchCompleted: (matchId: string) => void;
+  reorderMatches: (fromIndex: number, toIndex: number) => void;
   resetSession: () => void;
   hasActiveSession: boolean;
 }
@@ -201,6 +202,16 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }));
   };
 
+  const reorderMatches = (fromIndex: number, toIndex: number) => {
+    setSession((prev) => {
+      const updated = [...prev.matches];
+      const [moved] = updated.splice(fromIndex, 1);
+      if (!moved) return prev;
+      updated.splice(toIndex, 0, moved);
+      return { ...prev, matches: updated };
+    });
+  };
+
   const resetSession = () => {
     sessionStorage.removeItem(STORAGE_KEY);
     setSession(defaultSession);
@@ -224,6 +235,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         startSession,
         updateMatchScore,
         toggleMatchCompleted,
+        reorderMatches,
         resetSession,
         hasActiveSession,
       }}
