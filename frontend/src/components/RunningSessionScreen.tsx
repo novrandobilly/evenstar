@@ -21,7 +21,6 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
   const [activeTab, setActiveTab] = useState<"matches" | "standings">(
     "matches",
   );
-  const [showFinishedModal, setShowFinishedModal] = useState(false);
 
   const isDoubles = session.matchFormat === "doubles";
   const formatLabel = isDoubles ? "Doubles (Americano)" : "Singles";
@@ -145,7 +144,7 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
 
           <button
             type="button"
-            onClick={() => setShowFinishedModal(true)}
+            onClick={onEndSession}
             className="text-xs font-semibold text-rose-500 hover:text-rose-600 px-2 py-1"
           >
             End
@@ -370,51 +369,13 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
       <div className="pt-4 border-t border-slate-100 mt-2 sticky bottom-0 bg-slate-50 py-3">
         <button
           type="button"
-          onClick={() => setShowFinishedModal(true)}
+          onClick={onEndSession}
           className="flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 py-3.5 text-xs font-bold text-white shadow-md active:scale-[0.98] transition hover:bg-slate-800"
         >
-          <span>Complete & Exit Session</span>
+          <span>Complete & View Summary</span>
+          <span>🏆</span>
         </button>
       </div>
-
-      {/* Final Session Results Modal */}
-      {showFinishedModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl space-y-4">
-            <div className="text-center">
-              <div className="text-3xl mb-1">🏆</div>
-              <h2 className="text-xl font-extrabold text-slate-900">
-                Session Results
-              </h2>
-              <p className="text-xs text-slate-500">
-                {session.title || "Tennis Session"} · {formatLabel}
-              </p>
-            </div>
-
-            {/* Final Standings Leaderboard */}
-            <div className="max-h-[50vh] overflow-y-auto pr-0.5">
-              <StandingsTable standings={standings} isFinal={true} />
-            </div>
-
-            <div className="flex flex-col gap-2 pt-2">
-              <button
-                type="button"
-                onClick={onEndSession}
-                className="w-full rounded-2xl bg-emerald-600 py-3 text-xs font-bold text-white shadow-md hover:bg-emerald-700 transition"
-              >
-                Finish & Return to Home
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowFinishedModal(false)}
-                className="w-full rounded-2xl bg-slate-100 py-3 text-xs font-bold text-slate-700 hover:bg-slate-200 transition"
-              >
-                Back to Session
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

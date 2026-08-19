@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useSession } from "../../context/SessionContext";
+import { useModal } from "../../context/modal";
 import { RunningSessionScreen } from "../../components/RunningSessionScreen";
 
 export const InSessionFeature: React.FC = () => {
@@ -10,14 +11,26 @@ export const InSessionFeature: React.FC = () => {
     updateMatchScore,
     toggleMatchCompleted,
     reorderMatches,
-    resetSession,
   } = useSession();
+  const { showModal } = useModal();
 
   const handleEndSession = () => {
-    if (confirm("End this session and return to home?")) {
-      resetSession();
-      navigate("/");
-    }
+    const uncompletedCount = session.matches.filter((m) => !m.isCompleted).length;
+    const desc =
+      uncompletedCount > 0
+        ? `You still have ${uncompletedCount} unplayed matches. Are you sure you want to finish and view final standings?`
+        : "Are you ready to complete the session and view the final results?";
+
+    showModal({
+      title: "Complete Session?",
+      description: desc,
+      confirmText: "Complete & View Results",
+      cancelText: "Keep Playing",
+      type: "primary",
+      onConfirm: () => {
+        navigate("/session-summary");
+      },
+    });
   };
 
   if (!session.matches || session.matches.length === 0) {
