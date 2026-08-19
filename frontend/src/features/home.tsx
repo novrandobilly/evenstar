@@ -7,7 +7,7 @@ export const HomeFeature: React.FC = () => {
   const { session, hasActiveSession } = useSession();
 
   const handleResume = () => {
-    if (session.rounds.length > 0) {
+    if (session.matches.length > 0) {
       navigate('/in-session');
     } else {
       navigate('/create-session');
@@ -25,7 +25,7 @@ export const HomeFeature: React.FC = () => {
           Evenstar
         </h1>
         <p className="mt-2 text-sm text-slate-400 font-normal leading-relaxed">
-          Minimalist tennis host assistant. Fair rotation, matchmaking & session manager.
+          Minimalist tennis host assistant. Matchmaker & session manager.
         </p>
       </div>
 
@@ -34,7 +34,7 @@ export const HomeFeature: React.FC = () => {
         {hasActiveSession && (
           <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-xs">
             <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-emerald-600 mb-1">
-              <span>{session.rounds.length > 0 ? 'Live Session' : 'Active Draft'}</span>
+              <span>{session.matches.length > 0 ? 'Live Session' : 'Active Draft'}</span>
               <span>{session.players.length} Players</span>
             </div>
             <div className="text-sm font-bold text-slate-900 truncate mb-3">

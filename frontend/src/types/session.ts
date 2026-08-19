@@ -6,20 +6,14 @@ export interface Player {
 export type MatchFormat = 'doubles' | 'singles';
 export type DoublesGameMode = 'americano';
 
-export interface Match {
+export interface MatchItem {
   id: string;
-  courtNumber: number;
+  matchNumber: number;
   teamA: Player[];
   teamB: Player[];
-  scoreA?: number;
-  scoreB?: number;
-  isFinished?: boolean;
-}
-
-export interface Round {
-  roundNumber: number;
-  matches: Match[];
-  restingPlayers: Player[];
+  scoreA: string;
+  scoreB: string;
+  isCompleted: boolean;
 }
 
 export interface SessionConfig {
@@ -28,8 +22,7 @@ export interface SessionConfig {
   matchFormat: MatchFormat;
   doublesMode: DoublesGameMode;
   players: Player[];
-  currentRoundIndex: number;
-  rounds: Round[];
+  matches: MatchItem[];
   createdAt: string;
 }
 

@@ -3,7 +3,6 @@ import type {
   SessionConfig,
   MatchFormat,
   DoublesGameMode,
-  Round,
 } from '../types/session';
 import {
   MIN_PLAYERS_DOUBLES,
@@ -12,13 +11,12 @@ import {
   DEFAULT_PLAYERS_SINGLES,
   MAX_PLAYERS,
 } from '../types/session';
-import { generateRound } from '../utils/matchmaker';
+import { generateAllMatches } from '../utils/matchmaker';
 
 const STORAGE_KEY = 'evenstar_tennis_session_config';
 
 interface SessionContextType {
   session: SessionConfig;
-  currentRound: Round | null;
   setSessionTitle: (title: string) => void;
   setMatchFormat: (format: MatchFormat) => void;
   setDoublesMode: (mode: DoublesGameMode) => void;
@@ -27,8 +25,8 @@ interface SessionContextType {
   removePlayer: (index: number) => void;
   updatePlayerName: (index: number, name: string) => void;
   startSession: () => void;
-  nextRound: () => void;
-  updateScore: (matchId: string, scoreA: number, scoreB: number) => void;
+  updateMatchScore: (matchId: string, scoreA: string, scoreB: string) => void;
+  toggleMatchCompleted: (matchId: string) => void;
   resetSession: () => void;
   hasActiveSession: boolean;
 }
@@ -45,8 +43,7 @@ const defaultSession: SessionConfig = {
   matchFormat: 'doubles',
   doublesMode: 'americano',
   players: createInitialPlayers(DEFAULT_PLAYERS_DOUBLES),
-  currentRoundIndex: 0,
-  rounds: [],
+  matches: [],
   createdAt: new Date().toISOString(),
 };
 
@@ -88,7 +85,6 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       let updatedPlayers = [...prev.players];
 
       if (updatedPlayers.length < targetDefault) {
-        // Expand up to default count
         const additional = Array.from(
           { length: targetDefault - updatedPlayers.length },
           (_, i) => ({
@@ -98,7 +94,6 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         );
         updatedPlayers = [...updatedPlayers, ...additional];
       } else if (updatedPlayers.length > targetDefault) {
-        // When switching formats, adjust down to target default while keeping earlier names
         updatedPlayers = updatedPlayers.slice(0, targetDefault);
       }
 
@@ -174,45 +169,36 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const startSession = () => {
-    const firstRound = generateRound(session.players, session.matchFormat, 1, []);
+    const matches = generateAllMatches(session.players, session.matchFormat);
     setSession((prev) => ({
       ...prev,
-      rounds: [firstRound],
-      currentRoundIndex: 0,
+      matches,
     }));
   };
 
-  const nextRound = () => {
-    const nextRoundNumber = session.rounds.length + 1;
-    const newRound = generateRound(
-      session.players,
-      session.matchFormat,
-      nextRoundNumber,
-      session.rounds
-    );
+  const updateMatchScore = (matchId: string, scoreA: string, scoreB: string) => {
     setSession((prev) => ({
       ...prev,
-      rounds: [...prev.rounds, newRound],
-      currentRoundIndex: prev.rounds.length,
+      matches: prev.matches.map((m) => {
+        if (m.id !== matchId) return m;
+        const hasScores = scoreA.trim().length > 0 && scoreB.trim().length > 0;
+        return {
+          ...m,
+          scoreA,
+          scoreB,
+          isCompleted: hasScores ? true : m.isCompleted,
+        };
+      }),
     }));
   };
 
-  const updateScore = (matchId: string, scoreA: number, scoreB: number) => {
-    setSession((prev) => {
-      const updatedRounds = [...prev.rounds];
-      const round = updatedRounds[prev.currentRoundIndex];
-      if (round) {
-        const matchIdx = round.matches.findIndex((m) => m.id === matchId);
-        if (matchIdx !== -1) {
-          round.matches[matchIdx] = {
-            ...round.matches[matchIdx],
-            scoreA,
-            scoreB,
-          };
-        }
-      }
-      return { ...prev, rounds: updatedRounds };
-    });
+  const toggleMatchCompleted = (matchId: string) => {
+    setSession((prev) => ({
+      ...prev,
+      matches: prev.matches.map((m) =>
+        m.id === matchId ? { ...m, isCompleted: !m.isCompleted } : m
+      ),
+    }));
   };
 
   const resetSession = () => {
@@ -220,16 +206,14 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setSession(defaultSession);
   };
 
-  const currentRound = session.rounds[session.currentRoundIndex] || null;
   const hasActiveSession = Boolean(
-    session.rounds.length > 0 || session.players.some((p) => p.name.trim().length > 0)
+    session.matches.length > 0 || session.players.some((p) => p.name.trim().length > 0)
   );
 
   return (
     <SessionContext.Provider
       value={{
         session,
-        currentRound,
         setSessionTitle,
         setMatchFormat,
         setDoublesMode,
@@ -238,8 +222,8 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         removePlayer,
         updatePlayerName,
         startSession,
-        nextRound,
-        updateScore,
+        updateMatchScore,
+        toggleMatchCompleted,
         resetSession,
         hasActiveSession,
       }}
