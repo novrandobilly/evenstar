@@ -1,7 +1,7 @@
-import React, { useState, useRef } from 'react';
-import type { SessionConfig } from '../types/session';
-import { calculateStandings } from '../utils/standings';
-import { StandingsTable } from './StandingsTable';
+import React, { useState, useRef } from "react";
+import type { SessionConfig } from "../types/session";
+import { calculateStandings } from "../utils/standings";
+import { StandingsTable } from "./StandingsTable";
 
 interface RunningSessionScreenProps {
   session: SessionConfig;
@@ -18,16 +18,20 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
   onReorderMatches,
   onEndSession,
 }) => {
-  const [activeTab, setActiveTab] = useState<'matches' | 'standings'>('matches');
+  const [activeTab, setActiveTab] = useState<"matches" | "standings">(
+    "matches",
+  );
   const [showFinishedModal, setShowFinishedModal] = useState(false);
 
-  const isDoubles = session.matchFormat === 'doubles';
-  const formatLabel = isDoubles ? 'Doubles (Americano)' : 'Singles';
+  const isDoubles = session.matchFormat === "doubles";
+  const formatLabel = isDoubles ? "Doubles (Americano)" : "Singles";
   const completedCount = session.matches.filter((m) => m.isCompleted).length;
   const totalCount = session.matches.length;
 
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-  const [dropIndicatorIndex, setDropIndicatorIndex] = useState<number | null>(null);
+  const [dropIndicatorIndex, setDropIndicatorIndex] = useState<number | null>(
+    null,
+  );
 
   const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -36,13 +40,13 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
   // --- HTML5 Desktop Drag Handlers ---
   const handleDragStart = (e: React.DragEvent, index: number) => {
     setDraggedIndex(index);
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', `${index}`);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", `${index}`);
   };
 
   const handleDragOverRow = (e: React.DragEvent, index: number) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
+    e.dataTransfer.dropEffect = "move";
 
     const rect = e.currentTarget.getBoundingClientRect();
     const relativeY = e.clientY - rect.top;
@@ -113,7 +117,11 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
       if (draggedIndex < targetGap) {
         finalIndex = targetGap - 1;
       }
-      if (draggedIndex !== finalIndex && finalIndex >= 0 && finalIndex < session.matches.length) {
+      if (
+        draggedIndex !== finalIndex &&
+        finalIndex >= 0 &&
+        finalIndex < session.matches.length
+      ) {
         onReorderMatches(draggedIndex, finalIndex);
       }
     }
@@ -130,8 +138,8 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
             <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">
               Live Session · {formatLabel}
             </span>
-            <h1 className="text-base font-bold text-slate-900 truncate max-w-[220px]">
-              {session.title || 'Tennis Session'}
+            <h1 className="text-base font-bold text-slate-900 truncate max-w-55">
+              {session.title || "Tennis Session"}
             </h1>
           </div>
 
@@ -148,22 +156,22 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
         <div className="grid grid-cols-2 gap-1 p-1 bg-slate-200/80 rounded-2xl mb-4 text-xs font-bold">
           <button
             type="button"
-            onClick={() => setActiveTab('matches')}
+            onClick={() => setActiveTab("matches")}
             className={`py-2 rounded-xl transition ${
-              activeTab === 'matches'
-                ? 'bg-white text-slate-900 shadow-xs'
-                : 'text-slate-500 hover:text-slate-900'
+              activeTab === "matches"
+                ? "bg-white text-slate-900 shadow-xs"
+                : "text-slate-500 hover:text-slate-900"
             }`}
           >
             Matches ({completedCount}/{totalCount})
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab('standings')}
+            onClick={() => setActiveTab("standings")}
             className={`py-2 rounded-xl transition flex items-center justify-center gap-1.5 ${
-              activeTab === 'standings'
-                ? 'bg-white text-slate-900 shadow-xs'
-                : 'text-slate-500 hover:text-slate-900'
+              activeTab === "standings"
+                ? "bg-white text-slate-900 shadow-xs"
+                : "text-slate-500 hover:text-slate-900"
             }`}
           >
             <span>Standings</span>
@@ -174,7 +182,7 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
         </div>
 
         {/* TAB 1: MATCHES SCHEDULE */}
-        {activeTab === 'matches' && (
+        {activeTab === "matches" && (
           <div>
             <div className="pb-4">
               {session.matches.map((match, index) => {
@@ -204,7 +212,8 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
                     onDrop={(e) => {
                       const rect = e.currentTarget.getBoundingClientRect();
                       const relativeY = e.clientY - rect.top;
-                      const targetGap = relativeY < rect.height / 2 ? index : index + 1;
+                      const targetGap =
+                        relativeY < rect.height / 2 ? index : index + 1;
                       handleDrop(e, targetGap);
                     }}
                     className="relative cursor-default"
@@ -221,11 +230,11 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
                     {/* Match Row Card */}
                     <div
                       className={`flex items-center justify-between gap-2.5 p-3 my-1.5 rounded-2xl border transition-all ${
-                        isBeingDragged ? 'opacity-30 scale-[0.98]' : ''
+                        isBeingDragged ? "opacity-30 scale-[0.98]" : ""
                       } ${
                         match.isCompleted
-                          ? 'border-emerald-200 bg-emerald-50/30'
-                          : 'border-slate-200 bg-white shadow-2xs'
+                          ? "border-emerald-200 bg-emerald-50/30"
+                          : "border-slate-200 bg-white shadow-2xs"
                       }`}
                     >
                       {/* Match Number / Status Checkbox */}
@@ -235,14 +244,16 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
                           e.stopPropagation();
                           onToggleCompleted(match.id);
                         }}
-                        title={match.isCompleted ? 'Mark pending' : 'Mark completed'}
+                        title={
+                          match.isCompleted ? "Mark pending" : "Mark completed"
+                        }
                         className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-xs font-bold transition ${
                           match.isCompleted
-                            ? 'bg-emerald-600 text-white'
-                            : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
+                            ? "bg-emerald-600 text-white"
+                            : "bg-slate-100 text-slate-400 hover:bg-slate-200"
                         }`}
                       >
-                        {match.isCompleted ? '✓' : index + 1}
+                        {match.isCompleted ? "✓" : index + 1}
                       </button>
 
                       {/* Team A (Column stack of player names) */}
@@ -251,7 +262,9 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
                           <span
                             key={p.id || pIdx}
                             className={`text-xs font-bold truncate block leading-tight ${
-                              match.isCompleted ? 'text-slate-700' : 'text-slate-900'
+                              match.isCompleted
+                                ? "text-slate-700"
+                                : "text-slate-900"
                             }`}
                             title={p.name}
                           >
@@ -266,7 +279,9 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
                         inputMode="numeric"
                         value={match.scoreA}
                         onPointerDown={(e) => e.stopPropagation()}
-                        onChange={(e) => onUpdateScore(match.id, e.target.value, match.scoreB)}
+                        onChange={(e) =>
+                          onUpdateScore(match.id, e.target.value, match.scoreB)
+                        }
                         placeholder="0"
                         className="w-8 h-8 shrink-0 text-center text-xs font-black text-slate-900 bg-slate-100 rounded-lg focus:outline-none focus:bg-white focus:ring-1 focus:ring-emerald-500 transition"
                       />
@@ -282,7 +297,9 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
                         inputMode="numeric"
                         value={match.scoreB}
                         onPointerDown={(e) => e.stopPropagation()}
-                        onChange={(e) => onUpdateScore(match.id, match.scoreA, e.target.value)}
+                        onChange={(e) =>
+                          onUpdateScore(match.id, match.scoreA, e.target.value)
+                        }
                         placeholder="0"
                         className="w-8 h-8 shrink-0 text-center text-xs font-black text-slate-900 bg-slate-100 rounded-lg focus:outline-none focus:bg-white focus:ring-1 focus:ring-emerald-500 transition"
                       />
@@ -293,7 +310,9 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
                           <span
                             key={p.id || pIdx}
                             className={`text-xs font-bold truncate block leading-tight ${
-                              match.isCompleted ? 'text-slate-700' : 'text-slate-900'
+                              match.isCompleted
+                                ? "text-slate-700"
+                                : "text-slate-900"
                             }`}
                             title={p.name}
                           >
@@ -336,7 +355,7 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
         )}
 
         {/* TAB 2: LIVE STANDINGS */}
-        {activeTab === 'standings' && (
+        {activeTab === "standings" && (
           <div className="space-y-4 pb-4">
             <div className="flex items-center justify-between text-xs text-slate-500 px-1">
               <span>Sorted by Game Points (GW)</span>
@@ -364,9 +383,11 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
           <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl space-y-4">
             <div className="text-center">
               <div className="text-3xl mb-1">🏆</div>
-              <h2 className="text-xl font-extrabold text-slate-900">Session Results</h2>
+              <h2 className="text-xl font-extrabold text-slate-900">
+                Session Results
+              </h2>
               <p className="text-xs text-slate-500">
-                {session.title || 'Tennis Session'} · {formatLabel}
+                {session.title || "Tennis Session"} · {formatLabel}
               </p>
             </div>
 
