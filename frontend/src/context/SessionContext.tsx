@@ -52,7 +52,7 @@ const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
 export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [session, setSession] = useState<SessionConfig>(() => {
-    const saved = sessionStorage.getItem(STORAGE_KEY);
+    const saved = localStorage.getItem(STORAGE_KEY) || sessionStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -67,9 +67,13 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return defaultSession;
   });
 
-  // Sync to sessionStorage
+  // Sync to localStorage
   useEffect(() => {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+    } catch (e) {
+      console.error('Failed to save session to localStorage:', e);
+    }
   }, [session]);
 
   const setSessionTitle = (title: string) => {
@@ -213,7 +217,12 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const resetSession = () => {
-    sessionStorage.removeItem(STORAGE_KEY);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      sessionStorage.removeItem(STORAGE_KEY);
+    } catch (e) {
+      console.error('Failed to remove session from storage:', e);
+    }
     setSession(defaultSession);
   };
 
