@@ -4,7 +4,7 @@ import { useSession } from '../context/SessionContext';
 
 export const HomeFeature: React.FC = () => {
   const navigate = useNavigate();
-  const { session, hasActiveSession } = useSession();
+  const { session, hasActiveSession, sessionHistory, deleteHistorySession } = useSession();
 
   const handleResume = () => {
     if (session.matches.length > 0) {
@@ -12,6 +12,14 @@ export const HomeFeature: React.FC = () => {
     } else {
       navigate('/create-session');
     }
+  };
+
+  // Show newest first
+  const historyNewestFirst = [...sessionHistory].reverse();
+
+  const formatDate = (iso: string) => {
+    const d = new Date(iso);
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
   return (
@@ -58,6 +66,52 @@ export const HomeFeature: React.FC = () => {
           <span>Create Session</span>
           <span>→</span>
         </button>
+
+        {/* Past Sessions History */}
+        {historyNewestFirst.length > 0 && (
+          <div className="pt-2">
+            <div className="flex items-center justify-between mb-2 px-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                Past Sessions
+              </span>
+              <span className="text-[10px] font-semibold text-slate-300">
+                {historyNewestFirst.length} / 3
+              </span>
+            </div>
+            <div className="space-y-2">
+              {historyNewestFirst.map((s) => (
+                <div
+                  key={s.id}
+                  className="rounded-2xl border border-slate-100 bg-white p-3.5 shadow-xs flex items-center justify-between gap-3"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-bold text-slate-900 truncate">
+                      {s.title || 'Tennis Session'}
+                    </div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-[10px] font-semibold text-slate-400">
+                        {s.players.length} players
+                      </span>
+                      <span className="text-[10px] text-slate-300">·</span>
+                      <span className="text-[10px] font-semibold text-slate-400">
+                        {s.completedAt ? formatDate(s.completedAt) : formatDate(s.createdAt)}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => deleteHistorySession(s.id)}
+                    className="shrink-0 text-slate-300 hover:text-rose-500 transition text-sm px-1"
+                    title="Delete from history"
+                    aria-label="Delete session from history"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Footer minimal info */}

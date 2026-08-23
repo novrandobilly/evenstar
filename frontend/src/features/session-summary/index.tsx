@@ -9,14 +9,17 @@ import { shareStandingsAsImage } from '../../utils/shareImage';
 
 export const SessionSummaryFeature: React.FC = () => {
   const navigate = useNavigate();
-  const { session, resetSession } = useSession();
+  const { sessionHistory } = useSession();
   const { showModal } = useModal();
   const [showMatchHistory, setShowMatchHistory] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
   const [isSharing, setIsSharing] = useState(false);
 
-  const standings = calculateStandings(session.players, session.matches);
-  const isDoubles = session.matchFormat === 'doubles';
+  // The just-completed session is the last entry in history
+  const session = sessionHistory[sessionHistory.length - 1];
+
+  const standings = session ? calculateStandings(session.players, session.matches) : [];
+  const isDoubles = session?.matchFormat === 'doubles';
   const formatLabel = isDoubles ? 'Doubles (Americano)' : 'Singles';
 
   const firstPlace = standings[0];
@@ -61,7 +64,7 @@ export const SessionSummaryFeature: React.FC = () => {
     setIsSharing(true);
     try {
       const result = await shareStandingsAsImage(
-        session.title || 'Tennis Session Results',
+        session?.title || 'Tennis Session Results',
         formatLabel,
         standings
       );
@@ -80,9 +83,9 @@ export const SessionSummaryFeature: React.FC = () => {
 
   const handleCopyText = async () => {
     const textSummary = generateShareText(
-      session.title || 'Tennis Session',
+      session?.title || 'Tennis Session',
       formatLabel,
-      session.players.length,
+      session?.players.length ?? 0,
       standings
     );
     const success = await copyToClipboard(textSummary);
@@ -98,12 +101,11 @@ export const SessionSummaryFeature: React.FC = () => {
   const handleStartNewSession = () => {
     showModal({
       title: 'Start New Session?',
-      description: 'Starting a new session will clear current session results. Make sure you have shared or copied the leaderboard first.',
+      description: 'Ready to start a fresh session? Your results have already been saved to history.',
       confirmText: 'Start New Session',
       cancelText: 'Cancel',
       type: 'danger',
       onConfirm: () => {
-        resetSession();
         navigate('/create-session');
       },
     });
@@ -112,6 +114,25 @@ export const SessionSummaryFeature: React.FC = () => {
   const handleBackToHome = () => {
     navigate('/');
   };
+
+  if (!session) {
+    return (
+      <div className="flex min-h-dvh flex-col items-center justify-center p-6 text-center">
+        <div className="text-4xl mb-4">🎾</div>
+        <h2 className="text-lg font-bold text-slate-900">No Session Found</h2>
+        <p className="text-xs text-slate-500 mt-1 max-w-xs">
+          There is no completed session to display.
+        </p>
+        <button
+          type="button"
+          onClick={() => navigate('/')}
+          className="mt-6 rounded-2xl bg-slate-900 px-6 py-3 text-xs font-bold text-white shadow-md"
+        >
+          Back to Home
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-1 flex-col justify-between max-w-md mx-auto w-full px-4 py-6 select-none font-sans">

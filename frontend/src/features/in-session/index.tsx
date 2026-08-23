@@ -11,6 +11,7 @@ export const InSessionFeature: React.FC = () => {
     updateMatchScore,
     toggleMatchCompleted,
     reorderMatches,
+    completeSession,
   } = useSession();
   const { showModal } = useModal();
 
@@ -28,6 +29,7 @@ export const InSessionFeature: React.FC = () => {
       cancelText: "Keep Playing",
       type: "primary",
       onConfirm: () => {
+        completeSession();
         navigate("/session-summary");
       },
     });

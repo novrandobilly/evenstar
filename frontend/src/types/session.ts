@@ -24,6 +24,7 @@ export interface SessionConfig {
   players: Player[];
   matches: MatchItem[];
   createdAt: string;
+  completedAt?: string;
 }
 
 export const MIN_PLAYERS_DOUBLES = 4;
