@@ -9,6 +9,8 @@ export interface ModalOptions {
   type?: 'danger' | 'primary' | 'warning';
   onConfirm?: () => void;
   onCancel?: () => void;
+  contentBody?: React.ReactNode;
+  hideActions?: boolean;
 }
 
 interface ModalContextType {
@@ -57,34 +59,40 @@ export const ModalProvider: React.FC<{ children: ReactNode }> = ({ children }) =
                   {modalOptions.title}
                 </h3>
               )}
-              {modalOptions.description && (
-                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                  {modalOptions.description}
-                </p>
+              {modalOptions.contentBody ? (
+                modalOptions.contentBody
+              ) : (
+                modalOptions.description && (
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                    {modalOptions.description}
+                  </p>
+                )
               )}
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="flex-1 rounded-2xl bg-slate-100 py-3 text-xs font-bold text-slate-700 hover:bg-slate-200 active:scale-[0.98] transition"
-              >
-                {modalOptions.cancelText || 'Cancel'}
-              </button>
+            {!modalOptions.hideActions && (
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  className="flex-1 rounded-2xl bg-slate-100 py-3 text-xs font-bold text-slate-700 hover:bg-slate-200 active:scale-[0.98] transition"
+                >
+                  {modalOptions.cancelText || 'Cancel'}
+                </button>
 
-              <button
-                type="button"
-                onClick={handleConfirm}
-                className={`flex-1 rounded-2xl py-3 text-xs font-bold text-white shadow-md active:scale-[0.98] transition ${
-                  modalOptions.type === 'danger'
-                    ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/20'
-                    : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20'
-                }`}
-              >
-                {modalOptions.confirmText || 'Confirm'}
-              </button>
-            </div>
+                <button
+                  type="button"
+                  onClick={handleConfirm}
+                  className={`flex-1 rounded-2xl py-3 text-xs font-bold text-white shadow-md active:scale-[0.98] transition ${
+                    modalOptions.type === 'danger'
+                      ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/20'
+                      : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20'
+                  }`}
+                >
+                  {modalOptions.confirmText || 'Confirm'}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -1,12 +1,15 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useSession } from "../context/SessionContext";
+import { useModal } from "../context/modal";
+import PWAGuide from "../components/PWAGuide";
 import logo from "../assets/logo.svg";
 
 export const HomeFeature: React.FC = () => {
   const navigate = useNavigate();
   const { session, hasActiveSession, sessionHistory, deleteHistorySession } =
     useSession();
+  const { showModal, hideModal } = useModal();
 
   const handleResume = () => {
     if (session.matches.length > 0) {
@@ -14,6 +17,14 @@ export const HomeFeature: React.FC = () => {
     } else {
       navigate("/create-session");
     }
+  };
+
+  const handleOpenPwaGuide = () => {
+    showModal({
+      title: "PWA Install Guide",
+      contentBody: <PWAGuide onClose={hideModal} />,
+      hideActions: true,
+    });
   };
 
   // Show newest first
@@ -30,8 +41,20 @@ export const HomeFeature: React.FC = () => {
 
   return (
     <div className="flex flex-1 flex-col justify-between px-6 py-10 max-w-md mx-auto w-full">
+      {/* PWA Guide Trigger above Brand */}
+      <div className="pt-8">
+        <button
+          type="button"
+          onClick={handleOpenPwaGuide}
+          className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white hover:bg-slate-50 px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-800 shadow-2xs active:scale-[0.98] transition cursor-pointer"
+        >
+          <span>📱</span>
+          <span>Use as App</span>
+        </button>
+      </div>
+
       {/* Top Brand */}
-      <div className="pt-12 flex flex-row items-start justify-start gap-4">
+      <div className="pt-6 flex flex-row items-start justify-start gap-4">
         <img src={logo} alt="Kickserve" className="h-21 w-21" />
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
