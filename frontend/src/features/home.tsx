@@ -1,16 +1,18 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useSession } from '../context/SessionContext';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useSession } from "../context/SessionContext";
+import logo from "../assets/logo.svg";
 
 export const HomeFeature: React.FC = () => {
   const navigate = useNavigate();
-  const { session, hasActiveSession, sessionHistory, deleteHistorySession } = useSession();
+  const { session, hasActiveSession, sessionHistory, deleteHistorySession } =
+    useSession();
 
   const handleResume = () => {
     if (session.matches.length > 0) {
-      navigate('/in-session');
+      navigate("/in-session");
     } else {
-      navigate('/create-session');
+      navigate("/create-session");
     }
   };
 
@@ -19,22 +21,29 @@ export const HomeFeature: React.FC = () => {
 
   const formatDate = (iso: string) => {
     const d = new Date(iso);
-    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    return d.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
   };
 
   return (
     <div className="flex flex-1 flex-col justify-between px-6 py-10 max-w-md mx-auto w-full">
       {/* Top Brand */}
-      <div className="pt-12">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-600 text-2xl text-white shadow-md shadow-emerald-600/20 mb-6">
-          🎾
+      <div className="pt-12 flex flex-row items-start justify-start gap-4">
+        <img src={logo} alt="Kickserve" className="h-21 w-21" />
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
+            Kickserve
+          </h1>
+          <p className="mt-2 text-sm text-slate-400 font-normal leading-relaxed">
+            Minimalist tennis host assistant.
+          </p>
+          <p className="text-sm text-slate-400 font-normal leading-relaxed">
+            Matchmaker & session manager.
+          </p>
         </div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
-          Kickserve
-        </h1>
-        <p className="mt-2 text-sm text-slate-400 font-normal leading-relaxed">
-          Minimalist tennis host assistant. Matchmaker & session manager.
-        </p>
       </div>
 
       {/* Center Actions */}
@@ -42,11 +51,13 @@ export const HomeFeature: React.FC = () => {
         {hasActiveSession && (
           <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-xs">
             <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-emerald-600 mb-1">
-              <span>{session.matches.length > 0 ? 'Live Session' : 'Active Draft'}</span>
+              <span>
+                {session.matches.length > 0 ? "Live Session" : "Active Draft"}
+              </span>
               <span>{session.players.length} Players</span>
             </div>
             <div className="text-sm font-bold text-slate-900 truncate mb-3">
-              {session.title || 'Tennis Session'}
+              {session.title || "Tennis Session"}
             </div>
             <button
               type="button"
@@ -60,7 +71,7 @@ export const HomeFeature: React.FC = () => {
 
         <button
           type="button"
-          onClick={() => navigate('/create-session')}
+          onClick={() => navigate("/create-session")}
           className="flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 py-4 text-sm font-bold text-white shadow-lg active:scale-[0.98] transition hover:bg-slate-800"
         >
           <span>Create Session</span>
@@ -91,7 +102,7 @@ export const HomeFeature: React.FC = () => {
                     className="flex-1 text-left p-3.5 hover:bg-slate-50 transition active:scale-[0.99]"
                   >
                     <div className="text-xs font-bold text-slate-900 truncate">
-                      {s.title || 'Tennis Session'}
+                      {s.title || "Tennis Session"}
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className="text-[10px] font-semibold text-slate-400">
@@ -99,7 +110,9 @@ export const HomeFeature: React.FC = () => {
                       </span>
                       <span className="text-[10px] text-slate-300">·</span>
                       <span className="text-[10px] font-semibold text-slate-400">
-                        {s.completedAt ? formatDate(s.completedAt) : formatDate(s.createdAt)}
+                        {s.completedAt
+                          ? formatDate(s.completedAt)
+                          : formatDate(s.createdAt)}
                       </span>
                       <span className="text-[10px] text-slate-300">·</span>
                       <span className="text-[10px] font-semibold text-slate-400">

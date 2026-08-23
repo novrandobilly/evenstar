@@ -1,4 +1,5 @@
 import React from 'react';
+import logo from '../assets/logo.svg';
 
 interface HomeScreenProps {
   onCreateSession: () => void;
@@ -19,9 +20,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     <div className="flex flex-1 flex-col justify-between px-6 py-10 max-w-md mx-auto w-full">
       {/* Top clean brand */}
       <div className="pt-12">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-600 text-2xl text-white shadow-md shadow-emerald-600/20 mb-6">
-          🎾
-        </div>
+        <img src={logo} alt="Kickserve" className="h-14 w-14 mb-6" />
         <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
           Kickserve
         </h1>
