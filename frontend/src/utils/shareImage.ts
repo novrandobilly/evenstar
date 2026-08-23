@@ -20,7 +20,7 @@ export async function shareStandingsAsImage(
   fileName?: string
 ): Promise<ShareResult> {
   try {
-    const defaultFileName = `${(title || 'evenstar-tennis').toLowerCase().replace(/[^a-z0-9]+/g, '-')}-standings.png`;
+    const defaultFileName = `${(title || 'kickserve').toLowerCase().replace(/[^a-z0-9]+/g, '-')}-standings.png`;
     const finalFileName = fileName || defaultFileName;
 
     // 1. Generate PNG blob using pure HTML5 Canvas 2D engine

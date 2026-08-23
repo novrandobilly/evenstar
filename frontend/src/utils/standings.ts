@@ -80,12 +80,13 @@ export function calculateStandings(
   });
 
   // Sort standings:
-  // 1. Total Game Points Won (Americano standard)
-  // 2. Point Differential (gamesWon - gamesLost)
-  // 3. Match Wins
+  // 1. Point Differential (+/-) — primary ranking criterion
+  // 2. Total Games Won — first tiebreaker
+  // 3. Match Wins — second tiebreaker
+  // 4. Player name — alphabetical fallback
   const sorted = Object.values(statsMap).sort((a, b) => {
-    if (b.gamesWon !== a.gamesWon) return b.gamesWon - a.gamesWon;
     if (b.diff !== a.diff) return b.diff - a.diff;
+    if (b.gamesWon !== a.gamesWon) return b.gamesWon - a.gamesWon;
     if (b.matchWins !== a.matchWins) return b.matchWins - a.matchWins;
     return a.player.name.localeCompare(b.player.name);
   });

@@ -23,6 +23,6 @@ export function generateShareText(
   });
 
   lines.push(``);
-  lines.push(`Hosted with Evenstar Tennis 🎾`);
+  lines.push(`Hosted with Kickserve 🎾`);
   return lines.join('\n');
 }

@@ -30,7 +30,7 @@ export const HomeFeature: React.FC = () => {
           🎾
         </div>
         <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
-          Evenstar
+          Kickserve
         </h1>
         <p className="mt-2 text-sm text-slate-400 font-normal leading-relaxed">
           Minimalist tennis host assistant. Matchmaker & session manager.
@@ -82,9 +82,14 @@ export const HomeFeature: React.FC = () => {
               {historyNewestFirst.map((s) => (
                 <div
                   key={s.id}
-                  className="rounded-2xl border border-slate-100 bg-white p-3.5 shadow-xs flex items-center justify-between gap-3"
+                  className="rounded-2xl border border-slate-100 bg-white shadow-xs flex items-stretch overflow-hidden"
                 >
-                  <div className="flex-1 min-w-0">
+                  {/* Tappable card area — navigates to read-only view */}
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/history/${s.id}`)}
+                    className="flex-1 text-left p-3.5 hover:bg-slate-50 transition active:scale-[0.99]"
+                  >
                     <div className="text-xs font-bold text-slate-900 truncate">
                       {s.title || 'Tennis Session'}
                     </div>
@@ -96,12 +101,17 @@ export const HomeFeature: React.FC = () => {
                       <span className="text-[10px] font-semibold text-slate-400">
                         {s.completedAt ? formatDate(s.completedAt) : formatDate(s.createdAt)}
                       </span>
+                      <span className="text-[10px] text-slate-300">·</span>
+                      <span className="text-[10px] font-semibold text-slate-400">
+                        View →
+                      </span>
                     </div>
-                  </div>
+                  </button>
+                  {/* Delete button — stops propagation so it doesn't navigate */}
                   <button
                     type="button"
                     onClick={() => deleteHistorySession(s.id)}
-                    className="shrink-0 text-slate-300 hover:text-rose-500 transition text-sm px-1"
+                    className="shrink-0 px-3.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition text-sm border-l border-slate-100"
                     title="Delete from history"
                     aria-label="Delete session from history"
                   >

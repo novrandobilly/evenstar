@@ -257,7 +257,7 @@ export async function createStandingsImageBlob(
   ctx.textAlign = 'center';
   ctx.fillStyle = '#94a3b8'; // slate-400
   ctx.font = 'bold 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillText('🎾 Evenstar Tennis · Matchmaker & Leaderboards', width / 2, currentY + 12);
+  ctx.fillText('🎾 Kickserve · Matchmaker & Leaderboards', width / 2, currentY + 12);
 
   // Convert Canvas directly to Blob
   return new Promise<Blob>((resolve, reject) => {

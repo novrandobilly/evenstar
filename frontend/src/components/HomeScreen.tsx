@@ -23,7 +23,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           🎾
         </div>
         <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
-          Evenstar
+          Kickserve
         </h1>
         <p className="mt-2 text-sm text-slate-400 font-normal leading-relaxed">
           Minimalist tennis host assistant. Fair rotation, matchmaking & session manager.
