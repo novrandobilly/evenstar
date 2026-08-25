@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import type { Player } from "../../../../types/session";
+import type { Player } from "../../../../../../types/session";
 import { DropdownList } from "./features/DropdownList";
 
 interface CustomPlayerSelectProps {

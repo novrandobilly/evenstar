@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useSession } from '../../context/SessionContext';
-import { useModal } from '../../context/modal';
-import { calculateStandings } from '../../utils/standings';
-import { StandingsTable } from '../../components/StandingsTable';
-import { generateShareText } from './shareText';
-import { shareStandingsAsImage } from '../../utils/shareImage';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSession } from "../../context/SessionContext";
+import { useModal } from "../../context/modal";
+import { calculateStandings } from "../../utils/standings";
+import { StandingsTable } from "../in-session/features/RunningSession/features/StandingsTable";
+import { generateShareText } from "./shareText";
+import { shareStandingsAsImage } from "../../utils/shareImage";
 
 export const SessionSummaryFeature: React.FC = () => {
   const navigate = useNavigate();
@@ -18,9 +18,11 @@ export const SessionSummaryFeature: React.FC = () => {
   // The just-completed session is the last entry in history
   const session = sessionHistory[sessionHistory.length - 1];
 
-  const standings = session ? calculateStandings(session.players, session.matches) : [];
-  const isDoubles = session?.matchFormat === 'doubles';
-  const formatLabel = isDoubles ? 'Doubles (Americano)' : 'Singles';
+  const standings = session
+    ? calculateStandings(session.players, session.matches)
+    : [];
+  const isDoubles = session?.matchFormat === "doubles";
+  const formatLabel = isDoubles ? "Doubles (Americano)" : "Singles";
 
   const firstPlace = standings[0];
   const secondPlace = standings[1];
@@ -37,15 +39,15 @@ export const SessionSummaryFeature: React.FC = () => {
       }
     }
     try {
-      const textArea = document.createElement('textarea');
+      const textArea = document.createElement("textarea");
       textArea.value = text;
-      textArea.style.position = 'fixed';
-      textArea.style.left = '-999999px';
-      textArea.style.top = '-999999px';
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.top = "-999999px";
       document.body.appendChild(textArea);
       textArea.focus();
       textArea.select();
-      const successful = document.execCommand('copy');
+      const successful = document.execCommand("copy");
       document.body.removeChild(textArea);
       return successful;
     } catch {
@@ -64,17 +66,17 @@ export const SessionSummaryFeature: React.FC = () => {
     setIsSharing(true);
     try {
       const result = await shareStandingsAsImage(
-        session?.title || 'Tennis Session Results',
+        session?.title || "Tennis Session Results",
         formatLabel,
-        standings
+        standings,
       );
       if (result.message) {
         setNotification(result.message);
         setTimeout(() => setNotification(null), 3000);
       }
     } catch (err) {
-      console.error('Failed to share standings image:', err);
-      setNotification('Failed to share standings image');
+      console.error("Failed to share standings image:", err);
+      setNotification("Failed to share standings image");
       setTimeout(() => setNotification(null), 3000);
     } finally {
       setIsSharing(false);
@@ -83,36 +85,37 @@ export const SessionSummaryFeature: React.FC = () => {
 
   const handleCopyText = async () => {
     const textSummary = generateShareText(
-      session?.title || 'Tennis Session',
+      session?.title || "Tennis Session",
       formatLabel,
       session?.players.length ?? 0,
-      standings
+      standings,
     );
     const success = await copyToClipboard(textSummary);
     if (success) {
-      setNotification('Copied leaderboard to clipboard!');
+      setNotification("Copied leaderboard to clipboard!");
       setTimeout(() => setNotification(null), 2500);
     } else {
-      setNotification('Failed to copy to clipboard');
+      setNotification("Failed to copy to clipboard");
       setTimeout(() => setNotification(null), 2500);
     }
   };
 
   const handleStartNewSession = () => {
     showModal({
-      title: 'Start New Session?',
-      description: 'Ready to start a fresh session? Your results have already been saved to history.',
-      confirmText: 'Start New Session',
-      cancelText: 'Cancel',
-      type: 'danger',
+      title: "Start New Session?",
+      description:
+        "Ready to start a fresh session? Your results have already been saved to history.",
+      confirmText: "Start New Session",
+      cancelText: "Cancel",
+      type: "danger",
       onConfirm: () => {
-        navigate('/create-session');
+        navigate("/create-session");
       },
     });
   };
 
   const handleBackToHome = () => {
-    navigate('/');
+    navigate("/");
   };
 
   if (!session) {
@@ -125,7 +128,7 @@ export const SessionSummaryFeature: React.FC = () => {
         </p>
         <button
           type="button"
-          onClick={() => navigate('/')}
+          onClick={() => navigate("/")}
           className="mt-6 rounded-2xl bg-slate-900 px-6 py-3 text-xs font-bold text-white shadow-md"
         >
           Back to Home
@@ -146,7 +149,7 @@ export const SessionSummaryFeature: React.FC = () => {
             Session Completed!
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            {session.title || 'Tennis Session'} · {formatLabel}
+            {session.title || "Tennis Session"} · {formatLabel}
           </p>
         </div>
 
@@ -249,7 +252,9 @@ export const SessionSummaryFeature: React.FC = () => {
                       {secondPlace.player.name}
                     </span>
                     <span className="text-[11px] font-semibold text-slate-500">
-                      {secondPlace.diff > 0 ? `+${secondPlace.diff}` : secondPlace.diff}
+                      {secondPlace.diff > 0
+                        ? `+${secondPlace.diff}`
+                        : secondPlace.diff}
                     </span>
                     <div className="w-full h-14 bg-slate-100 rounded-t-xl mt-2 flex items-center justify-center font-black text-slate-400 text-sm">
                       2
@@ -267,7 +272,9 @@ export const SessionSummaryFeature: React.FC = () => {
                   {firstPlace.player.name}
                 </span>
                 <span className="text-xs font-black text-emerald-600">
-                  {firstPlace.diff > 0 ? `+${firstPlace.diff}` : firstPlace.diff}
+                  {firstPlace.diff > 0
+                    ? `+${firstPlace.diff}`
+                    : firstPlace.diff}
                 </span>
                 <div className="w-full h-20 bg-amber-400/20 border-t-2 border-amber-400 rounded-t-xl mt-2 flex items-center justify-center font-black text-amber-700 text-base shadow-xs">
                   1
@@ -283,7 +290,9 @@ export const SessionSummaryFeature: React.FC = () => {
                       {thirdPlace.player.name}
                     </span>
                     <span className="text-[11px] font-semibold text-slate-500">
-                      {thirdPlace.diff > 0 ? `+${thirdPlace.diff}` : thirdPlace.diff}
+                      {thirdPlace.diff > 0
+                        ? `+${thirdPlace.diff}`
+                        : thirdPlace.diff}
                     </span>
                     <div className="w-full h-10 bg-amber-100/50 rounded-t-xl mt-2 flex items-center justify-center font-black text-amber-800 text-sm">
                       3
@@ -304,7 +313,7 @@ export const SessionSummaryFeature: React.FC = () => {
               Complete Standings
             </span>
             <span className="text-[10px] font-semibold text-slate-400">
-              {session.title || 'Kickserve'}
+              {session.title || "Kickserve"}
             </span>
           </div>
           <StandingsTable standings={standings} isFinal={true} />
@@ -318,7 +327,9 @@ export const SessionSummaryFeature: React.FC = () => {
             className="flex w-full items-center justify-between p-3.5 text-xs font-bold text-slate-900 hover:bg-slate-50 transition"
           >
             <span>Match Scores Breakdown ({session.matches.length})</span>
-            <span className="text-slate-400">{showMatchHistory ? '▲' : '▼'}</span>
+            <span className="text-slate-400">
+              {showMatchHistory ? "▲" : "▼"}
+            </span>
           </button>
 
           {showMatchHistory && (
@@ -328,15 +339,17 @@ export const SessionSummaryFeature: React.FC = () => {
                   key={m.id}
                   className="flex items-center justify-between py-2 px-2 text-xs"
                 >
-                  <span className="text-slate-400 font-bold w-6">#{idx + 1}</span>
+                  <span className="text-slate-400 font-bold w-6">
+                    #{idx + 1}
+                  </span>
                   <div className="flex-1 text-right font-semibold truncate text-slate-800 pr-2">
-                    {m.teamA.map((p) => p.name).join(' / ')}
+                    {m.teamA.map((p) => p.name).join(" / ")}
                   </div>
                   <div className="font-black bg-slate-100 px-2 py-0.5 rounded text-slate-900 text-[11px]">
-                    {m.scoreA || '0'} - {m.scoreB || '0'}
+                    {m.scoreA || "0"} - {m.scoreB || "0"}
                   </div>
                   <div className="flex-1 text-left font-semibold truncate text-slate-800 pl-2">
-                    {m.teamB.map((p) => p.name).join(' / ')}
+                    {m.teamB.map((p) => p.name).join(" / ")}
                   </div>
                 </div>
               ))}

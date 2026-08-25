@@ -1,5 +1,5 @@
 import React from "react";
-import type { Player } from "../../../../../types/session";
+import type { Player } from "../../../../../../../types/session";
 
 interface DropdownListProps {
   players: Player[];

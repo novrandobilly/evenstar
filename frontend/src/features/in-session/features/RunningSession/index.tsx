@@ -5,10 +5,12 @@ import type {
   MatchItem,
 } from "../../../../types/session";
 import { calculateStandings } from "../../../../utils/standings";
-import { StandingsTable } from "../../../../components/StandingsTable";
+import { StandingsTable } from "./features/StandingsTable";
 import { useModal } from "../../../../context/modal";
 
-import { CustomPlayerSelect } from "../CustomPlayerSelect";
+import { useDragDropDesktop } from "../../hooks/useDragDropDesktop";
+import { useDragDropMobile } from "../../hooks/useDragDropMobile";
+import { CustomPlayerSelect } from "./features/CustomPlayerSelect";
 
 interface RunningSessionProps {
   session: SessionConfig;
@@ -62,12 +64,27 @@ export const RunningSession: React.FC<RunningSessionProps> = ({
   const completedCount = session.matches.filter((m) => m.isCompleted).length;
   const totalCount = session.matches.length;
 
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-  const [dropIndicatorIndex, setDropIndicatorIndex] = useState<number | null>(
-    null,
-  );
-
   const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const desktopDrag = useDragDropDesktop({
+    matchesCount: session.matches.length,
+    onReorderMatches,
+  });
+
+  const mobileDrag = useDragDropMobile({
+    matchesCount: session.matches.length,
+    rowRefs,
+    onReorderMatches,
+  });
+
+  const draggedIndex =
+    desktopDrag.draggedIndex !== null
+      ? desktopDrag.draggedIndex
+      : mobileDrag.draggedIndex;
+  const dropIndicatorIndex =
+    desktopDrag.dropIndicatorIndex !== null
+      ? desktopDrag.dropIndicatorIndex
+      : mobileDrag.dropIndicatorIndex;
 
   const standings = calculateStandings(session.players, session.matches);
 
@@ -161,98 +178,6 @@ export const RunningSession: React.FC<RunningSessionProps> = ({
     setNewPlayerName("");
     setPlayerModalError(null);
     setIsAddPlayerModalOpen(false);
-  };
-
-  // --- HTML5 Desktop Drag Handlers ---
-  const handleDragStart = (e: React.DragEvent, index: number) => {
-    setDraggedIndex(index);
-    e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", `${index}`);
-  };
-
-  const handleDragOverRow = (e: React.DragEvent, index: number) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-
-    const rect = e.currentTarget.getBoundingClientRect();
-    const relativeY = e.clientY - rect.top;
-    const isTopHalf = relativeY < rect.height / 2;
-    const targetGap = isTopHalf ? index : index + 1;
-
-    if (dropIndicatorIndex !== targetGap) {
-      setDropIndicatorIndex(targetGap);
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent, targetGap: number) => {
-    e.preventDefault();
-    e.stopPropagation();
-    executeDrop(targetGap);
-  };
-
-  const handleDragEnd = () => {
-    setDraggedIndex(null);
-    setDropIndicatorIndex(null);
-  };
-
-  // --- Mobile Touch Handlers ---
-  const handleTouchStart = (_e: React.TouchEvent, index: number) => {
-    setDraggedIndex(index);
-    setDropIndicatorIndex(index);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (draggedIndex === null) return;
-    if (e.cancelable) e.preventDefault();
-
-    const touch = e.touches[0];
-    const touchY = touch.clientY;
-
-    let bestGap = 0;
-    let found = false;
-
-    for (let i = 0; i < session.matches.length; i++) {
-      const el = rowRefs.current[i];
-      if (!el) continue;
-
-      const rect = el.getBoundingClientRect();
-      const midY = rect.top + rect.height / 2;
-
-      if (touchY < midY) {
-        bestGap = i;
-        found = true;
-        break;
-      }
-    }
-
-    if (!found) bestGap = session.matches.length;
-    if (dropIndicatorIndex !== bestGap) setDropIndicatorIndex(bestGap);
-  };
-
-  const handleTouchEnd = () => {
-    if (draggedIndex !== null && dropIndicatorIndex !== null) {
-      executeDrop(dropIndicatorIndex);
-    }
-    setDraggedIndex(null);
-    setDropIndicatorIndex(null);
-  };
-
-  const executeDrop = (targetGap: number) => {
-    if (draggedIndex !== null && targetGap !== null) {
-      let finalIndex = targetGap;
-      if (draggedIndex < targetGap) {
-        finalIndex = targetGap - 1;
-      }
-      if (
-        draggedIndex !== finalIndex &&
-        finalIndex >= 0 &&
-        finalIndex < session.matches.length
-      ) {
-        onReorderMatches(draggedIndex, finalIndex);
-      }
-    }
-    setDraggedIndex(null);
-    setDropIndicatorIndex(null);
   };
 
   return (
@@ -376,15 +301,15 @@ export const RunningSession: React.FC<RunningSessionProps> = ({
                       rowRefs.current[index] = el;
                     }}
                     draggable
-                    onDragStart={(e) => handleDragStart(e, index)}
-                    onDragEnd={handleDragEnd}
-                    onDragOver={(e) => handleDragOverRow(e, index)}
+                    onDragStart={(e) => desktopDrag.handleDragStart(e, index)}
+                    onDragEnd={desktopDrag.handleDragEnd}
+                    onDragOver={(e) => desktopDrag.handleDragOverRow(e, index)}
                     onDrop={(e) => {
                       const rect = e.currentTarget.getBoundingClientRect();
                       const relativeY = e.clientY - rect.top;
                       const targetGap =
                         relativeY < rect.height / 2 ? index : index + 1;
-                      handleDrop(e, targetGap);
+                      desktopDrag.handleDrop(e, targetGap);
                     }}
                     className="relative cursor-default rounded-2xl"
                   >
@@ -512,9 +437,11 @@ export const RunningSession: React.FC<RunningSessionProps> = ({
                           </svg>
                         </button>
                         <div
-                          onTouchStart={(e) => handleTouchStart(e, index)}
-                          onTouchMove={handleTouchMove}
-                          onTouchEnd={handleTouchEnd}
+                          onTouchStart={(e) =>
+                            mobileDrag.handleTouchStart(e, index)
+                          }
+                          onTouchMove={mobileDrag.handleTouchMove}
+                          onTouchEnd={mobileDrag.handleTouchEnd}
                           title="Drag to reorder match"
                           className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-600 active:text-emerald-600 px-1 py-0.5 touch-none"
                         >
@@ -613,7 +540,7 @@ export const RunningSession: React.FC<RunningSessionProps> = ({
                         key={`a-${idx}`}
                         players={availablePlayers}
                         selectedId={formTeamA[idx] || ""}
-                        onChange={(id) => {
+                        onChange={(id: string) => {
                           const updated = [...formTeamA];
                           updated[idx] = id;
                           setFormTeamA(updated);
@@ -646,7 +573,7 @@ export const RunningSession: React.FC<RunningSessionProps> = ({
                         key={`b-${idx}`}
                         players={availablePlayers}
                         selectedId={formTeamB[idx] || ""}
-                        onChange={(id) => {
+                        onChange={(id: string) => {
                           const updated = [...formTeamB];
                           updated[idx] = id;
                           setFormTeamB(updated);
