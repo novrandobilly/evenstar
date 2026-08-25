@@ -72,16 +72,16 @@ const loadHistory = (): SessionConfig[] => {
   }
 };
 
-const isDuplicateMatch = (
+const findDuplicateMatch = (
   matches: MatchItem[],
   teamA: Player[],
   teamB: Player[],
   excludeMatchId?: string
-): boolean => {
+): MatchItem | undefined => {
   const targetA = teamA.map((p: Player) => p.id).sort().join(',');
   const targetB = teamB.map((p: Player) => p.id).sort().join(',');
 
-  return matches.some((m) => {
+  return matches.find((m) => {
     if (excludeMatchId && m.id === excludeMatchId) return false;
     const mA = m.teamA.map((p: Player) => p.id).sort().join(',');
     const mB = m.teamB.map((p: Player) => p.id).sort().join(',');
@@ -269,8 +269,9 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const addCustomMatch = (teamA: Player[], teamB: Player[]) => {
-    if (isDuplicateMatch(session.matches, teamA, teamB)) {
-      return { success: false, error: 'This match matchup already exists on the schedule!' };
+    const dup = findDuplicateMatch(session.matches, teamA, teamB);
+    if (dup) {
+      return { success: false, error: `This matchup already exists as Match #${dup.matchNumber}!` };
     }
 
     setSession((prev) => {
@@ -294,8 +295,9 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const editCustomMatch = (matchId: string, teamA: Player[], teamB: Player[]) => {
-    if (isDuplicateMatch(session.matches, teamA, teamB, matchId)) {
-      return { success: false, error: 'This match matchup already exists on the schedule!' };
+    const dup = findDuplicateMatch(session.matches, teamA, teamB, matchId);
+    if (dup) {
+      return { success: false, error: `This matchup already exists as Match #${dup.matchNumber}!` };
     }
 
     setSession((prev) => ({
