@@ -1,11 +1,11 @@
-import React, { useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useSession } from '../../context/SessionContext';
+import React, { useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSession } from "../../context/SessionContext";
 import {
   MAX_PLAYERS,
   MIN_PLAYERS_DOUBLES,
   MIN_PLAYERS_SINGLES,
-} from '../../types/session';
+} from "../../types/session";
 
 export const CreateSessionFeature: React.FC = () => {
   const navigate = useNavigate();
@@ -23,10 +23,12 @@ export const CreateSessionFeature: React.FC = () => {
     startSession,
   } = useSession();
 
-  const isDoubles = session.matchFormat === 'doubles';
+  const isDoubles = session.matchFormat === "doubles";
   const minRequired = isDoubles ? MIN_PLAYERS_DOUBLES : MIN_PLAYERS_SINGLES;
   const playerCount = session.players.length;
-  const filledCount = session.players.filter((p) => p.name.trim().length > 0).length;
+  const filledCount = session.players.filter(
+    (p) => p.name.trim().length > 0,
+  ).length;
   const isAllFilled = filledCount === playerCount && playerCount >= minRequired;
 
   const handleDecrement = () => {
@@ -48,8 +50,11 @@ export const CreateSessionFeature: React.FC = () => {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
-    if (e.key === 'Enter') {
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number,
+  ) => {
+    if (e.key === "Enter") {
       e.preventDefault();
       if (index === playerCount - 1 && playerCount < MAX_PLAYERS) {
         addPlayer();
@@ -64,7 +69,7 @@ export const CreateSessionFeature: React.FC = () => {
 
   const handleStartSession = () => {
     startSession();
-    navigate('/in-session');
+    navigate("/in-session");
   };
 
   return (
@@ -74,14 +79,11 @@ export const CreateSessionFeature: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <button
             type="button"
-            onClick={() => navigate('/')}
+            onClick={() => navigate("/")}
             className="text-xs font-semibold text-slate-400 hover:text-slate-900 transition"
           >
             ← Back
           </button>
-          <span className="text-[11px] font-bold tracking-widest uppercase text-emerald-600">
-            Create Session
-          </span>
         </div>
 
         {/* Session Title */}
@@ -103,22 +105,22 @@ export const CreateSessionFeature: React.FC = () => {
           <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-2xl">
             <button
               type="button"
-              onClick={() => setMatchFormat('doubles')}
+              onClick={() => setMatchFormat("doubles")}
               className={`py-2.5 rounded-xl text-xs font-bold transition ${
                 isDoubles
-                  ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-500 hover:text-slate-900'
+                  ? "bg-white text-slate-900 shadow-xs"
+                  : "text-slate-500 hover:text-slate-900"
               }`}
             >
               Doubles (2v2)
             </button>
             <button
               type="button"
-              onClick={() => setMatchFormat('singles')}
+              onClick={() => setMatchFormat("singles")}
               className={`py-2.5 rounded-xl text-xs font-bold transition ${
                 !isDoubles
-                  ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-500 hover:text-slate-900'
+                  ? "bg-white text-slate-900 shadow-xs"
+                  : "text-slate-500 hover:text-slate-900"
               }`}
             >
               Singles (1v1)
@@ -137,8 +139,8 @@ export const CreateSessionFeature: React.FC = () => {
                 type="radio"
                 name="doublesMode"
                 value="americano"
-                checked={session.doublesMode === 'americano'}
-                onChange={() => setDoublesMode('americano')}
+                checked={session.doublesMode === "americano"}
+                onChange={() => setDoublesMode("americano")}
                 className="mt-0.5 h-4 w-4 text-emerald-600 accent-emerald-600 focus:ring-emerald-500"
               />
               <div className="flex-1">
@@ -211,8 +213,8 @@ export const CreateSessionFeature: React.FC = () => {
                     key={player.id}
                     className={`flex items-center gap-2.5 rounded-xl border px-3 py-2 transition ${
                       isFilled
-                        ? 'border-slate-200 bg-white'
-                        : 'border-slate-100 bg-slate-50/70 focus-within:border-slate-400 focus-within:bg-white'
+                        ? "border-slate-200 bg-white"
+                        : "border-slate-100 bg-slate-50/70 focus-within:border-slate-400 focus-within:bg-white"
                     }`}
                   >
                     <span className="text-xs font-bold text-slate-400 min-w-[1.2rem] text-center">
@@ -257,8 +259,8 @@ export const CreateSessionFeature: React.FC = () => {
           onClick={handleStartSession}
           className={`flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-sm font-bold transition ${
             isAllFilled
-              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 active:scale-[0.98]'
-              : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+              ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 active:scale-[0.98]"
+              : "bg-slate-200 text-slate-400 cursor-not-allowed"
           }`}
         >
           <span>Start Session</span>
