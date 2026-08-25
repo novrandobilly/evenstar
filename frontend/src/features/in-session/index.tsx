@@ -2,7 +2,8 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useSession } from "../../context/SessionContext";
 import { useModal } from "../../context/modal";
-import { RunningSession } from "./features/RunningSession/RunningSession";
+import { EmptyStateSession } from "./features/EmptyStateSession";
+import { RunningSession } from "./features/RunningSession";
 
 export const InSessionFeature: React.FC = () => {
   const navigate = useNavigate();
@@ -42,23 +43,7 @@ export const InSessionFeature: React.FC = () => {
   };
 
   if (!session.matches || session.matches.length === 0) {
-    return (
-      <div className="flex min-h-dvh flex-col items-center justify-center p-6 text-center">
-        <div className="text-4xl mb-4">🎾</div>
-        <h2 className="text-lg font-bold text-slate-900">No Active Session</h2>
-        <p className="text-xs text-slate-500 mt-1 max-w-xs">
-          There is no session in progress. Create a new session to generate the
-          match schedule.
-        </p>
-        <button
-          type="button"
-          onClick={() => navigate("/create-session")}
-          className="mt-6 rounded-2xl bg-slate-900 px-6 py-3 text-xs font-bold text-white shadow-md"
-        >
-          Create Session
-        </button>
-      </div>
-    );
+    return <EmptyStateSession />;
   }
 
   return (
