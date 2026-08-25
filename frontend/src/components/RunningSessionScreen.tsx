@@ -30,13 +30,21 @@ const CustomPlayerSelect: React.FC<{
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
       </button>
 
       {isOpen && (
         <>
-          <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
+          <div
+            className="fixed inset-0 z-10"
+            onClick={() => setIsOpen(false)}
+          />
           <ul className="absolute z-20 w-full mt-1 max-h-40 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-lg focus:outline-none text-xs font-bold divide-y divide-slate-50 animate-dropdown-in origin-top">
             <li
               onClick={() => {
@@ -55,7 +63,9 @@ const CustomPlayerSelect: React.FC<{
                   setIsOpen(false);
                 }}
                 className={`px-3 py-2 hover:bg-emerald-50 hover:text-emerald-700 cursor-pointer transition ${
-                  p.id === selectedId ? "bg-emerald-50/50 text-emerald-600" : "text-slate-700"
+                  p.id === selectedId
+                    ? "bg-emerald-50/50 text-emerald-600"
+                    : "text-slate-700"
                 }`}
               >
                 {p.name}
@@ -74,8 +84,15 @@ interface RunningSessionScreenProps {
   onToggleCompleted: (matchId: string) => void;
   onReorderMatches: (fromIndex: number, toIndex: number) => void;
   onEndSession: () => void;
-  onAddCustomMatch: (teamA: Player[], teamB: Player[]) => { success: boolean; error?: string };
-  onEditCustomMatch: (matchId: string, teamA: Player[], teamB: Player[]) => { success: boolean; error?: string };
+  onAddCustomMatch: (
+    teamA: Player[],
+    teamB: Player[],
+  ) => { success: boolean; error?: string };
+  onEditCustomMatch: (
+    matchId: string,
+    teamA: Player[],
+    teamB: Player[],
+  ) => { success: boolean; error?: string };
   onDeleteMatch: (matchId: string) => void;
   onAddPlayerWithName: (name: string) => void;
 }
@@ -141,7 +158,8 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
   const handleDeleteMatch = (matchId: string) => {
     showModal({
       title: "Delete Match?",
-      description: "Are you sure you want to delete this match? This cannot be undone.",
+      description:
+        "Are you sure you want to delete this match? This cannot be undone.",
       confirmText: "Delete",
       cancelText: "Cancel",
       type: "danger",
@@ -166,13 +184,19 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
     const allSelectedIds = [...idsA, ...idsB];
     const uniqueSelected = new Set(allSelectedIds);
     if (uniqueSelected.size !== allSelectedIds.length) {
-      setFormError("A player cannot be selected more than once in the same match.");
+      setFormError(
+        "A player cannot be selected more than once in the same match.",
+      );
       return;
     }
 
     const playersMap = new Map(session.players.map((p) => [p.id, p]));
-    const teamAPlayers = idsA.map((id) => playersMap.get(id)).filter(Boolean) as Player[];
-    const teamBPlayers = idsB.map((id) => playersMap.get(id)).filter(Boolean) as Player[];
+    const teamAPlayers = idsA
+      .map((id) => playersMap.get(id))
+      .filter(Boolean) as Player[];
+    const teamBPlayers = idsB
+      .map((id) => playersMap.get(id))
+      .filter(Boolean) as Player[];
 
     let res;
     if (editingMatch) {
@@ -194,7 +218,9 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
       setPlayerModalError("Player name cannot be empty.");
       return;
     }
-    const nameExists = session.players.some((p) => p.name.toLowerCase() === trimmed.toLowerCase());
+    const nameExists = session.players.some(
+      (p) => p.name.toLowerCase() === trimmed.toLowerCase(),
+    );
     if (nameExists) {
       setPlayerModalError("A player with this name already exists.");
       return;
@@ -459,7 +485,7 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
                         title={
                           match.isCompleted ? "Mark pending" : "Mark completed"
                         }
-                        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-xs font-bold transition ${
+                        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md self-start mt-0.5 text-xs font-bold transition ${
                           match.isCompleted
                             ? "bg-emerald-600 text-white"
                             : "bg-slate-100 text-slate-400 hover:bg-slate-200"
@@ -468,73 +494,69 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
                         {match.isCompleted ? "✓" : index + 1}
                       </button>
 
-                      {/* Team A (Column stack of player names) */}
-                      <div className="flex-1 text-right min-w-0 flex flex-col justify-center">
-                        {match.teamA.map((p, pIdx) => (
+                      {/* Players & Scores Stack */}
+                      <div className="flex-1 min-w-0 flex flex-col gap-2">
+                        {/* Team A */}
+                        <div className="flex items-center justify-between gap-3">
                           <span
-                            key={p.id || pIdx}
-                            className={`text-xs font-bold truncate block leading-tight ${
+                            className={`text-xs font-bold truncate ${
                               match.isCompleted
-                                ? "text-slate-700"
+                                ? "text-slate-500"
                                 : "text-slate-900"
                             }`}
-                            title={p.name}
+                            title={match.teamA.map((p) => p.name).join(" & ")}
                           >
-                            {p.name}
+                            {match.teamA.map((p) => p.name).join(" & ")}
                           </span>
-                        ))}
-                      </div>
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            value={match.scoreA}
+                            onPointerDown={(e) => e.stopPropagation()}
+                            onChange={(e) =>
+                              onUpdateScore(
+                                match.id,
+                                e.target.value,
+                                match.scoreB,
+                              )
+                            }
+                            placeholder="0"
+                            className="w-8 h-7 shrink-0 text-center text-xs font-black text-slate-900 bg-slate-100 rounded-lg focus:outline-none focus:bg-white focus:ring-1 focus:ring-emerald-500 transition"
+                          />
+                        </div>
 
-                      {/* Score A Input */}
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        value={match.scoreA}
-                        onPointerDown={(e) => e.stopPropagation()}
-                        onChange={(e) =>
-                          onUpdateScore(match.id, e.target.value, match.scoreB)
-                        }
-                        placeholder="0"
-                        className="w-8 h-8 shrink-0 text-center text-xs font-black text-slate-900 bg-slate-100 rounded-lg focus:outline-none focus:bg-white focus:ring-1 focus:ring-emerald-500 transition"
-                      />
-
-                      {/* VS Divider */}
-                      <span className="text-[10px] font-bold text-slate-300 uppercase shrink-0">
-                        vs
-                      </span>
-
-                      {/* Score B Input */}
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        value={match.scoreB}
-                        onPointerDown={(e) => e.stopPropagation()}
-                        onChange={(e) =>
-                          onUpdateScore(match.id, match.scoreA, e.target.value)
-                        }
-                        placeholder="0"
-                        className="w-8 h-8 shrink-0 text-center text-xs font-black text-slate-900 bg-slate-100 rounded-lg focus:outline-none focus:bg-white focus:ring-1 focus:ring-emerald-500 transition"
-                      />
-
-                      {/* Team B (Column stack of player names) */}
-                      <div className="flex-1 text-left min-w-0 flex flex-col justify-center">
-                        {match.teamB.map((p, pIdx) => (
+                        {/* Team B */}
+                        <div className="flex items-center justify-between gap-3">
                           <span
-                            key={p.id || pIdx}
-                            className={`text-xs font-bold truncate block leading-tight ${
+                            className={`text-xs font-bold truncate ${
                               match.isCompleted
-                                ? "text-slate-700"
+                                ? "text-slate-500"
                                 : "text-slate-900"
                             }`}
-                            title={p.name}
+                            title={match.teamB.map((p) => p.name).join(" & ")}
                           >
-                            {p.name}
+                            {match.teamB.map((p) => p.name).join(" & ")}
                           </span>
-                        ))}
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            value={match.scoreB}
+                            onPointerDown={(e) => e.stopPropagation()}
+                            onChange={(e) =>
+                              onUpdateScore(
+                                match.id,
+                                match.scoreA,
+                                e.target.value,
+                              )
+                            }
+                            placeholder="0"
+                            className="w-8 h-7 shrink-0 text-center text-xs font-black text-slate-900 bg-slate-100 rounded-lg focus:outline-none focus:bg-white focus:ring-1 focus:ring-emerald-500 transition"
+                          />
+                        </div>
                       </div>
 
-                      {/* Edit/Delete Match Actions */}
-                      <div className="flex items-center gap-1 shrink-0">
+                      {/* Vertical Divider and Actions */}
+                      <div className="flex flex-col gap-1.5 items-center justify-center shrink-0 border-l border-slate-100 pl-2">
                         <button
                           type="button"
                           onClick={(e) => {
@@ -542,7 +564,7 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
                             handleOpenEditModal(match);
                           }}
                           title="Edit match"
-                          className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition"
+                          className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition"
                         >
                           <svg
                             className="w-3.5 h-3.5"
@@ -557,45 +579,21 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
                             <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
                           </svg>
                         </button>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteMatch(match.id);
-                          }}
-                          title="Delete match"
-                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                        <div
+                          onTouchStart={(e) => handleTouchStart(e, index)}
+                          onTouchMove={handleTouchMove}
+                          onTouchEnd={handleTouchEnd}
+                          title="Drag to reorder match"
+                          className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-600 active:text-emerald-600 px-1 py-0.5 touch-none"
                         >
                           <svg
                             className="w-3.5 h-3.5"
                             viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
+                            fill="currentColor"
                           >
-                            <polyline points="3 6 5 6 21 6" />
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                            <path d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm8-12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" />
                           </svg>
-                        </button>
-                      </div>
-
-                      {/* Drag Handle Icon with 0ms Touch Support */}
-                      <div
-                        onTouchStart={(e) => handleTouchStart(e, index)}
-                        onTouchMove={handleTouchMove}
-                        onTouchEnd={handleTouchEnd}
-                        title="Drag to reorder match"
-                        className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-600 active:text-emerald-600 px-1 py-1 touch-none"
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                        >
-                          <path d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm8-12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" />
-                        </svg>
+                        </div>
                       </div>
                     </div>
 
@@ -674,7 +672,9 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
                       ...formTeamB,
                     ];
                     const availablePlayers = session.players.filter(
-                      (p) => p.name.trim().length > 0 && !otherSelectedIds.includes(p.id)
+                      (p) =>
+                        p.name.trim().length > 0 &&
+                        !otherSelectedIds.includes(p.id),
                     );
                     return (
                       <CustomPlayerSelect
@@ -705,7 +705,9 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
                       ...formTeamB.filter((_, i) => i !== idx),
                     ];
                     const availablePlayers = session.players.filter(
-                      (p) => p.name.trim().length > 0 && !otherSelectedIds.includes(p.id)
+                      (p) =>
+                        p.name.trim().length > 0 &&
+                        !otherSelectedIds.includes(p.id),
                     );
                     return (
                       <CustomPlayerSelect
@@ -726,6 +728,18 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
             </div>
 
             <div className="flex gap-2 pt-2">
+              {editingMatch && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleDeleteMatch(editingMatch.id);
+                    setIsFormModalOpen(false);
+                  }}
+                  className="rounded-2xl bg-rose-50 hover:bg-rose-100 px-4 py-3 text-xs font-bold text-rose-600 active:scale-[0.98] transition"
+                >
+                  Delete
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => setIsFormModalOpen(false)}
@@ -750,7 +764,9 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs transition-all duration-300">
           <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl space-y-4 animate-modal-in">
             <div className="flex items-center justify-between border-b pb-2">
-              <h3 className="text-sm font-extrabold text-slate-900">Add New Player</h3>
+              <h3 className="text-sm font-extrabold text-slate-900">
+                Add New Player
+              </h3>
               <button
                 type="button"
                 onClick={() => setIsAddPlayerModalOpen(false)}
