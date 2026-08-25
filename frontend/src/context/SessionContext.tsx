@@ -33,11 +33,11 @@ interface SessionContextType {
   updateMatchScore: (matchId: string, scoreA: string, scoreB: string) => void;
   toggleMatchCompleted: (matchId: string) => void;
   reorderMatches: (fromIndex: number, toIndex: number) => void;
-  /** Archives the current session into history (auto-evicting the oldest if at limit), then resets. */
   completeSession: () => void;
   /** Discards the current active session without saving to history. */
   resetSession: () => void;
   deleteHistorySession: (sessionId: string) => void;
+  addPlayerWithName: (name: string) => void;
   addCustomMatch: (teamA: Player[], teamB: Player[]) => { success: boolean; error?: string };
   editCustomMatch: (matchId: string, teamA: Player[], teamB: Player[]) => { success: boolean; error?: string };
   deleteMatch: (matchId: string) => void;
@@ -370,6 +370,16 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setSessionHistory((prev) => prev.filter((s) => s.id !== sessionId));
   };
 
+  const addPlayerWithName = (name: string) => {
+    setSession((prev) => {
+      if (prev.players.length >= MAX_PLAYERS) return prev;
+      return {
+        ...prev,
+        players: [...prev.players, { id: `p-${Date.now()}`, name }],
+      };
+    });
+  };
+
   const hasActiveSession = Boolean(
     session.matches.length > 0 || session.players.some((p) => p.name.trim().length > 0)
   );
@@ -396,6 +406,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         completeSession,
         resetSession,
         deleteHistorySession,
+        addPlayerWithName,
         hasActiveSession,
       }}
     >

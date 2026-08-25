@@ -15,6 +15,7 @@ export const InSessionFeature: React.FC = () => {
     addCustomMatch,
     editCustomMatch,
     deleteMatch,
+    addPlayerWithName,
   } = useSession();
   const { showModal } = useModal();
 
@@ -69,6 +70,7 @@ export const InSessionFeature: React.FC = () => {
         onAddCustomMatch={addCustomMatch}
         onEditCustomMatch={editCustomMatch}
         onDeleteMatch={deleteMatch}
+        onAddPlayerWithName={addPlayerWithName}
       />
     </div>
   );
