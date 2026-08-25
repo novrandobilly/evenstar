@@ -12,7 +12,7 @@ import { TabNavigation } from "./features/TabNavigation";
 import { MatchesSchedule } from "./features/MatchesSchedule";
 import { LiveStandings } from "./features/LiveStandings";
 import { RunningSessionFooter } from "./features/RunningSessionFooter";
-import { MatchFormModal } from "./features/MatchFormModal";
+import { EditMatchModal } from "./features/EditMatchModal";
 
 interface RunningSessionProps {
   session: SessionConfig;
@@ -148,12 +148,11 @@ export const RunningSession: React.FC<RunningSessionProps> = ({
 
       <RunningSessionFooter onEndSession={onEndSession} />
 
-      <MatchFormModal
+      <EditMatchModal
         isOpen={isFormModalOpen}
         editingMatch={editingMatch}
         session={session}
         onClose={() => setIsFormModalOpen(false)}
-        onAddCustomMatch={onAddCustomMatch}
         onEditCustomMatch={onEditCustomMatch}
         onDeleteMatch={handleDeleteMatch}
       />

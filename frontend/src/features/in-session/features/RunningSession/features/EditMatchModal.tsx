@@ -2,22 +2,20 @@ import React, { useState, useEffect } from "react";
 import type { SessionConfig, Player, MatchItem } from "../../../../../types/session";
 import { CustomPlayerSelect } from "./CustomPlayerSelect";
 
-interface MatchFormModalProps {
+interface EditMatchModalProps {
   isOpen: boolean;
   editingMatch: MatchItem | null;
   session: SessionConfig;
   onClose: () => void;
-  onAddCustomMatch: (teamA: Player[], teamB: Player[]) => { success: boolean; error?: string };
   onEditCustomMatch: (matchId: string, teamA: Player[], teamB: Player[]) => { success: boolean; error?: string };
   onDeleteMatch: (matchId: string) => void;
 }
 
-export const MatchFormModal: React.FC<MatchFormModalProps> = ({
+export const EditMatchModal: React.FC<EditMatchModalProps> = ({
   isOpen,
   editingMatch,
   session,
   onClose,
-  onAddCustomMatch,
   onEditCustomMatch,
   onDeleteMatch,
 }) => {
@@ -27,19 +25,14 @@ export const MatchFormModal: React.FC<MatchFormModalProps> = ({
   const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isOpen) {
-      if (editingMatch) {
-        setFormTeamA(editingMatch.teamA.map((p) => p.id));
-        setFormTeamB(editingMatch.teamB.map((p) => p.id));
-      } else {
-        setFormTeamA(isDoubles ? ["", ""] : [""]);
-        setFormTeamB(isDoubles ? ["", ""] : [""]);
-      }
+    if (isOpen && editingMatch) {
+      setFormTeamA(editingMatch.teamA.map((p) => p.id));
+      setFormTeamB(editingMatch.teamB.map((p) => p.id));
       setFormError(null);
     }
-  }, [isOpen, editingMatch, isDoubles]);
+  }, [isOpen, editingMatch]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !editingMatch) return null;
 
   const handleSaveMatch = () => {
     const sizeA = isDoubles ? 2 : 1;
@@ -64,12 +57,7 @@ export const MatchFormModal: React.FC<MatchFormModalProps> = ({
     const teamAPlayers = idsA.map((id) => playersMap.get(id)).filter(Boolean) as Player[];
     const teamBPlayers = idsB.map((id) => playersMap.get(id)).filter(Boolean) as Player[];
 
-    let res;
-    if (editingMatch) {
-      res = onEditCustomMatch(editingMatch.id, teamAPlayers, teamBPlayers);
-    } else {
-      res = onAddCustomMatch(teamAPlayers, teamBPlayers);
-    }
+    const res = onEditCustomMatch(editingMatch.id, teamAPlayers, teamBPlayers);
 
     if (res && !res.success) {
       setFormError(res.error || "An error occurred.");
@@ -82,9 +70,7 @@ export const MatchFormModal: React.FC<MatchFormModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs transition-all duration-300">
       <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl space-y-4 animate-modal-in">
         <div className="flex items-center justify-between border-b pb-2">
-          <h3 className="text-sm font-extrabold text-slate-900">
-            {editingMatch ? "Edit Match" : "Add Custom Match"}
-          </h3>
+          <h3 className="text-sm font-extrabold text-slate-900">Edit Match</h3>
           <button
             type="button"
             onClick={onClose}
@@ -165,18 +151,16 @@ export const MatchFormModal: React.FC<MatchFormModalProps> = ({
         </div>
 
         <div className="flex gap-2 pt-2">
-          {editingMatch && (
-            <button
-              type="button"
-              onClick={() => {
-                onDeleteMatch(editingMatch.id);
-                onClose();
-              }}
-              className="rounded-2xl bg-rose-50 hover:bg-rose-100 px-4 py-3 text-xs font-bold text-rose-600 active:scale-[0.98] transition cursor-pointer"
-            >
-              Delete
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => {
+              onDeleteMatch(editingMatch.id);
+              onClose();
+            }}
+            className="rounded-2xl bg-rose-50 hover:bg-rose-100 px-4 py-3 text-xs font-bold text-rose-600 active:scale-[0.98] transition cursor-pointer"
+          >
+            Delete
+          </button>
           <button
             type="button"
             onClick={onClose}
@@ -189,7 +173,7 @@ export const MatchFormModal: React.FC<MatchFormModalProps> = ({
             onClick={handleSaveMatch}
             className="flex-1 rounded-2xl bg-emerald-600 hover:bg-emerald-700 py-3 text-xs font-bold text-white shadow-md active:scale-[0.98] transition cursor-pointer"
           >
-            Save Match
+            Save Changes
           </button>
         </div>
       </div>
