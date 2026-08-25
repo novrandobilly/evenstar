@@ -1,10 +1,8 @@
 import React from "react";
-import type { SessionConfig, MatchItem } from "../../../../../types/session";
+import type { MatchItem } from "../../../../../types/session";
+import { useSession } from "../../../../../context/SessionContext";
 
 interface MatchesScheduleProps {
-  session: SessionConfig;
-  onUpdateScore: (matchId: string, scoreA: string, scoreB: string) => void;
-  onToggleCompleted: (matchId: string) => void;
   onOpenEditModal: (match: MatchItem) => void;
   desktopDrag: {
     handleDragStart: (e: React.DragEvent, index: number) => void;
@@ -23,9 +21,6 @@ interface MatchesScheduleProps {
 }
 
 export const MatchesSchedule: React.FC<MatchesScheduleProps> = ({
-  session,
-  onUpdateScore,
-  onToggleCompleted,
   onOpenEditModal,
   desktopDrag,
   mobileDrag,
@@ -33,6 +28,8 @@ export const MatchesSchedule: React.FC<MatchesScheduleProps> = ({
   dropIndicatorIndex,
   rowRefs,
 }) => {
+  const { session, updateMatchScore, toggleMatchCompleted } = useSession();
+
   return (
     <div className="pb-4">
       {session.matches.map((match, index) => {
@@ -92,7 +89,7 @@ export const MatchesSchedule: React.FC<MatchesScheduleProps> = ({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onToggleCompleted(match.id);
+                  toggleMatchCompleted(match.id);
                 }}
                 title={
                   match.isCompleted ? "Mark pending" : "Mark completed"
@@ -124,7 +121,7 @@ export const MatchesSchedule: React.FC<MatchesScheduleProps> = ({
                     value={match.scoreA}
                     onPointerDown={(e) => e.stopPropagation()}
                     onChange={(e) =>
-                      onUpdateScore(match.id, e.target.value, match.scoreB)
+                      updateMatchScore(match.id, e.target.value, match.scoreB)
                     }
                     placeholder="0"
                     className="w-8 h-7 shrink-0 text-center text-xs font-black text-slate-900 bg-slate-100 rounded-lg focus:outline-none focus:bg-white focus:ring-1 focus:ring-emerald-500 transition"
@@ -147,7 +144,7 @@ export const MatchesSchedule: React.FC<MatchesScheduleProps> = ({
                     value={match.scoreB}
                     onPointerDown={(e) => e.stopPropagation()}
                     onChange={(e) =>
-                      onUpdateScore(match.id, match.scoreA, e.target.value)
+                      updateMatchScore(match.id, match.scoreA, e.target.value)
                     }
                     placeholder="0"
                     className="w-8 h-7 shrink-0 text-center text-xs font-black text-slate-900 bg-slate-100 rounded-lg focus:outline-none focus:bg-white focus:ring-1 focus:ring-emerald-500 transition"

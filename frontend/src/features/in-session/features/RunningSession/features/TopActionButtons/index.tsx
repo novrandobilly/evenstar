@@ -1,19 +1,10 @@
 import React, { useState } from "react";
-import type { SessionConfig, Player } from "../../../../../../types/session";
+import { useSession } from "../../../../../../context/SessionContext";
 import { AddMatchModal } from "./features/AddMatchModal";
 import { AddPlayerModal } from "./features/AddPlayerModal";
 
-interface TopActionButtonsProps {
-  session: SessionConfig;
-  onAddCustomMatch: (teamA: Player[], teamB: Player[]) => { success: boolean; error?: string };
-  onAddPlayerWithName: (name: string) => void;
-}
-
-export const TopActionButtons: React.FC<TopActionButtonsProps> = ({
-  session,
-  onAddCustomMatch,
-  onAddPlayerWithName,
-}) => {
+export const TopActionButtons: React.FC = () => {
+  const { session, addCustomMatch, addPlayerWithName } = useSession();
   const [isAddMatchModalOpen, setIsAddMatchModalOpen] = useState(false);
   const [isAddPlayerModalOpen, setIsAddPlayerModalOpen] = useState(false);
 
@@ -66,14 +57,14 @@ export const TopActionButtons: React.FC<TopActionButtonsProps> = ({
         isOpen={isAddMatchModalOpen}
         session={session}
         onClose={() => setIsAddMatchModalOpen(false)}
-        onAddCustomMatch={onAddCustomMatch}
+        onAddCustomMatch={addCustomMatch}
       />
 
       <AddPlayerModal
         isOpen={isAddPlayerModalOpen}
         session={session}
         onClose={() => setIsAddPlayerModalOpen(false)}
-        onAddPlayerWithName={onAddPlayerWithName}
+        onAddPlayerWithName={addPlayerWithName}
       />
     </>
   );

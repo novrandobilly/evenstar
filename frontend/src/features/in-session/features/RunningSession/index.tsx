@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
-import type { SessionConfig, MatchItem } from "../../../../types/session";
+import { useNavigate } from "react-router-dom";
+import { useSession } from "../../../../context/SessionContext";
 import { calculateStandings } from "../../../../utils/standings";
 import { useModal } from "../../../../context/modal";
 
@@ -13,41 +14,20 @@ import { MatchesSchedule } from "./features/MatchesSchedule";
 import { LiveStandings } from "./features/LiveStandings";
 import { RunningSessionFooter } from "./features/RunningSessionFooter";
 import { EditMatchModal } from "./features/EditMatchModal";
+import type { MatchItem } from "../../../../types/session";
 
-interface RunningSessionProps {
-  session: SessionConfig;
-  onUpdateScore: (matchId: string, scoreA: string, scoreB: string) => void;
-  onToggleCompleted: (matchId: string) => void;
-  onReorderMatches: (fromIndex: number, toIndex: number) => void;
-  onEndSession: () => void;
-  onAddCustomMatch: (
-    teamA: any[],
-    teamB: any[],
-  ) => { success: boolean; error?: string };
-  onEditCustomMatch: (
-    matchId: string,
-    teamA: any[],
-    teamB: any[],
-  ) => { success: boolean; error?: string };
-  onDeleteMatch: (matchId: string) => void;
-  onAddPlayerWithName: (name: string) => void;
-}
-
-export const RunningSession: React.FC<RunningSessionProps> = ({
-  session,
-  onUpdateScore,
-  onToggleCompleted,
-  onReorderMatches,
-  onEndSession,
-  onAddCustomMatch,
-  onEditCustomMatch,
-  onDeleteMatch,
-  onAddPlayerWithName,
-}) => {
+export const RunningSession: React.FC = () => {
+  const navigate = useNavigate();
   const { showModal } = useModal();
-  const [activeTab, setActiveTab] = useState<"matches" | "standings">(
-    "matches",
-  );
+  const {
+    session,
+    reorderMatches,
+    completeSession,
+    editCustomMatch,
+    deleteMatch,
+  } = useSession();
+
+  const [activeTab, setActiveTab] = useState<"matches" | "standings">("matches");
 
   // Modals visibility state
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -62,13 +42,13 @@ export const RunningSession: React.FC<RunningSessionProps> = ({
 
   const desktopDrag = useDragDropDesktop({
     matchesCount: session.matches.length,
-    onReorderMatches,
+    onReorderMatches: reorderMatches,
   });
 
   const mobileDrag = useDragDropMobile({
     matchesCount: session.matches.length,
     rowRefs,
-    onReorderMatches,
+    onReorderMatches: reorderMatches,
   });
 
   const draggedIndex =
@@ -96,7 +76,27 @@ export const RunningSession: React.FC<RunningSessionProps> = ({
       cancelText: "Cancel",
       type: "danger",
       onConfirm: () => {
-        onDeleteMatch(matchId);
+        deleteMatch(matchId);
+      },
+    });
+  };
+
+  const handleEndSession = () => {
+    const uncompletedCount = session.matches.filter((m) => !m.isCompleted).length;
+    const desc =
+      uncompletedCount > 0
+        ? `You still have ${uncompletedCount} unplayed matches. Are you sure you want to finish and view final standings?`
+        : "Are you ready to complete the session and view the final results?";
+
+    showModal({
+      title: "Complete Session?",
+      description: desc,
+      confirmText: "Complete & View Results",
+      cancelText: "Keep Playing",
+      type: "primary",
+      onConfirm: () => {
+        completeSession();
+        navigate("/session-summary");
       },
     });
   };
@@ -107,14 +107,10 @@ export const RunningSession: React.FC<RunningSessionProps> = ({
         <TopAppBar
           formatLabel={formatLabel}
           sessionTitle={session.title}
-          onEndSession={onEndSession}
+          onEndSession={handleEndSession}
         />
 
-        <TopActionButtons
-          session={session}
-          onAddCustomMatch={onAddCustomMatch}
-          onAddPlayerWithName={onAddPlayerWithName}
-        />
+        <TopActionButtons />
 
         <TabNavigation
           activeTab={activeTab}
@@ -126,9 +122,6 @@ export const RunningSession: React.FC<RunningSessionProps> = ({
 
         {activeTab === "matches" && (
           <MatchesSchedule
-            session={session}
-            onUpdateScore={onUpdateScore}
-            onToggleCompleted={onToggleCompleted}
             onOpenEditModal={handleOpenEditModal}
             desktopDrag={desktopDrag}
             mobileDrag={mobileDrag}
@@ -146,14 +139,14 @@ export const RunningSession: React.FC<RunningSessionProps> = ({
         )}
       </div>
 
-      <RunningSessionFooter onEndSession={onEndSession} />
+      <RunningSessionFooter onEndSession={handleEndSession} />
 
       <EditMatchModal
         isOpen={isFormModalOpen}
         editingMatch={editingMatch}
         session={session}
         onClose={() => setIsFormModalOpen(false)}
-        onEditCustomMatch={onEditCustomMatch}
+        onEditCustomMatch={editCustomMatch}
         onDeleteMatch={handleDeleteMatch}
       />
     </div>
