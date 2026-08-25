@@ -3,6 +3,8 @@ import type {
   SessionConfig,
   MatchFormat,
   DoublesGameMode,
+  Player,
+  MatchItem,
 } from '../types/session';
 import {
   MIN_PLAYERS_DOUBLES,
@@ -36,6 +38,9 @@ interface SessionContextType {
   /** Discards the current active session without saving to history. */
   resetSession: () => void;
   deleteHistorySession: (sessionId: string) => void;
+  addCustomMatch: (teamA: Player[], teamB: Player[]) => { success: boolean; error?: string };
+  editCustomMatch: (matchId: string, teamA: Player[], teamB: Player[]) => { success: boolean; error?: string };
+  deleteMatch: (matchId: string) => void;
   hasActiveSession: boolean;
 }
 
@@ -65,6 +70,23 @@ const loadHistory = (): SessionConfig[] => {
   } catch {
     return [];
   }
+};
+
+const isDuplicateMatch = (
+  matches: MatchItem[],
+  teamA: Player[],
+  teamB: Player[],
+  excludeMatchId?: string
+): boolean => {
+  const targetA = teamA.map((p: Player) => p.id).sort().join(',');
+  const targetB = teamB.map((p: Player) => p.id).sort().join(',');
+
+  return matches.some((m) => {
+    if (excludeMatchId && m.id === excludeMatchId) return false;
+    const mA = m.teamA.map((p: Player) => p.id).sort().join(',');
+    const mB = m.teamB.map((p: Player) => p.id).sort().join(',');
+    return (mA === targetA && mB === targetB) || (mA === targetB && mB === targetA);
+  });
 };
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
@@ -246,6 +268,66 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     });
   };
 
+  const addCustomMatch = (teamA: Player[], teamB: Player[]) => {
+    if (isDuplicateMatch(session.matches, teamA, teamB)) {
+      return { success: false, error: 'This match matchup already exists on the schedule!' };
+    }
+
+    setSession((prev) => {
+      const nextNum = prev.matches.length > 0 ? Math.max(...prev.matches.map((m) => m.matchNumber)) + 1 : 1;
+      const newMatch: MatchItem = {
+        id: `match-${Date.now()}`,
+        matchNumber: nextNum,
+        teamA,
+        teamB,
+        scoreA: '',
+        scoreB: '',
+        isCompleted: false,
+      };
+      return {
+        ...prev,
+        matches: [...prev.matches, newMatch],
+      };
+    });
+
+    return { success: true };
+  };
+
+  const editCustomMatch = (matchId: string, teamA: Player[], teamB: Player[]) => {
+    if (isDuplicateMatch(session.matches, teamA, teamB, matchId)) {
+      return { success: false, error: 'This match matchup already exists on the schedule!' };
+    }
+
+    setSession((prev) => ({
+      ...prev,
+      matches: prev.matches.map((m) => {
+        if (m.id !== matchId) return m;
+        return {
+          ...m,
+          teamA,
+          teamB,
+        };
+      }),
+    }));
+
+    return { success: true };
+  };
+
+  const deleteMatch = (matchId: string) => {
+    setSession((prev) => {
+      const filtered = prev.matches.filter((m) => m.id !== matchId);
+      // Re-index match numbers so they are sequential 1, 2, 3...
+      const reindexed = filtered.map((m, idx) => ({
+        ...m,
+        matchNumber: idx + 1,
+      }));
+      return {
+        ...prev,
+        matches: reindexed,
+      };
+    });
+  };
+
   /**
    * Archives the current session into history (auto-evicting the oldest if
    * already at MAX_HISTORY), then resets the active session.
@@ -308,6 +390,9 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         updateMatchScore,
         toggleMatchCompleted,
         reorderMatches,
+        addCustomMatch,
+        editCustomMatch,
+        deleteMatch,
         completeSession,
         resetSession,
         deleteHistorySession,

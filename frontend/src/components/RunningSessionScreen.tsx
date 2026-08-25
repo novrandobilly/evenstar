@@ -1,7 +1,8 @@
 import React, { useState, useRef } from "react";
-import type { SessionConfig } from "../types/session";
+import type { SessionConfig, Player, MatchItem } from "../types/session";
 import { calculateStandings } from "../utils/standings";
 import { StandingsTable } from "./StandingsTable";
+import { useModal } from "../context/modal";
 
 interface RunningSessionScreenProps {
   session: SessionConfig;
@@ -9,6 +10,9 @@ interface RunningSessionScreenProps {
   onToggleCompleted: (matchId: string) => void;
   onReorderMatches: (fromIndex: number, toIndex: number) => void;
   onEndSession: () => void;
+  onAddCustomMatch: (teamA: Player[], teamB: Player[]) => { success: boolean; error?: string };
+  onEditCustomMatch: (matchId: string, teamA: Player[], teamB: Player[]) => { success: boolean; error?: string };
+  onDeleteMatch: (matchId: string) => void;
 }
 
 export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
@@ -17,10 +21,21 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
   onToggleCompleted,
   onReorderMatches,
   onEndSession,
+  onAddCustomMatch,
+  onEditCustomMatch,
+  onDeleteMatch,
 }) => {
+  const { showModal } = useModal();
   const [activeTab, setActiveTab] = useState<"matches" | "standings">(
     "matches",
   );
+
+  // Form Modal state for adding/editing matches
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [editingMatch, setEditingMatch] = useState<MatchItem | null>(null);
+  const [formTeamA, setFormTeamA] = useState<string[]>([]);
+  const [formTeamB, setFormTeamB] = useState<string[]>([]);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const isDoubles = session.matchFormat === "doubles";
   const formatLabel = isDoubles ? "Doubles (Americano)" : "Singles";
@@ -35,6 +50,72 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
   const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const standings = calculateStandings(session.players, session.matches);
+
+  const handleOpenAddModal = () => {
+    setEditingMatch(null);
+    setFormTeamA(isDoubles ? ["", ""] : [""]);
+    setFormTeamB(isDoubles ? ["", ""] : [""]);
+    setFormError(null);
+    setIsFormModalOpen(true);
+  };
+
+  const handleOpenEditModal = (match: MatchItem) => {
+    setEditingMatch(match);
+    setFormTeamA(match.teamA.map((p) => p.id));
+    setFormTeamB(match.teamB.map((p) => p.id));
+    setFormError(null);
+    setIsFormModalOpen(true);
+  };
+
+  const handleDeleteMatch = (matchId: string) => {
+    showModal({
+      title: "Delete Match?",
+      description: "Are you sure you want to delete this match? This cannot be undone.",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      type: "danger",
+      onConfirm: () => {
+        onDeleteMatch(matchId);
+      },
+    });
+  };
+
+  const handleSaveMatch = () => {
+    const sizeA = isDoubles ? 2 : 1;
+    const sizeB = isDoubles ? 2 : 1;
+
+    const idsA = formTeamA.filter(Boolean);
+    const idsB = formTeamB.filter(Boolean);
+
+    if (idsA.length !== sizeA || idsB.length !== sizeB) {
+      setFormError("Please select all players for both teams.");
+      return;
+    }
+
+    const allSelectedIds = [...idsA, ...idsB];
+    const uniqueSelected = new Set(allSelectedIds);
+    if (uniqueSelected.size !== allSelectedIds.length) {
+      setFormError("A player cannot be selected more than once in the same match.");
+      return;
+    }
+
+    const playersMap = new Map(session.players.map((p) => [p.id, p]));
+    const teamAPlayers = idsA.map((id) => playersMap.get(id)).filter(Boolean) as Player[];
+    const teamBPlayers = idsB.map((id) => playersMap.get(id)).filter(Boolean) as Player[];
+
+    let res;
+    if (editingMatch) {
+      res = onEditCustomMatch(editingMatch.id, teamAPlayers, teamBPlayers);
+    } else {
+      res = onAddCustomMatch(teamAPlayers, teamBPlayers);
+    }
+
+    if (res && !res.success) {
+      setFormError(res.error || "An error occurred.");
+    } else {
+      setIsFormModalOpen(false);
+    }
+  };
 
   // --- HTML5 Desktop Drag Handlers ---
   const handleDragStart = (e: React.DragEvent, index: number) => {
@@ -320,6 +401,54 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
                         ))}
                       </div>
 
+                      {/* Edit/Delete Match Actions */}
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenEditModal(match);
+                          }}
+                          title="Edit match"
+                          className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition"
+                        >
+                          <svg
+                            className="w-3.5 h-3.5"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M12 20h9" />
+                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteMatch(match.id);
+                          }}
+                          title="Delete match"
+                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                        >
+                          <svg
+                            className="w-3.5 h-3.5"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                          </svg>
+                        </button>
+                      </div>
+
                       {/* Drag Handle Icon with 0ms Touch Support */}
                       <div
                         onTouchStart={(e) => handleTouchStart(e, index)}
@@ -350,6 +479,17 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
                 );
               })}
             </div>
+            
+            {/* Add Custom Match Button */}
+            <div className="mt-2 mb-6">
+              <button
+                type="button"
+                onClick={handleOpenAddModal}
+                className="w-full py-3 rounded-2xl border border-dashed border-slate-300 hover:border-emerald-300 bg-white hover:bg-emerald-50/20 text-slate-500 hover:text-emerald-700 text-xs font-bold transition flex items-center justify-center gap-1.5"
+              >
+                <span>+ Add Custom Match</span>
+              </button>
+            </div>
           </div>
         )}
 
@@ -376,6 +516,113 @@ export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
           <span>🏆</span>
         </button>
       </div>
+
+      {/* Form Modal for Adding / Editing Matches */}
+      {isFormModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b pb-2">
+              <h3 className="text-sm font-extrabold text-slate-900">
+                {editingMatch ? "Edit Match" : "Add Custom Match"}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsFormModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 text-sm font-bold p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            {formError && (
+              <div className="text-[11px] font-bold text-rose-500 bg-rose-50 p-2.5 rounded-xl border border-rose-100">
+                {formError}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              {/* TEAM A */}
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                  Team A
+                </label>
+                <div className="space-y-2">
+                  {Array.from({ length: isDoubles ? 2 : 1 }).map((_, idx) => (
+                    <select
+                      key={`a-${idx}`}
+                      value={formTeamA[idx] || ""}
+                      onChange={(e) => {
+                        const updated = [...formTeamA];
+                        updated[idx] = e.target.value;
+                        setFormTeamA(updated);
+                        setFormError(null);
+                      }}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    >
+                      <option value="">-- Select Player --</option>
+                      {session.players
+                        .filter((p) => p.name.trim().length > 0)
+                        .map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.name}
+                          </option>
+                        ))}
+                    </select>
+                  ))}
+                </div>
+              </div>
+
+              {/* TEAM B */}
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                  Team B
+                </label>
+                <div className="space-y-2">
+                  {Array.from({ length: isDoubles ? 2 : 1 }).map((_, idx) => (
+                    <select
+                      key={`b-${idx}`}
+                      value={formTeamB[idx] || ""}
+                      onChange={(e) => {
+                        const updated = [...formTeamB];
+                        updated[idx] = e.target.value;
+                        setFormTeamB(updated);
+                        setFormError(null);
+                      }}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    >
+                      <option value="">-- Select Player --</option>
+                      {session.players
+                        .filter((p) => p.name.trim().length > 0)
+                        .map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.name}
+                          </option>
+                        ))}
+                    </select>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setIsFormModalOpen(false)}
+                className="flex-1 rounded-2xl bg-slate-100 py-3 text-xs font-bold text-slate-700 hover:bg-slate-200 active:scale-[0.98] transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveMatch}
+                className="flex-1 rounded-2xl bg-emerald-600 hover:bg-emerald-700 py-3 text-xs font-bold text-white shadow-md active:scale-[0.98] transition"
+              >
+                Save Match
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

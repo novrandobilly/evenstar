@@ -12,6 +12,9 @@ export const InSessionFeature: React.FC = () => {
     toggleMatchCompleted,
     reorderMatches,
     completeSession,
+    addCustomMatch,
+    editCustomMatch,
+    deleteMatch,
   } = useSession();
   const { showModal } = useModal();
 
@@ -63,6 +66,9 @@ export const InSessionFeature: React.FC = () => {
         onToggleCompleted={toggleMatchCompleted}
         onReorderMatches={reorderMatches}
         onEndSession={handleEndSession}
+        onAddCustomMatch={addCustomMatch}
+        onEditCustomMatch={editCustomMatch}
+        onDeleteMatch={deleteMatch}
       />
     </div>
   );
