@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useSession } from "../../context/SessionContext";
 import { useModal } from "../../context/modal";
-import { RunningSessionScreen } from "./features/RunningSessionScreen";
+import { RunningSession } from "./features/RunningSession/RunningSession";
 
 export const InSessionFeature: React.FC = () => {
   const navigate = useNavigate();
@@ -63,7 +63,7 @@ export const InSessionFeature: React.FC = () => {
 
   return (
     <div className="flex min-h-dvh flex-col bg-slate-50 text-slate-900 antialiased font-sans">
-      <RunningSessionScreen
+      <RunningSession
         session={session}
         onUpdateScore={updateMatchScore}
         onToggleCompleted={toggleMatchCompleted}

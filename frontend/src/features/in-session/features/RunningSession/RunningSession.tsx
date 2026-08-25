@@ -1,12 +1,16 @@
 import React, { useState, useRef } from "react";
-import type { SessionConfig, Player, MatchItem } from "../../../types/session";
-import { calculateStandings } from "../../../utils/standings";
-import { StandingsTable } from "../../../components/StandingsTable";
-import { useModal } from "../../../context/modal";
+import type {
+  SessionConfig,
+  Player,
+  MatchItem,
+} from "../../../../types/session";
+import { calculateStandings } from "../../../../utils/standings";
+import { StandingsTable } from "../../../../components/StandingsTable";
+import { useModal } from "../../../../context/modal";
 
-import { CustomPlayerSelect } from "./CustomPlayerSelect";
+import { CustomPlayerSelect } from "../CustomPlayerSelect";
 
-interface RunningSessionScreenProps {
+interface RunningSessionProps {
   session: SessionConfig;
   onUpdateScore: (matchId: string, scoreA: string, scoreB: string) => void;
   onToggleCompleted: (matchId: string) => void;
@@ -25,7 +29,7 @@ interface RunningSessionScreenProps {
   onAddPlayerWithName: (name: string) => void;
 }
 
-export const RunningSessionScreen: React.FC<RunningSessionScreenProps> = ({
+export const RunningSession: React.FC<RunningSessionProps> = ({
   session,
   onUpdateScore,
   onToggleCompleted,
