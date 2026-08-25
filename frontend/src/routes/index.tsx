@@ -1,9 +1,9 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import HomeFeature from '../features/home';
-import CreateSessionFeature from '../features/create-session';
-import InSessionFeature from '../features/in-session';
-import SessionSummaryFeature from '../features/session-summary';
-import HistorySessionFeature from '../features/history-session';
+import { Routes, Route, Navigate } from "react-router-dom";
+import HomeFeature from "../features/home";
+import CreateSessionFeature from "../features/create-session";
+import InSessionFeature from "../features/in-session";
+import SessionSummaryFeature from "../features/session-summary";
+import HistorySessionFeature from "../features/history-session";
 
 export const AppRoutes = () => {
   return (

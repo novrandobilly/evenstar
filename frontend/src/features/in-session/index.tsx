@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useSession } from "../../context/SessionContext";
 import { useModal } from "../../context/modal";
-import { RunningSessionScreen } from "../../components/RunningSessionScreen";
+import { RunningSessionScreen } from "./features/RunningSessionScreen";
 
 export const InSessionFeature: React.FC = () => {
   const navigate = useNavigate();
@@ -20,7 +20,9 @@ export const InSessionFeature: React.FC = () => {
   const { showModal } = useModal();
 
   const handleEndSession = () => {
-    const uncompletedCount = session.matches.filter((m) => !m.isCompleted).length;
+    const uncompletedCount = session.matches.filter(
+      (m) => !m.isCompleted,
+    ).length;
     const desc =
       uncompletedCount > 0
         ? `You still have ${uncompletedCount} unplayed matches. Are you sure you want to finish and view final standings?`

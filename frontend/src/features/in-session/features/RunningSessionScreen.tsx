@@ -1,82 +1,10 @@
 import React, { useState, useRef } from "react";
-import type { SessionConfig, Player, MatchItem } from "../types/session";
-import { calculateStandings } from "../utils/standings";
-import { StandingsTable } from "./StandingsTable";
-import { useModal } from "../context/modal";
+import type { SessionConfig, Player, MatchItem } from "../../../types/session";
+import { calculateStandings } from "../../../utils/standings";
+import { StandingsTable } from "../../../components/StandingsTable";
+import { useModal } from "../../../context/modal";
 
-const CustomPlayerSelect: React.FC<{
-  players: Player[];
-  selectedId: string;
-  onChange: (id: string) => void;
-}> = ({ players, selectedId, onChange }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const selectedPlayer = players.find((p) => p.id === selectedId);
-
-  return (
-    <div className="relative">
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 text-left focus:outline-none focus:ring-1 focus:ring-emerald-500 flex items-center justify-between transition-all"
-      >
-        <span className={selectedPlayer ? "text-slate-800" : "text-slate-400"}>
-          {selectedPlayer ? selectedPlayer.name : "-- Select Player --"}
-        </span>
-        <svg
-          className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
-          }`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M19 9l-7 7-7-7"
-          />
-        </svg>
-      </button>
-
-      {isOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-10"
-            onClick={() => setIsOpen(false)}
-          />
-          <ul className="absolute z-20 w-full mt-1 max-h-40 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-lg focus:outline-none text-xs font-bold divide-y divide-slate-50 animate-dropdown-in origin-top">
-            <li
-              onClick={() => {
-                onChange("");
-                setIsOpen(false);
-              }}
-              className="px-3 py-2 hover:bg-slate-50 text-slate-400 cursor-pointer"
-            >
-              -- Select Player --
-            </li>
-            {players.map((p) => (
-              <li
-                key={p.id}
-                onClick={() => {
-                  onChange(p.id);
-                  setIsOpen(false);
-                }}
-                className={`px-3 py-2 hover:bg-emerald-50 hover:text-emerald-700 cursor-pointer transition ${
-                  p.id === selectedId
-                    ? "bg-emerald-50/50 text-emerald-600"
-                    : "text-slate-700"
-                }`}
-              >
-                {p.name}
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-    </div>
-  );
-};
+import { CustomPlayerSelect } from "./CustomPlayerSelect";
 
 interface RunningSessionScreenProps {
   session: SessionConfig;

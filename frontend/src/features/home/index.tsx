@@ -1,9 +1,9 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useSession } from "../context/SessionContext";
-import { useModal } from "../context/modal";
-import PWAGuide from "../components/PWAGuide";
-import logo from "../assets/logo.svg";
+import { useSession } from "../../context/SessionContext";
+import { useModal } from "../../context/modal";
+import PWAGuide from "../../components/PWAGuide";
+import logo from "../../assets/logo.svg";
 
 export const HomeFeature: React.FC = () => {
   const navigate = useNavigate();
