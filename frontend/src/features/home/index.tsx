@@ -56,18 +56,19 @@ export const HomeFeature: React.FC = () => {
         {/* Content Container (z-10) */}
         <div className="relative z-10 flex flex-col justify-between h-full flex-1">
           {/* Top Brand Bar */}
-          <div className="pt-2 flex items-center gap-2">
+          <div className="flex items-end gap-2">
             <img
               src={logo}
               alt="Kickserve"
-              className="h-6.5 w-auto object-contain drop-shadow-sm brightness-110"
+              className="h-5 w-auto object-contain drop-shadow-sm brightness-110"
             />
-            <div className="flex items-center gap-1.5 pl-1.5 border-l border-white/20">
-              <span className="text-[10px] font-semibold tracking-wider text-slate-300 uppercase">
+            <div className="flex items-end gap-1.5 pl-1.5 border-l border-white/20">
+              <span className="text-[10px] font-normal tracking-wider text-slate-300 uppercase leading-none">
                 BY
               </span>
-              <span className="text-[10px] font-extrabold tracking-widest text-white uppercase">
-                ENVIENSTUDIO
+              <span className="text-[10px] font-normal tracking-widest text-white uppercase leading-none">
+                <span className="font-black">ENVIEN</span>
+                STUDIO
               </span>
             </div>
           </div>
@@ -75,10 +76,18 @@ export const HomeFeature: React.FC = () => {
           {/* Hero Headline & Subtitle */}
           <div className="my-auto pt-8 pb-4">
             <h1 className="text-[54px] sm:text-[60px] font-black italic tracking-tighter leading-[0.92] text-left">
-              <span className="block text-white drop-shadow-md">Plan</span>
-              <span className="block text-white drop-shadow-md">Less,</span>
-              <span className="block text-volt-500 drop-shadow-md">Play</span>
-              <span className="block text-volt-500 drop-shadow-md">More.</span>
+              <span className="block text-white drop-shadow-md -rotate-5">
+                Plan
+              </span>
+              <span className="block text-white drop-shadow-md -rotate-5 pl-1.5">
+                Less,
+              </span>
+              <span className="block text-volt-500 drop-shadow-md -rotate-5 pl-3">
+                Play
+              </span>
+              <span className="block text-volt-500 drop-shadow-md -rotate-5 pl-4.5">
+                More.
+              </span>
             </h1>
 
             <div className="mt-5 space-y-0.5 text-xs sm:text-sm font-medium leading-relaxed drop-shadow-sm text-left max-w-xs">
