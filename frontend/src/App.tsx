@@ -10,7 +10,11 @@ export function App() {
       <ScrollToTop />
       <ModalProvider>
         <SessionProvider>
-          <AppRoutes />
+          <div className="min-h-dvh w-full bg-slate-100 flex justify-center text-slate-900 antialiased font-sans">
+            <div className="w-full max-w-md min-h-dvh bg-slate-50 sm:border-x sm:border-slate-200 sm:shadow-xl flex flex-col relative">
+              <AppRoutes />
+            </div>
+          </div>
         </SessionProvider>
       </ModalProvider>
     </BrowserRouter>

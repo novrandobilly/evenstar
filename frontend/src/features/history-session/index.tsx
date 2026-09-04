@@ -102,7 +102,7 @@ export const HistorySessionFeature: React.FC = () => {
 
   if (!session) {
     return (
-      <div className="flex min-h-dvh flex-col items-center justify-center p-6 text-center">
+      <div className="flex flex-1 flex-col items-center justify-center p-6 text-center">
         <div className="text-4xl mb-4">🎾</div>
         <h2 className="text-lg font-bold text-slate-900">Session Not Found</h2>
         <p className="text-xs text-slate-500 mt-1 max-w-xs">

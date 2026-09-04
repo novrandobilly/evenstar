@@ -10,11 +10,7 @@ export const InSessionFeature: React.FC = () => {
     return <EmptyStateSession />;
   }
 
-  return (
-    <div className="flex min-h-dvh flex-col bg-slate-50 text-slate-900 antialiased font-sans">
-      <RunningSession />
-    </div>
-  );
+  return <RunningSession />;
 };
 
 export default InSessionFeature;
