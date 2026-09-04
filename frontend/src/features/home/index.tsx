@@ -54,13 +54,14 @@ export const HomeFeature: React.FC = () => {
       </div>
 
       {/* Top Brand */}
-      <div className="pt-6 flex flex-row items-start justify-start gap-4">
-        <img src={logo} alt="Kickserve" className="h-21 w-21" />
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
-            Kickserve
-          </h1>
-          <p className="mt-2 text-sm text-slate-400 font-normal leading-relaxed">
+      <div className="pt-6">
+        <img
+          src={logo}
+          alt="Kickserve"
+          className="h-14 w-auto max-w-[260px] object-contain"
+        />
+        <div className="mt-3.5">
+          <p className="text-sm text-slate-500 font-medium leading-relaxed">
             Minimalist tennis host assistant.
           </p>
           <p className="text-sm text-slate-400 font-normal leading-relaxed">
