@@ -90,13 +90,13 @@ export const HomeFeature: React.FC = () => {
               </span>
             </h1>
 
-            <div className="mt-5 space-y-0.5 text-xs sm:text-sm font-medium leading-relaxed drop-shadow-sm text-left max-w-xs">
-              <p className="text-white/90">Kickserve handles</p>
-              <p className="text-white/90">the matchups, scores,</p>
-              <p className="text-white/90">and standings.</p>
-              <p className="text-volt-400 font-bold pt-0.5">
+            <div className="flex flex-col gap-1 leading-none mt-10 space-y-0.5 text-xs sm:text-sm font-medium drop-shadow-sm text-left max-w-xs">
+              <span className="text-white/90">Kickserve handles</span>
+              <span className="text-white/90">the matchups, scores,</span>
+              <span className="text-white/90">and standings.</span>
+              <span className="text-volt-400 font-extrabold mt-2">
                 You just bring your game.
-              </p>
+              </span>
             </div>
           </div>
 
@@ -106,7 +106,7 @@ export const HomeFeature: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate("/create-session")}
-              className="w-full flex items-center justify-between rounded-full bg-volt-500 hover:bg-volt-400 px-6 py-4 text-slate-950 font-black text-sm shadow-2xl shadow-black/40 active:scale-[0.98] transition cursor-pointer"
+              className="w-fit flex items-center gap-4 justify-start rounded-full bg-volt-500 hover:bg-volt-400 px-4 py-2 text-slate-950 font-black text-sm shadow-2xl shadow-black/40 active:scale-[0.98] transition cursor-pointer"
             >
               <span>Start a Session</span>
               <span className="text-base font-black">→</span>
@@ -116,9 +116,21 @@ export const HomeFeature: React.FC = () => {
             <button
               type="button"
               onClick={handleOpenPwaGuide}
-              className="w-full flex items-center justify-center rounded-full bg-white hover:bg-slate-100 px-6 py-3.5 text-slate-950 font-bold text-xs shadow-lg shadow-black/20 active:scale-[0.98] transition cursor-pointer"
+              className="w-fit flex items-center gap-2 justify-start rounded-full bg-white hover:bg-slate-100 px-4 py-2 text-slate-950 font-bold text-xs shadow-lg shadow-black/20 active:scale-[0.98] transition cursor-pointer"
             >
-              <span>Use Kickserve as App</span>
+              <svg
+                className="w-3.5 h-3.5 text-slate-800 shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect x="5" y="2" width="14" height="20" rx="3" ry="3" />
+                <line x1="12" y1="18" x2="12.01" y2="18" />
+              </svg>
+              <span>Use as App</span>
             </button>
           </div>
         </div>
