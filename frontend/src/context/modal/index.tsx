@@ -51,11 +51,11 @@ export const ModalProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
       {/* Global Confirmation Modal Dialog */}
       {modalOptions && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs animate-fade-in">
-          <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-court-950/70 p-4 backdrop-blur-xs animate-fade-in transition-all">
+          <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl space-y-4 border border-[#ded7c4] animate-modal-in">
             <div>
               {modalOptions.title && (
-                <h3 className="text-base font-extrabold text-slate-900">
+                <h3 className="text-base font-black text-slate-900 tracking-tight">
                   {modalOptions.title}
                 </h3>
               )}
@@ -63,7 +63,7 @@ export const ModalProvider: React.FC<{ children: ReactNode }> = ({ children }) =
                 modalOptions.contentBody
               ) : (
                 modalOptions.description && (
-                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                  <p className="text-xs text-slate-500 mt-1.5 leading-relaxed font-medium">
                     {modalOptions.description}
                   </p>
                 )
@@ -71,11 +71,11 @@ export const ModalProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             </div>
 
             {!modalOptions.hideActions && (
-              <div className="flex items-center justify-end gap-2 pt-2">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-chalk-200">
                 <button
                   type="button"
                   onClick={handleCancel}
-                  className="flex-1 rounded-2xl bg-slate-100 py-3 text-xs font-bold text-slate-700 hover:bg-slate-200 active:scale-[0.98] transition"
+                  className="flex-1 rounded-2xl bg-chalk-100 py-3 text-xs font-bold text-slate-700 hover:bg-chalk-200 active:scale-[0.98] transition cursor-pointer border border-[#ded7c4]"
                 >
                   {modalOptions.cancelText || 'Cancel'}
                 </button>
@@ -83,10 +83,10 @@ export const ModalProvider: React.FC<{ children: ReactNode }> = ({ children }) =
                 <button
                   type="button"
                   onClick={handleConfirm}
-                  className={`flex-1 rounded-2xl py-3 text-xs font-bold text-white shadow-md active:scale-[0.98] transition ${
+                  className={`flex-1 rounded-2xl py-3 text-xs font-black shadow-md active:scale-[0.98] transition cursor-pointer ${
                     modalOptions.type === 'danger'
-                      ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/20'
-                      : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20'
+                      ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-rose-600/20'
+                      : 'bg-court-850 hover:bg-court-900 text-volt-300 shadow-court-900/20 border border-court-700/40'
                   }`}
                 >
                   {modalOptions.confirmText || 'Confirm'}

@@ -12,10 +12,14 @@ export const LiveStandings: React.FC<LiveStandingsProps> = ({
   standings,
 }) => {
   return (
-    <div className="space-y-4 pb-4">
-      <div className="flex items-center justify-between text-xs text-slate-500 px-1">
-        <span>Sorted by Game Points (GW)</span>
-        <span>{completedCount} matches counted</span>
+    <div className="space-y-3 pb-4">
+      <div className="flex items-center justify-between text-xs px-1">
+        <span className="text-[11px] font-bold text-slate-500">
+          Ranked by Game Points (GW)
+        </span>
+        <span className="text-[10px] font-black uppercase text-court-700 bg-court-100/70 px-2 py-0.5 rounded-full border border-court-500/20">
+          {completedCount} matches played
+        </span>
       </div>
       <StandingsTable standings={standings} />
     </div>

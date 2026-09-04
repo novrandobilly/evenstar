@@ -1,13 +1,44 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'Space Grotesk', ui-monospace, SFMono-Regular, monospace;
+
+  --color-court-950: #061910;
+  --color-court-900: #0b291a;
+  --color-court-850: #0f3522;
+  --color-court-800: #13422b;
+  --color-court-700: #1b5639;
+  --color-court-600: #246d4a;
+  --color-court-500: #2f885e;
+  --color-court-100: #e2f4ea;
+  --color-court-50: #f0faf4;
+
+  --color-volt-500: #b4e100;
+  --color-volt-400: #c7f208;
+  --color-volt-300: #dbfa4d;
+  --color-volt-200: #ecfc91;
+  --color-volt-100: #f6fdd0;
+
+  --color-chalk-50: #fdfcf9;
+  --color-chalk-100: #f7f4ec;
+  --color-chalk-200: #ede8dc;
+  --color-chalk-300: #ded7c4;
+
+  --color-clay-600: #c24d24;
+  --color-clay-500: #df5d2c;
+  --color-clay-100: #fdeadc;
+  --color-clay-50: #fdf5f0;
+}
+
 @keyframes modal-scale-in {
   from {
     opacity: 0;
-    transform: scale(0.95);
+    transform: scale(0.96) translateY(4px);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) translateY(0);
   }
 }
 
@@ -22,10 +53,52 @@
   }
 }
 
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes glow-volt {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(180, 225, 0, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(180, 225, 0, 0.7);
+  }
+}
+
 .animate-modal-in {
   animation: modal-scale-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-dropdown-in {
   animation: dropdown-slide-in 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-volt-glow {
+  animation: glow-volt 2.5s ease-in-out infinite;
+}
+
+/* Tennis Court Subtle Geometric Texture */
+.court-pattern {
+  background-image: 
+    radial-gradient(ellipse at 50% 0%, rgba(180, 225, 0, 0.08) 0%, transparent 60%),
+    linear-gradient(to bottom, #092215, #06170e);
+}
+
+.court-lines-overlay {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
 }

@@ -21,9 +21,9 @@ export const CustomPlayerSelect: React.FC<CustomPlayerSelectProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 text-left focus:outline-none focus:ring-1 focus:ring-emerald-500 flex items-center justify-between transition-all"
+        className="w-full bg-chalk-50 border border-[#ded7c4] rounded-2xl px-3.5 py-2.5 text-xs font-bold text-slate-800 text-left focus:outline-none focus:border-court-600 focus:ring-2 focus:ring-court-500/20 flex items-center justify-between transition cursor-pointer"
       >
-        <span className={selectedPlayer ? "text-slate-800" : "text-slate-400"}>
+        <span className={selectedPlayer ? "text-slate-900 font-extrabold" : "text-slate-400 font-medium"}>
           {selectedPlayer ? selectedPlayer.name : "-- Select Player --"}
         </span>
         <svg
@@ -37,7 +37,7 @@ export const CustomPlayerSelect: React.FC<CustomPlayerSelectProps> = ({
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth="2"
+            strokeWidth="2.5"
             d="M19 9l-7 7-7-7"
           />
         </svg>

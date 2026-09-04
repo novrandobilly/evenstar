@@ -2,7 +2,8 @@ import type { PlayerStats } from './standings';
 
 /**
  * Draw the standings results directly to an HTML5 Canvas in edge-to-edge high-resolution portrait mode.
- * Optimized for mobile screens (e.g. iPhone SE, Instagram Stories, WhatsApp, iMessage) with large, high-contrast readable typography.
+ * Styled with Grand Slam tournament aesthetic & Kickserve Volt neon accents.
+ * Optimized for mobile screens (e.g. WhatsApp, iMessage, Instagram Stories) with high-contrast readable typography.
  */
 export async function createStandingsImageBlob(
   title: string,
@@ -10,14 +11,14 @@ export async function createStandingsImageBlob(
   standings: PlayerStats[]
 ): Promise<Blob> {
   const width = 1080; // Crisp mobile portrait width
-  const pad = 32;
+  const pad = 36;
 
-  const headerHeight = 310;
-  const podiumHeight = standings.length >= 3 ? 360 : 0;
-  const tableHeaderHeight = 76;
-  const rowHeight = 104;
+  const headerHeight = 320;
+  const podiumHeight = standings.length >= 3 ? 370 : 0;
+  const tableHeaderHeight = 80;
+  const rowHeight = 106;
   const tableRowsHeight = standings.length * rowHeight;
-  const footerHeight = 120;
+  const footerHeight = 130;
 
   const height =
     headerHeight +
@@ -33,45 +34,47 @@ export async function createStandingsImageBlob(
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Could not get canvas context');
 
-  // 1. Full Canvas Background - Clean edge-to-edge White
-  ctx.fillStyle = '#ffffff';
+  // 1. Full Canvas Background - Warm Chalk Tone
+  ctx.fillStyle = '#fcfbf7';
   ctx.fillRect(0, 0, width, height);
 
-  // Top accent bar (Emerald green)
-  ctx.fillStyle = '#059669';
-  ctx.fillRect(0, 0, width, 14);
+  // Top accent bars (Deep court green + Electric Volt neon line)
+  ctx.fillStyle = '#0a2519';
+  ctx.fillRect(0, 0, width, 18);
+  ctx.fillStyle = '#b4e100';
+  ctx.fillRect(0, 18, width, 6);
 
-  let currentY = 72;
+  let currentY = 82;
 
   // 2. Format / Category Pill Badge
   const badgeText = `🏆 ${formatLabel.toUpperCase()}`;
   ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.textAlign = 'center';
   const badgeMetrics = ctx.measureText(badgeText);
-  const badgeW = badgeMetrics.width + 48;
-  const badgeH = 54;
+  const badgeW = badgeMetrics.width + 52;
+  const badgeH = 56;
   const badgeX = width / 2 - badgeW / 2;
 
-  ctx.fillStyle = '#ecfdf5'; // emerald-50
-  roundRect(ctx, badgeX, currentY - 38, badgeW, badgeH, 27);
+  ctx.fillStyle = '#e2f4ea';
+  roundRect(ctx, badgeX, currentY - 38, badgeW, badgeH, 28);
   ctx.fill();
-  ctx.strokeStyle = '#6ee7b7'; // emerald-300
+  ctx.strokeStyle = '#246d4a';
   ctx.lineWidth = 2.5;
-  roundRect(ctx, badgeX, currentY - 38, badgeW, badgeH, 27);
+  roundRect(ctx, badgeX, currentY - 38, badgeW, badgeH, 28);
   ctx.stroke();
 
-  ctx.fillStyle = '#047857'; // emerald-700
-  ctx.fillText(badgeText, width / 2, currentY - 2);
+  ctx.fillStyle = '#0f3522';
+  ctx.fillText(badgeText, width / 2, currentY - 1);
 
-  currentY += 68;
+  currentY += 72;
 
-  // 3. Main Session Title (Large and prominent)
-  ctx.fillStyle = '#0f172a'; // slate-900
+  // 3. Main Session Title
+  ctx.fillStyle = '#0f172a';
   ctx.font = '900 62px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText(truncateText(title || 'Tennis Session Results', 24), width / 2, currentY);
 
-  currentY += 46;
+  currentY += 48;
 
   // 4. Subtitle / Date
   const dateStr = new Date().toLocaleDateString('en-US', {
@@ -80,11 +83,11 @@ export async function createStandingsImageBlob(
     day: 'numeric',
     year: 'numeric',
   });
-  ctx.fillStyle = '#64748b'; // slate-500
-  ctx.font = '700 28px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillText(`Final Standings · ${dateStr}`, width / 2, currentY);
+  ctx.fillStyle = '#1b5639';
+  ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillText(`Official Tournament Standings · ${dateStr}`, width / 2, currentY);
 
-  currentY += 64;
+  currentY += 68;
 
   // 5. Podium Finishers (Top 3 Cards)
   if (standings.length >= 3) {
@@ -97,9 +100,8 @@ export async function createStandingsImageBlob(
     const colWidth = (podiumAvailW - colGap * 2) / 3;
 
     const pY = currentY;
-    const cardHeight = 280;
+    const cardHeight = 290;
 
-    // Helper for drawing each podium pedestal
     const drawPodiumCard = (
       stat: PlayerStats,
       medal: string,
@@ -116,40 +118,40 @@ export async function createStandingsImageBlob(
       ctx.fill();
 
       ctx.strokeStyle = borderColor;
-      ctx.lineWidth = isWinner ? 3.5 : 2;
+      ctx.lineWidth = isWinner ? 4 : 2;
       roundRect(ctx, x, y, w, h, 28);
       ctx.stroke();
 
       // Medal emoji
       ctx.textAlign = 'center';
-      ctx.font = isWinner ? '68px sans-serif' : '56px sans-serif';
-      ctx.fillText(medal, x + w / 2, y + (isWinner ? 74 : 64));
+      ctx.font = isWinner ? '70px sans-serif' : '58px sans-serif';
+      ctx.fillText(medal, x + w / 2, y + (isWinner ? 78 : 66));
 
-      // Player Name (Large & Bold)
+      // Player Name
       ctx.fillStyle = isWinner ? '#78350f' : '#0f172a';
       ctx.font = `bold ${isWinner ? '34px' : '30px'} -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-      ctx.fillText(truncateText(stat.player.name, 13), x + w / 2, y + (isWinner ? 138 : 126));
+      ctx.fillText(truncateText(stat.player.name, 13), x + w / 2, y + (isWinner ? 142 : 130));
 
       // Points Badge
-      const ptsY = y + (isWinner ? 198 : 184);
-      ctx.fillStyle = isWinner ? '#059669' : '#047857';
-      ctx.font = `900 ${isWinner ? '34px' : '30px'} -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+      const ptsY = y + (isWinner ? 204 : 190);
+      ctx.fillStyle = isWinner ? '#13422b' : '#1e293b';
+      ctx.font = `900 ${isWinner ? '36px' : '30px'} -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
       ctx.fillText(`${stat.gamesWon} pts`, x + w / 2, ptsY);
 
-      // Rank Label (2nd, 1st, 3rd)
+      // Rank Label
       ctx.fillStyle = isWinner ? '#b45309' : '#64748b';
       ctx.font = `800 ${isWinner ? '22px' : '20px'} -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-      ctx.fillText(isWinner ? '1ST PLACE' : stat.rank === 2 ? '2ND PLACE' : '3RD PLACE', x + w / 2, ptsY + 38);
+      ctx.fillText(isWinner ? '1ST PLACE' : stat.rank === 2 ? '2ND PLACE' : '3RD PLACE', x + w / 2, ptsY + 40);
     };
 
     // 2nd Place (Left)
     drawPodiumCard(p2, '🥈', pad, pY + 20, colWidth, cardHeight - 20, '#f8fafc', '#cbd5e1', false);
 
     // 1st Place (Center - Elevated & Highlighted)
-    drawPodiumCard(p1, '🥇', pad + colWidth + colGap, pY, colWidth, cardHeight, '#fefce8', '#facc15', true);
+    drawPodiumCard(p1, '🥇', pad + colWidth + colGap, pY, colWidth, cardHeight, '#fffbeb', '#f59e0b', true);
 
     // 3rd Place (Right)
-    drawPodiumCard(p3, '🥉', pad + (colWidth + colGap) * 2, pY + 30, colWidth, cardHeight - 30, '#fff7ed', '#fed7aa', false);
+    drawPodiumCard(p3, '🥉', pad + (colWidth + colGap) * 2, pY + 30, colWidth, cardHeight - 30, '#fff7ed', '#fdba74', false);
 
     currentY += cardHeight + 48;
   }
@@ -159,28 +161,29 @@ export async function createStandingsImageBlob(
   const tableW = width - pad * 2;
 
   // Table Header Container
-  ctx.fillStyle = '#0f172a'; // slate-900 header
-  roundRect(ctx, tableX, currentY, tableW, tableHeaderHeight, 20);
+  ctx.fillStyle = '#0a2519'; // Deep court green header
+  roundRect(ctx, tableX, currentY, tableW, tableHeaderHeight, 22);
   ctx.fill();
 
-  ctx.fillStyle = '#94a3b8'; // slate-400
+  ctx.fillStyle = '#ffffff';
   ctx.font = 'bold 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 
   ctx.textAlign = 'center';
-  ctx.fillText('RANK', tableX + 54, currentY + 47);
+  ctx.fillText('RANK', tableX + 54, currentY + 50);
 
   ctx.textAlign = 'left';
-  ctx.fillText('PLAYER', tableX + 130, currentY + 47);
+  ctx.fillText('PLAYER', tableX + 130, currentY + 50);
 
   ctx.textAlign = 'center';
-  ctx.fillText('MP', tableX + tableW - 440, currentY + 47);
-  ctx.fillText('W-L', tableX + tableW - 305, currentY + 47);
-  ctx.fillText('GW-GL', tableX + tableW - 170, currentY + 47);
+  ctx.fillText('MP', tableX + tableW - 440, currentY + 50);
+  ctx.fillText('W-L', tableX + tableW - 305, currentY + 50);
+  ctx.fillText('GW-GL', tableX + tableW - 170, currentY + 50);
 
   ctx.textAlign = 'right';
-  ctx.fillText('+/-', tableX + tableW - 40, currentY + 47);
+  ctx.fillStyle = '#b4e100'; // Volt yellow diff indicator
+  ctx.fillText('+/-', tableX + tableW - 40, currentY + 50);
 
-  currentY += tableHeaderHeight + 12;
+  currentY += tableHeaderHeight + 14;
 
   // Table Rows
   standings.forEach((stat, idx) => {
@@ -189,75 +192,75 @@ export async function createStandingsImageBlob(
 
     // Row Background
     if (isLeader) {
-      ctx.fillStyle = 'rgba(254, 240, 138, 0.45)'; // soft amber-100
+      ctx.fillStyle = 'rgba(254, 240, 138, 0.45)';
     } else if (idx % 2 === 0) {
-      ctx.fillStyle = '#f8fafc'; // slate-50
+      ctx.fillStyle = '#f6f4ed';
     } else {
       ctx.fillStyle = '#ffffff';
     }
-    roundRect(ctx, tableX, rowY, tableW, rowHeight - 8, 18);
+    roundRect(ctx, tableX, rowY, tableW, rowHeight - 8, 20);
     ctx.fill();
 
     // Row Border
-    ctx.strokeStyle = isLeader ? '#facc15' : '#e2e8f0';
-    ctx.lineWidth = isLeader ? 2.5 : 1.5;
-    roundRect(ctx, tableX, rowY, tableW, rowHeight - 8, 18);
+    ctx.strokeStyle = isLeader ? '#f59e0b' : '#e5e0d4';
+    ctx.lineWidth = isLeader ? 3 : 1.5;
+    roundRect(ctx, tableX, rowY, tableW, rowHeight - 8, 20);
     ctx.stroke();
 
     // Rank / Medal
     ctx.textAlign = 'center';
     if (stat.rank === 1) {
       ctx.font = '40px sans-serif';
-      ctx.fillText('🥇', tableX + 54, rowY + 58);
+      ctx.fillText('🥇', tableX + 54, rowY + 60);
     } else if (stat.rank === 2) {
       ctx.font = '40px sans-serif';
-      ctx.fillText('🥈', tableX + 54, rowY + 58);
+      ctx.fillText('🥈', tableX + 54, rowY + 60);
     } else if (stat.rank === 3) {
       ctx.font = '40px sans-serif';
-      ctx.fillText('🥉', tableX + 54, rowY + 58);
+      ctx.fillText('🥉', tableX + 54, rowY + 60);
     } else {
       ctx.fillStyle = '#64748b';
       ctx.font = 'bold 30px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      ctx.fillText(`${stat.rank}`, tableX + 54, rowY + 58);
+      ctx.fillText(`${stat.rank}`, tableX + 54, rowY + 60);
     }
 
-    // Player Name (Prominent & Clear)
+    // Player Name
     ctx.textAlign = 'left';
     ctx.fillStyle = isLeader ? '#78350f' : '#0f172a';
     ctx.font = 'bold 34px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    ctx.fillText(truncateText(stat.player.name, 18), tableX + 130, rowY + 58);
+    ctx.fillText(truncateText(stat.player.name, 18), tableX + 130, rowY + 60);
 
     // MP (Matches Played)
     ctx.textAlign = 'center';
     ctx.fillStyle = '#64748b';
-    ctx.font = '700 30px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    ctx.fillText(`${stat.matchesPlayed}`, tableX + tableW - 440, rowY + 58);
+    ctx.font = 'bold 30px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText(`${stat.matchesPlayed}`, tableX + tableW - 440, rowY + 60);
 
     // W-L (Wins-Losses)
     ctx.fillStyle = '#1e293b';
     ctx.font = 'bold 30px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    ctx.fillText(`${stat.matchWins}-${stat.matchLosses}`, tableX + tableW - 305, rowY + 58);
+    ctx.fillText(`${stat.matchWins}-${stat.matchLosses}`, tableX + tableW - 305, rowY + 60);
 
     // GW-GL (Games Won - Games Lost)
     ctx.fillStyle = '#475569';
-    ctx.font = '700 30px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    ctx.fillText(`${stat.gamesWon}-${stat.gamesLost}`, tableX + tableW - 170, rowY + 58);
+    ctx.font = 'bold 30px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText(`${stat.gamesWon}-${stat.gamesLost}`, tableX + tableW - 170, rowY + 60);
 
     // Differential (+/-)
     ctx.textAlign = 'right';
     const diffStr = stat.diff > 0 ? `+${stat.diff}` : `${stat.diff}`;
-    ctx.fillStyle = stat.diff > 0 ? '#059669' : stat.diff < 0 ? '#dc2626' : '#64748b';
+    ctx.fillStyle = stat.diff > 0 ? '#13422b' : stat.diff < 0 ? '#c24d24' : '#64748b';
     ctx.font = '900 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    ctx.fillText(diffStr, tableX + tableW - 40, rowY + 58);
+    ctx.fillText(diffStr, tableX + tableW - 40, rowY + 60);
   });
 
   currentY += standings.length * rowHeight + 36;
 
   // 7. Footer Brand Watermark
   ctx.textAlign = 'center';
-  ctx.fillStyle = '#94a3b8'; // slate-400
-  ctx.font = 'bold 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillText('🎾 Kickserve · Matchmaker & Leaderboards', width / 2, currentY + 12);
+  ctx.fillStyle = '#1b5639';
+  ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillText('🎾 KICKSERVE · TENNIS MATCHMAKER & LEADERBOARDS', width / 2, currentY + 12);
 
   // Convert Canvas directly to Blob
   return new Promise<Blob>((resolve, reject) => {
@@ -296,5 +299,3 @@ function truncateText(str: string, maxLen: number) {
   if (!str) return 'Unnamed';
   return str.length > maxLen ? str.slice(0, maxLen - 1) + '…' : str;
 }
-
-

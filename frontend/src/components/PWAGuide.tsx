@@ -59,24 +59,24 @@ export const PWAGuide: React.FC<PWAGuideProps> = ({ onClose }) => {
   return (
     <div className="flex flex-col justify-between">
       {/* Step Content */}
-      <div className="py-4 flex flex-col items-center justify-center min-h-0">
-        <div className="w-full aspect-[9/16] max-h-[40vh] rounded-2xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center mb-4">
+      <div className="py-3 flex flex-col items-center justify-center min-h-0">
+        <div className="w-full aspect-[9/16] max-h-[38vh] rounded-2xl overflow-hidden border border-[#ded7c4] bg-chalk-100 flex items-center justify-center mb-3.5 shadow-2xs">
           <img src={step.img} alt={step.title} className="w-full h-full object-contain" />
         </div>
-        <h3 className="text-sm font-extrabold text-slate-900 text-center">{step.title}</h3>
-        <p className="text-xs text-slate-500 text-center mt-1.5 px-4 leading-relaxed h-12 overflow-y-auto">
+        <h3 className="text-sm font-black text-slate-900 text-center tracking-tight">{step.title}</h3>
+        <p className="text-xs text-slate-500 text-center mt-1 px-3 leading-relaxed h-12 overflow-y-auto font-medium">
           {step.desc}
         </p>
       </div>
 
       {/* Navigation Actions */}
-      <div className="pt-3 border-t border-slate-100 space-y-3">
+      <div className="pt-3 border-t border-chalk-200 space-y-3">
         {/* Dot Indicators */}
         <div className="flex justify-center gap-1.5">
           {STEPS.map((_, idx) => (
             <span 
               key={idx} 
-              className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentStep ? 'w-4 bg-slate-800' : 'w-1.5 bg-slate-200'}`} 
+              className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentStep ? 'w-5 bg-court-700' : 'w-1.5 bg-chalk-300'}`} 
             />
           ))}
         </div>
@@ -86,14 +86,14 @@ export const PWAGuide: React.FC<PWAGuideProps> = ({ onClose }) => {
             type="button"
             onClick={handlePrev}
             disabled={currentStep === 0}
-            className="flex-1 rounded-2xl bg-slate-100 py-3.5 text-xs font-bold text-slate-700 hover:bg-slate-200 disabled:opacity-30 disabled:pointer-events-none transition"
+            className="flex-1 rounded-2xl bg-chalk-100 py-3 text-xs font-bold text-slate-700 hover:bg-chalk-200 disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer border border-[#ded7c4]"
           >
             Previous
           </button>
           <button
             type="button"
             onClick={handleNext}
-            className="flex-1 rounded-2xl bg-slate-900 py-3.5 text-xs font-bold text-white hover:bg-slate-800 shadow-md transition"
+            className="flex-1 rounded-2xl bg-court-850 hover:bg-court-900 py-3 text-xs font-black text-volt-300 shadow-md transition cursor-pointer border border-court-700/40"
           >
             {currentStep === STEPS.length - 1 ? 'Done' : 'Next'}
           </button>

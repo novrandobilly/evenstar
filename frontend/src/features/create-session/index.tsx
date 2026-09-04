@@ -73,57 +73,66 @@ export const CreateSessionFeature: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-1 flex-col justify-between max-w-md mx-auto w-full px-5 py-6">
+    <div className="flex flex-1 flex-col justify-between max-w-md mx-auto w-full px-5 py-6 font-sans">
       <div>
-        {/* Top bar */}
-        <div className="flex items-center justify-between mb-6">
+        {/* Top Header Bar */}
+        <div className="flex items-center justify-between mb-5">
           <button
             type="button"
             onClick={() => navigate("/")}
-            className="text-xs font-semibold text-slate-400 hover:text-slate-900 transition"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-court-900 transition cursor-pointer px-2 py-1 -ml-2 rounded-lg hover:bg-chalk-100"
           >
-            ← Back
+            <span>←</span>
+            <span>Home</span>
           </button>
+          <span className="text-[10px] font-black uppercase tracking-widest text-court-700 bg-court-100/70 px-2.5 py-1 rounded-full border border-court-500/20">
+            Session Setup
+          </span>
         </div>
 
-        {/* Session Title */}
-        <div className="mb-6">
+        {/* Session Title Input */}
+        <div className="mb-5 bg-white p-4 rounded-2xl border border-[#ded7c4] shadow-2xs focus-within:border-court-600 focus-within:ring-2 focus-within:ring-court-500/20 transition">
+          <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">
+            Session Title
+          </label>
           <input
             type="text"
             value={session.title}
             onChange={(e) => setSessionTitle(e.target.value)}
-            placeholder="Session Name"
-            className="w-full text-xl font-bold tracking-tight text-slate-900 placeholder:text-slate-300 focus:outline-none border-b border-slate-200 pb-2 focus:border-emerald-600 transition"
+            placeholder="e.g. Sunday Morning Club"
+            className="w-full text-base font-extrabold text-slate-900 placeholder:text-slate-300 focus:outline-none bg-transparent"
           />
         </div>
 
         {/* Match Format: Doubles / Singles */}
         <div className="mb-4">
-          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+          <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 px-1">
             Match Format
           </label>
-          <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-2xl">
+          <div className="grid grid-cols-2 gap-1.5 p-1.5 bg-chalk-200/80 rounded-2xl border border-[#ded7c4]">
             <button
               type="button"
               onClick={() => setMatchFormat("doubles")}
-              className={`py-2.5 rounded-xl text-xs font-bold transition ${
+              className={`py-2.5 rounded-xl text-xs font-black transition cursor-pointer flex items-center justify-center gap-1.5 ${
                 isDoubles
-                  ? "bg-white text-slate-900 shadow-xs"
-                  : "text-slate-500 hover:text-slate-900"
+                  ? "bg-court-850 text-volt-300 shadow-md shadow-court-900/10"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
               }`}
             >
-              Doubles (2v2)
+              <span>👥</span>
+              <span>Doubles (2v2)</span>
             </button>
             <button
               type="button"
               onClick={() => setMatchFormat("singles")}
-              className={`py-2.5 rounded-xl text-xs font-bold transition ${
+              className={`py-2.5 rounded-xl text-xs font-black transition cursor-pointer flex items-center justify-center gap-1.5 ${
                 !isDoubles
-                  ? "bg-white text-slate-900 shadow-xs"
-                  : "text-slate-500 hover:text-slate-900"
+                  ? "bg-court-850 text-volt-300 shadow-md shadow-court-900/10"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
               }`}
             >
-              Singles (1v1)
+              <span>👤</span>
+              <span>Singles (1v1)</span>
             </button>
           </div>
         </div>
@@ -131,53 +140,58 @@ export const CreateSessionFeature: React.FC = () => {
         {/* Doubles Game Mode */}
         {isDoubles && (
           <div className="mb-4">
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 px-1">
               Game Mode
             </label>
-            <label className="flex items-start gap-3 p-3 rounded-2xl border border-slate-200 bg-white cursor-pointer hover:border-slate-300 transition">
+            <label className="flex items-start gap-3 p-3.5 rounded-2xl border-2 border-court-600/30 bg-white cursor-pointer hover:border-court-600 transition shadow-2xs">
               <input
                 type="radio"
                 name="doublesMode"
                 value="americano"
                 checked={session.doublesMode === "americano"}
                 onChange={() => setDoublesMode("americano")}
-                className="mt-0.5 h-4 w-4 text-emerald-600 accent-emerald-600 focus:ring-emerald-500"
+                className="mt-0.5 h-4 w-4 text-court-700 accent-court-700 focus:ring-court-500"
               />
               <div className="flex-1">
-                <span className="text-xs font-bold text-slate-900 block">
-                  Americano
-                </span>
-                <span className="text-xs text-slate-400 block mt-0.5 leading-relaxed">
-                  Rotating partners each round with fair match rotation.
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-black text-slate-900">
+                    Americano Tournament
+                  </span>
+                  <span className="text-[9px] font-black uppercase tracking-wider bg-volt-100 text-court-900 px-1.5 py-0.5 rounded">
+                    Popular
+                  </span>
+                </div>
+                <span className="text-[11px] text-slate-500 block mt-0.5 leading-relaxed font-medium">
+                  Rotating partners every round with guaranteed fair playtime.
                 </span>
               </div>
             </label>
           </div>
         )}
 
-        {/* Unified Players Container (Count Control + Names) */}
+        {/* Unified Players Container */}
         <div className="mb-5">
-          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
-            Players
+          <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 px-1">
+            Player Roster
           </label>
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
+          <div className="rounded-3xl border border-[#ded7c4] bg-white p-4 shadow-xs">
             {/* Header with Stepper */}
-            <div className="flex items-center justify-between pb-3.5 border-b border-slate-100 mb-3.5">
+            <div className="flex items-center justify-between pb-3 border-b border-chalk-200 mb-3">
               <div>
-                <span className="text-xs font-bold text-slate-900">
-                  Total Players
+                <span className="text-xs font-black text-slate-900 block">
+                  Total Roster
                 </span>
-                <p className="text-[11px] text-slate-400 mt-0.5">
+                <p className="text-[11px] text-court-700 font-bold mt-0.5">
                   {filledCount} of {playerCount} named (Min {minRequired})
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <button
                   type="button"
                   onClick={handleDecrement}
                   disabled={playerCount <= minRequired}
-                  className="h-8 w-8 rounded-lg bg-slate-100 text-sm font-bold text-slate-700 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition hover:bg-slate-200"
+                  className="h-8 w-8 rounded-xl bg-chalk-100 text-sm font-black text-slate-700 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition hover:bg-chalk-200 cursor-pointer flex items-center justify-center border border-[#ded7c4]"
                 >
                   -
                 </button>
@@ -188,21 +202,21 @@ export const CreateSessionFeature: React.FC = () => {
                   max={MAX_PLAYERS}
                   value={playerCount}
                   onChange={handleNumberInputChange}
-                  className="w-12 text-center text-sm font-black text-slate-900 bg-slate-50 rounded-lg py-1 border border-slate-200 focus:outline-none focus:border-emerald-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="w-11 text-center text-sm font-black text-slate-900 bg-chalk-50 rounded-xl py-1 border border-[#ded7c4] focus:outline-none focus:border-court-600 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
 
                 <button
                   type="button"
                   onClick={handleIncrement}
                   disabled={playerCount >= MAX_PLAYERS}
-                  className="h-8 w-8 rounded-lg bg-slate-100 text-sm font-bold text-slate-700 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition hover:bg-slate-200"
+                  className="h-8 w-8 rounded-xl bg-chalk-100 text-sm font-black text-slate-700 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition hover:bg-chalk-200 cursor-pointer flex items-center justify-center border border-[#ded7c4]"
                 >
                   +
                 </button>
               </div>
             </div>
 
-            {/* Dynamic Player Inputs (Natural full list without inner scrollbar) */}
+            {/* Dynamic Player Inputs */}
             <div className="space-y-2">
               {session.players.map((player, index) => {
                 const isFilled = player.name.trim().length > 0;
@@ -211,13 +225,19 @@ export const CreateSessionFeature: React.FC = () => {
                 return (
                   <div
                     key={player.id}
-                    className={`flex items-center gap-2.5 rounded-xl border px-3 py-2 transition ${
+                    className={`flex items-center gap-2.5 rounded-xl border px-3 py-2 transition-all ${
                       isFilled
-                        ? "border-slate-200 bg-white"
-                        : "border-slate-100 bg-slate-50/70 focus-within:border-slate-400 focus-within:bg-white"
+                        ? "border-court-500/30 bg-court-50/40"
+                        : "border-[#ded7c4] bg-chalk-50/70 focus-within:border-court-600 focus-within:bg-white"
                     }`}
                   >
-                    <span className="text-xs font-bold text-slate-400 min-w-[1.2rem] text-center">
+                    <span
+                      className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-black shrink-0 ${
+                        isFilled
+                          ? "bg-court-700 text-volt-300"
+                          : "bg-chalk-200 text-slate-500"
+                      }`}
+                    >
                       {index + 1}
                     </span>
 
@@ -230,14 +250,14 @@ export const CreateSessionFeature: React.FC = () => {
                       onChange={(e) => updatePlayerName(index, e.target.value)}
                       onKeyDown={(e) => handleKeyDown(e, index)}
                       placeholder={`Player ${index + 1}`}
-                      className="w-full bg-transparent text-sm font-semibold text-slate-900 placeholder:text-slate-300 focus:outline-none"
+                      className="w-full bg-transparent text-sm font-bold text-slate-900 placeholder:text-slate-300 focus:outline-none"
                     />
 
                     {canRemove && (
                       <button
                         type="button"
                         onClick={() => removePlayer(index)}
-                        className="text-slate-300 hover:text-rose-500 text-xs px-1 transition"
+                        className="text-slate-300 hover:text-rose-500 text-xs px-1.5 transition cursor-pointer"
                         title="Remove player"
                       >
                         ✕
@@ -252,24 +272,24 @@ export const CreateSessionFeature: React.FC = () => {
       </div>
 
       {/* Start Session CTA */}
-      <div className="pt-4 border-t border-slate-100 mt-2">
+      <div className="pt-4 border-t border-chalk-200 mt-2">
         <button
           type="button"
           disabled={!isAllFilled}
           onClick={handleStartSession}
-          className={`flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-sm font-bold transition ${
+          className={`flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-sm font-black transition cursor-pointer ${
             isAllFilled
-              ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 active:scale-[0.98]"
-              : "bg-slate-200 text-slate-400 cursor-not-allowed"
+              ? "bg-court-850 hover:bg-court-900 text-volt-300 shadow-lg shadow-court-900/20 active:scale-[0.98] border border-court-700/50"
+              : "bg-chalk-200 text-slate-400 cursor-not-allowed border border-chalk-300"
           }`}
         >
-          <span>Start Session</span>
-          <span>🎾</span>
+          <span>Generate Schedule & Start</span>
+          <span className="text-base">🎾</span>
         </button>
 
         {!isAllFilled && (
-          <p className="text-center text-[11px] text-slate-400 mt-2">
-            Fill in all {playerCount} player names to start
+          <p className="text-center text-[11px] font-semibold text-slate-400 mt-2">
+            Enter all {playerCount} player names to generate matches
           </p>
         )}
       </div>

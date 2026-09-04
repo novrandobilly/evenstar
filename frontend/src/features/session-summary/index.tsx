@@ -55,12 +55,6 @@ export const SessionSummaryFeature: React.FC = () => {
     }
   };
 
-  /**
-   * SHARE STANDINGS AS IMAGE:
-   * Dynamically renders the standings table into a clean PNG image and shares natively:
-   * - iOS / Android / macOS Safari: Opens native OS Share Sheet with the image file
-   * - Desktop macOS/Windows browsers: Copies image directly to clipboard or downloads PNG
-   */
   const handleShareImage = async () => {
     if (isSharing) return;
     setIsSharing(true);
@@ -122,14 +116,14 @@ export const SessionSummaryFeature: React.FC = () => {
     return (
       <div className="flex flex-1 flex-col items-center justify-center p-6 text-center">
         <div className="text-4xl mb-4">🎾</div>
-        <h2 className="text-lg font-bold text-slate-900">No Session Found</h2>
-        <p className="text-xs text-slate-500 mt-1 max-w-xs">
+        <h2 className="text-lg font-black text-slate-900">No Session Found</h2>
+        <p className="text-xs text-slate-500 mt-1 max-w-xs font-medium">
           There is no completed session to display.
         </p>
         <button
           type="button"
           onClick={() => navigate("/")}
-          className="mt-6 rounded-2xl bg-slate-900 px-6 py-3 text-xs font-bold text-white shadow-md"
+          className="mt-6 rounded-2xl bg-court-850 hover:bg-court-900 px-6 py-3.5 text-xs font-black text-volt-300 shadow-md cursor-pointer"
         >
           Back to Home
         </button>
@@ -139,33 +133,33 @@ export const SessionSummaryFeature: React.FC = () => {
 
   return (
     <div className="flex flex-1 flex-col justify-between max-w-md mx-auto w-full px-4 py-6 select-none font-sans">
-      <div className="space-y-5">
+      <div className="space-y-4">
         {/* Header Branding */}
         <div className="text-center pt-2">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-2xl shadow-sm mb-2">
+          <div className="inline-flex h-14 w-14 items-center justify-center rounded-3xl bg-gradient-to-br from-amber-100 to-amber-200 text-3xl shadow-sm mb-2.5 ring-4 ring-amber-50">
             🏆
           </div>
           <h1 className="text-2xl font-black tracking-tight text-slate-900">
-            Session Completed!
+            Tournament Complete!
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs font-bold text-court-700 mt-0.5">
             {session.title || "Tennis Session"} · {formatLabel}
           </p>
         </div>
 
         {/* Social Share & Copy Buttons */}
         <div className="grid grid-cols-2 gap-2.5">
-          {/* Native Image Share Button (iOS / Android / macOS native share sheet & desktop fallback) */}
+          {/* Native Image Share Button */}
           <button
             type="button"
             onClick={handleShareImage}
             disabled={isSharing}
-            className="flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-3.5 text-xs font-bold text-white shadow-md hover:bg-slate-800 disabled:opacity-60 active:scale-[0.98] transition cursor-pointer"
+            className="flex items-center justify-center gap-2 rounded-2xl bg-court-850 hover:bg-court-900 px-4 py-3.5 text-xs font-black text-volt-300 shadow-md shadow-court-900/15 disabled:opacity-60 active:scale-[0.98] transition cursor-pointer border border-court-700/40"
           >
             {isSharing ? (
               <>
                 <svg
-                  className="w-4 h-4 animate-spin text-white"
+                  className="w-4 h-4 animate-spin text-volt-300"
                   fill="none"
                   viewBox="0 0 24 24"
                 >
@@ -188,7 +182,7 @@ export const SessionSummaryFeature: React.FC = () => {
             ) : (
               <>
                 <svg
-                  className="w-4 h-4 text-white"
+                  className="w-4 h-4 text-volt-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -209,10 +203,10 @@ export const SessionSummaryFeature: React.FC = () => {
           <button
             type="button"
             onClick={handleCopyText}
-            className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 hover:border-slate-300 active:scale-[0.98] transition"
+            className="flex items-center justify-center gap-2 rounded-2xl border border-[#ded7c4] bg-white px-4 py-3.5 text-xs font-bold text-slate-800 shadow-2xs hover:bg-chalk-50 hover:border-court-500/40 active:scale-[0.98] transition cursor-pointer"
           >
             <svg
-              className="w-4 h-4 text-emerald-600"
+              className="w-4 h-4 text-court-700"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -220,7 +214,7 @@ export const SessionSummaryFeature: React.FC = () => {
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth={2}
+                strokeWidth={2.5}
                 d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
               />
             </svg>
@@ -230,7 +224,7 @@ export const SessionSummaryFeature: React.FC = () => {
 
         {/* Feedback Notification Toast */}
         {notification && (
-          <div className="rounded-xl bg-emerald-700 text-white text-xs font-bold py-2.5 px-3 text-center shadow-lg animate-fade-in flex items-center justify-center gap-2">
+          <div className="rounded-2xl bg-court-850 text-volt-300 text-xs font-black py-3 px-4 text-center shadow-lg animate-fade-in flex items-center justify-center gap-2 border border-court-700/50">
             <span>✓</span>
             <span>{notification}</span>
           </div>
@@ -238,8 +232,8 @@ export const SessionSummaryFeature: React.FC = () => {
 
         {/* Top 3 Podium Cards */}
         {firstPlace && (
-          <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-xs">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block text-center mb-3">
+          <div className="rounded-3xl border border-[#ded7c4] bg-white p-4 shadow-xs">
+            <span className="text-[10px] font-black uppercase tracking-widest text-court-800 block text-center mb-3">
               Podium Finishers
             </span>
             <div className="grid grid-cols-3 gap-2 items-end pt-2 pb-1">
@@ -247,36 +241,36 @@ export const SessionSummaryFeature: React.FC = () => {
               <div className="flex flex-col items-center text-center">
                 {secondPlace ? (
                   <>
-                    <span className="text-xl mb-1">🥈</span>
-                    <span className="text-xs font-bold text-slate-900 truncate w-full px-1">
+                    <span className="text-2xl mb-1">🥈</span>
+                    <span className="text-xs font-black text-slate-900 truncate w-full px-1">
                       {secondPlace.player.name}
                     </span>
-                    <span className="text-[11px] font-semibold text-slate-500">
+                    <span className="font-mono text-[11px] font-bold text-slate-500">
                       {secondPlace.diff > 0
                         ? `+${secondPlace.diff}`
                         : secondPlace.diff}
                     </span>
-                    <div className="w-full h-14 bg-slate-100 rounded-t-xl mt-2 flex items-center justify-center font-black text-slate-400 text-sm">
+                    <div className="w-full h-14 bg-gradient-to-t from-slate-200 to-slate-100 rounded-t-2xl mt-2 flex items-center justify-center font-mono font-black text-slate-500 text-sm border-t-2 border-slate-300">
                       2
                     </div>
                   </>
                 ) : (
-                  <div className="w-full h-14 bg-slate-50 rounded-t-xl mt-2" />
+                  <div className="w-full h-14 bg-chalk-100 rounded-t-2xl mt-2" />
                 )}
               </div>
 
               {/* 1st Place (Center - Elevated) */}
               <div className="flex flex-col items-center text-center">
-                <span className="text-2xl mb-1 animate-bounce">🥇</span>
-                <span className="text-xs font-extrabold text-slate-900 truncate w-full px-1">
+                <span className="text-3xl mb-1 animate-bounce">🥇</span>
+                <span className="text-xs font-black text-slate-900 truncate w-full px-1">
                   {firstPlace.player.name}
                 </span>
-                <span className="text-xs font-black text-emerald-600">
+                <span className="font-mono text-xs font-black text-court-700">
                   {firstPlace.diff > 0
                     ? `+${firstPlace.diff}`
                     : firstPlace.diff}
                 </span>
-                <div className="w-full h-20 bg-amber-400/20 border-t-2 border-amber-400 rounded-t-xl mt-2 flex items-center justify-center font-black text-amber-700 text-base shadow-xs">
+                <div className="w-full h-20 bg-gradient-to-t from-amber-300/40 via-amber-200/30 to-amber-100/30 border-t-2 border-amber-400 rounded-t-2xl mt-2 flex items-center justify-center font-mono font-black text-amber-800 text-base shadow-xs">
                   1
                 </div>
               </div>
@@ -285,21 +279,21 @@ export const SessionSummaryFeature: React.FC = () => {
               <div className="flex flex-col items-center text-center">
                 {thirdPlace ? (
                   <>
-                    <span className="text-xl mb-1">🥉</span>
-                    <span className="text-xs font-bold text-slate-900 truncate w-full px-1">
+                    <span className="text-2xl mb-1">🥉</span>
+                    <span className="text-xs font-black text-slate-900 truncate w-full px-1">
                       {thirdPlace.player.name}
                     </span>
-                    <span className="text-[11px] font-semibold text-slate-500">
+                    <span className="font-mono text-[11px] font-bold text-slate-500">
                       {thirdPlace.diff > 0
                         ? `+${thirdPlace.diff}`
                         : thirdPlace.diff}
                     </span>
-                    <div className="w-full h-10 bg-amber-100/50 rounded-t-xl mt-2 flex items-center justify-center font-black text-amber-800 text-sm">
+                    <div className="w-full h-10 bg-gradient-to-t from-amber-200/40 to-amber-100/20 rounded-t-2xl mt-2 flex items-center justify-center font-mono font-black text-amber-900 text-sm border-t-2 border-amber-300">
                       3
                     </div>
                   </>
                 ) : (
-                  <div className="w-full h-10 bg-slate-50 rounded-t-xl mt-2" />
+                  <div className="w-full h-10 bg-chalk-100 rounded-t-2xl mt-2" />
                 )}
               </div>
             </div>
@@ -309,46 +303,46 @@ export const SessionSummaryFeature: React.FC = () => {
         {/* Full Final Standings Table */}
         <div className="space-y-2">
           <div className="flex items-center justify-between px-1">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
               Complete Standings
             </span>
-            <span className="text-[10px] font-semibold text-slate-400">
-              {session.title || "Kickserve"}
+            <span className="text-[10px] font-bold text-court-700 bg-court-100/70 px-2 py-0.5 rounded-full">
+              Final Official Results
             </span>
           </div>
           <StandingsTable standings={standings} isFinal={true} />
         </div>
 
         {/* Collapsible Match History Breakdown */}
-        <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-2xs">
+        <div className="rounded-3xl border border-[#ded7c4] bg-white overflow-hidden shadow-2xs">
           <button
             type="button"
             onClick={() => setShowMatchHistory(!showMatchHistory)}
-            className="flex w-full items-center justify-between p-3.5 text-xs font-bold text-slate-900 hover:bg-slate-50 transition"
+            className="flex w-full items-center justify-between p-4 text-xs font-black text-slate-900 hover:bg-chalk-50 transition cursor-pointer"
           >
             <span>Match Scores Breakdown ({session.matches.length})</span>
-            <span className="text-slate-400">
+            <span className="text-court-700 font-bold">
               {showMatchHistory ? "▲" : "▼"}
             </span>
           </button>
 
           {showMatchHistory && (
-            <div className="divide-y divide-slate-100 p-2 pt-0 space-y-1">
+            <div className="divide-y divide-chalk-100 p-2.5 pt-0 space-y-1">
               {session.matches.map((m, idx) => (
                 <div
                   key={m.id}
-                  className="flex items-center justify-between py-2 px-2 text-xs"
+                  className="flex items-center justify-between py-2.5 px-2 text-xs"
                 >
-                  <span className="text-slate-400 font-bold w-6">
+                  <span className="font-mono text-slate-400 font-bold w-6">
                     #{idx + 1}
                   </span>
-                  <div className="flex-1 text-right font-semibold truncate text-slate-800 pr-2">
+                  <div className="flex-1 text-right font-extrabold truncate text-slate-800 pr-2.5">
                     {m.teamA.map((p) => p.name).join(" / ")}
                   </div>
-                  <div className="font-black bg-slate-100 px-2 py-0.5 rounded text-slate-900 text-[11px]">
+                  <div className="font-mono font-black bg-chalk-100 px-2.5 py-1 rounded-lg text-slate-900 text-[11px] border border-[#ded7c4]">
                     {m.scoreA || "0"} - {m.scoreB || "0"}
                   </div>
-                  <div className="flex-1 text-left font-semibold truncate text-slate-800 pl-2">
+                  <div className="flex-1 text-left font-extrabold truncate text-slate-800 pl-2.5">
                     {m.teamB.map((p) => p.name).join(" / ")}
                   </div>
                 </div>
@@ -363,15 +357,15 @@ export const SessionSummaryFeature: React.FC = () => {
         <button
           type="button"
           onClick={handleStartNewSession}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 py-3.5 text-xs font-bold text-white shadow-md active:scale-[0.98] transition hover:bg-emerald-700"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-court-850 hover:bg-court-900 py-4 text-xs font-black text-volt-300 shadow-lg shadow-court-900/20 active:scale-[0.98] transition cursor-pointer border border-court-700/50"
         >
           <span>Start New Session</span>
-          <span>🎾</span>
+          <span className="text-base">🎾</span>
         </button>
         <button
           type="button"
           onClick={handleBackToHome}
-          className="flex w-full items-center justify-center py-2.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition"
+          className="flex w-full items-center justify-center py-2.5 text-xs font-bold text-slate-500 hover:text-slate-900 transition cursor-pointer"
         >
           Back to Home
         </button>

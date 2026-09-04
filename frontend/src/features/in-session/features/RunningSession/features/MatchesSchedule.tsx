@@ -31,7 +31,7 @@ export const MatchesSchedule: React.FC<MatchesScheduleProps> = ({
   const { session, updateMatchScore, toggleMatchCompleted } = useSession();
 
   return (
-    <div className="pb-4">
+    <div className="pb-4 space-y-2.5">
       {session.matches.map((match, index) => {
         const isBeingDragged = draggedIndex === index;
         const showGapBefore =
@@ -63,25 +63,25 @@ export const MatchesSchedule: React.FC<MatchesScheduleProps> = ({
                 relativeY < rect.height / 2 ? index : index + 1;
               desktopDrag.handleDrop(e, targetGap);
             }}
-            className="relative cursor-default rounded-2xl"
+            className="relative cursor-default rounded-3xl"
           >
             {/* Gap Indicator (Top) */}
             {showGapBefore && (
-              <div className="my-1.5 flex items-center gap-1.5 px-2 pointer-events-none animate-pulse">
-                <span className="h-2 w-2 rounded-full bg-emerald-600 ring-2 ring-emerald-200"></span>
-                <div className="h-0.5 flex-1 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></div>
-                <span className="h-2 w-2 rounded-full bg-emerald-600 ring-2 ring-emerald-200"></span>
+              <div className="my-2 flex items-center gap-1.5 px-3 pointer-events-none animate-pulse">
+                <span className="h-2.5 w-2.5 rounded-full bg-volt-500 ring-2 ring-court-600 shadow-sm"></span>
+                <div className="h-1 flex-1 rounded-full bg-volt-400 shadow-sm"></div>
+                <span className="h-2.5 w-2.5 rounded-full bg-volt-500 ring-2 ring-court-600 shadow-sm"></span>
               </div>
             )}
 
             {/* Match Row Card */}
             <div
-              className={`flex items-center justify-between gap-2.5 p-3 my-1.5 rounded-2xl border transition-all ${
+              className={`flex items-center justify-between gap-3 p-3.5 rounded-3xl border transition-all ${
                 isBeingDragged ? "opacity-30 scale-[0.98]" : ""
               } ${
                 match.isCompleted
-                  ? "border-emerald-200 bg-emerald-50/30"
-                  : "border-slate-200 bg-white shadow-2xs"
+                  ? "border-court-500/30 bg-court-50/50 shadow-2xs"
+                  : "border-[#ded7c4] bg-white shadow-xs hover:border-court-500/40"
               }`}
             >
               {/* Match Number / Status Checkbox */}
@@ -92,24 +92,24 @@ export const MatchesSchedule: React.FC<MatchesScheduleProps> = ({
                   toggleMatchCompleted(match.id);
                 }}
                 title={
-                  match.isCompleted ? "Mark pending" : "Mark completed"
+                  match.isCompleted ? "Mark in progress" : "Mark completed"
                 }
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md self-start mt-0.5 text-xs font-bold transition cursor-pointer ${
+                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl self-start mt-0.5 text-xs font-black transition cursor-pointer active:scale-90 ${
                   match.isCompleted
-                    ? "bg-emerald-600 text-white"
-                    : "bg-slate-100 text-slate-400 hover:bg-slate-200"
+                    ? "bg-court-850 text-volt-300 shadow-sm"
+                    : "bg-chalk-100 text-slate-700 hover:bg-court-100 hover:text-court-850 border border-[#ded7c4]"
                 }`}
               >
                 {match.isCompleted ? "✓" : index + 1}
               </button>
 
               {/* Players & Scores Stack */}
-              <div className="flex-1 min-w-0 flex flex-col gap-2">
+              <div className="flex-1 min-w-0 flex flex-col gap-2.5">
                 {/* Team A */}
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center justify-between gap-2.5">
                   <span
-                    className={`text-xs font-bold truncate ${
-                      match.isCompleted ? "text-slate-500" : "text-slate-900"
+                    className={`text-xs font-extrabold truncate ${
+                      match.isCompleted ? "text-slate-600" : "text-slate-900"
                     }`}
                     title={match.teamA.map((p) => p.name).join(" & ")}
                   >
@@ -124,15 +124,15 @@ export const MatchesSchedule: React.FC<MatchesScheduleProps> = ({
                       updateMatchScore(match.id, e.target.value, match.scoreB)
                     }
                     placeholder="0"
-                    className="w-8 h-7 shrink-0 text-center text-xs font-black text-slate-900 bg-slate-100 rounded-lg focus:outline-none focus:bg-white focus:ring-1 focus:ring-emerald-500 transition"
+                    className="w-10 h-8 shrink-0 text-center font-mono text-sm font-black text-slate-900 bg-chalk-100 rounded-xl border border-[#ded7c4] focus:outline-none focus:bg-white focus:border-court-600 focus:ring-2 focus:ring-court-500/20 transition"
                   />
                 </div>
 
                 {/* Team B */}
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center justify-between gap-2.5">
                   <span
-                    className={`text-xs font-bold truncate ${
-                      match.isCompleted ? "text-slate-500" : "text-slate-900"
+                    className={`text-xs font-extrabold truncate ${
+                      match.isCompleted ? "text-slate-600" : "text-slate-900"
                     }`}
                     title={match.teamB.map((p) => p.name).join(" & ")}
                   >
@@ -147,21 +147,21 @@ export const MatchesSchedule: React.FC<MatchesScheduleProps> = ({
                       updateMatchScore(match.id, match.scoreA, e.target.value)
                     }
                     placeholder="0"
-                    className="w-8 h-7 shrink-0 text-center text-xs font-black text-slate-900 bg-slate-100 rounded-lg focus:outline-none focus:bg-white focus:ring-1 focus:ring-emerald-500 transition"
+                    className="w-10 h-8 shrink-0 text-center font-mono text-sm font-black text-slate-900 bg-chalk-100 rounded-xl border border-[#ded7c4] focus:outline-none focus:bg-white focus:border-court-600 focus:ring-2 focus:ring-court-500/20 transition"
                   />
                 </div>
               </div>
 
               {/* Vertical Divider and Actions */}
-              <div className="flex flex-col gap-1.5 items-center justify-center shrink-0 border-l border-slate-100 pl-2">
+              <div className="flex flex-col gap-2 items-center justify-center shrink-0 border-l border-chalk-200 pl-2.5">
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     onOpenEditModal(match);
                   }}
-                  title="Edit match"
-                  className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition cursor-pointer"
+                  title="Edit match lineup"
+                  className="p-1.5 text-slate-400 hover:text-court-800 hover:bg-court-100/60 rounded-xl transition cursor-pointer"
                 >
                   <svg
                     className="w-3.5 h-3.5"
@@ -181,7 +181,7 @@ export const MatchesSchedule: React.FC<MatchesScheduleProps> = ({
                   onTouchMove={mobileDrag.handleTouchMove}
                   onTouchEnd={mobileDrag.handleTouchEnd}
                   title="Drag to reorder match"
-                  className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-600 active:text-emerald-600 px-1 py-0.5 touch-none"
+                  className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-court-700 active:text-court-800 px-1 py-0.5 touch-none"
                 >
                   <svg
                     className="w-3.5 h-3.5"
@@ -196,10 +196,10 @@ export const MatchesSchedule: React.FC<MatchesScheduleProps> = ({
 
             {/* Gap Indicator (Bottom of last item) */}
             {showGapAfter && (
-              <div className="my-1.5 flex items-center gap-1.5 px-2 pointer-events-none animate-pulse">
-                <span className="h-2 w-2 rounded-full bg-emerald-600 ring-2 ring-emerald-200"></span>
-                <div className="h-0.5 flex-1 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></div>
-                <span className="h-2 w-2 rounded-full bg-emerald-600 ring-2 ring-emerald-200"></span>
+              <div className="my-2 flex items-center gap-1.5 px-3 pointer-events-none animate-pulse">
+                <span className="h-2.5 w-2.5 rounded-full bg-volt-500 ring-2 ring-court-600 shadow-sm"></span>
+                <div className="h-1 flex-1 rounded-full bg-volt-400 shadow-sm"></div>
+                <span className="h-2.5 w-2.5 rounded-full bg-volt-500 ring-2 ring-court-600 shadow-sm"></span>
               </div>
             )}
           </div>

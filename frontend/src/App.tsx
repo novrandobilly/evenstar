@@ -10,8 +10,9 @@ export function App() {
       <ScrollToTop />
       <ModalProvider>
         <SessionProvider>
-          <div className="min-h-dvh w-full bg-slate-100 flex justify-center text-slate-900 antialiased font-sans">
-            <div className="w-full max-w-md min-h-dvh bg-slate-50 sm:border-x sm:border-slate-200 sm:shadow-xl flex flex-col relative">
+          <div className="min-h-dvh w-full court-pattern court-lines-overlay flex justify-center text-slate-900 antialiased font-sans">
+            {/* Container with ONLY left & right side borders on desktop */}
+            <div className="w-full max-w-md min-h-dvh bg-[#fcfbf7] border-0 sm:border-x sm:border-[#ded7c4] shadow-2xl sm:shadow-[0_0_50px_rgba(0,0,0,0.4),0_0_30px_rgba(180,225,0,0.05)] flex flex-col relative selection:bg-volt-500 selection:text-court-950">
               <AppRoutes />
             </div>
           </div>

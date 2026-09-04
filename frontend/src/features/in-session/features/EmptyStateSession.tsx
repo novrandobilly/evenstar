@@ -6,18 +6,19 @@ export const EmptyStateSession: React.FC = () => {
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center p-6 text-center">
-      <div className="text-4xl mb-4">🎾</div>
-      <h2 className="text-lg font-bold text-slate-900">No Active Session</h2>
-      <p className="text-xs text-slate-500 mt-1 max-w-xs">
-        There is no session in progress. Create a new session to generate the
-        match schedule.
+      <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-court-100 text-3xl shadow-sm mb-4 border border-court-500/20">
+        🎾
+      </div>
+      <h2 className="text-lg font-black text-slate-900 tracking-tight">No Active Match Session</h2>
+      <p className="text-xs text-slate-500 mt-1 max-w-xs font-medium leading-relaxed">
+        There is no match schedule currently running. Set up your players to start matchmaking.
       </p>
       <button
         type="button"
         onClick={() => navigate("/create-session")}
-        className="mt-6 rounded-2xl bg-slate-900 px-6 py-3 text-xs font-bold text-white shadow-md cursor-pointer"
+        className="mt-6 rounded-2xl bg-court-850 hover:bg-court-900 px-6 py-3.5 text-xs font-black text-volt-300 shadow-lg shadow-court-900/15 active:scale-[0.98] transition cursor-pointer border border-court-700/50"
       >
-        Create Session
+        Create New Session →
       </button>
     </div>
   );
