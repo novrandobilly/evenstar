@@ -58,7 +58,7 @@ export const HomeFeature: React.FC = () => {
         <img
           src={logo}
           alt="Kickserve"
-          className="h-14 w-auto max-w-[260px] object-contain"
+          className="h-14 w-auto max-w-65 object-contain"
         />
         <div className="mt-3.5">
           <p className="text-sm text-slate-500 font-medium leading-relaxed">
