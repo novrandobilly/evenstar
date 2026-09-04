@@ -40,47 +40,86 @@ export const HomeFeature: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-1 flex-col justify-between px-5 py-7 max-w-md mx-auto w-full">
-      {/* Top Header Bar */}
-      <div className="flex items-center justify-between pt-1">
-        <button
-          type="button"
-          onClick={handleOpenPwaGuide}
-          className="inline-flex items-center gap-1.5 rounded-full border border-chalk-300 bg-white hover:bg-chalk-100 px-3.5 py-1.5 text-xs font-bold text-slate-700 shadow-xs active:scale-[0.98] transition cursor-pointer"
-        >
-          <span>📱</span>
-          <span>Use as App</span>
-        </button>
-      </div>
+    <div className="flex flex-1 flex-col w-full font-sans select-none">
+      {/* 🎾 HERO SECTION MATCHING SCREENSHOT */}
+      <div className="relative w-full min-h-[88vh] sm:min-h-160 flex flex-col justify-between p-6 overflow-hidden bg-slate-900">
+        {/* Background Image Asset */}
+        <div
+          className="absolute inset-0 bg-cover bg-position-[center_right_-20px] sm:bg-center"
+          style={{ backgroundImage: "url('/home-background.png')" }}
+        />
 
-      {/* Brand Hero Card */}
-      <div className="mt-6 rounded-3xl bg-linear-to-br from-court-900 via-court-850 to-court-950 p-6 text-white shadow-xl shadow-court-950/20 relative overflow-hidden border border-court-700/50">
-        {/* Decorative Court Geometry */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-radial from-volt-500/15 to-transparent rounded-full blur-xl pointer-events-none" />
-        <div className="absolute -bottom-6 -right-6 w-24 h-24 border border-white/10 rounded-full pointer-events-none" />
+        {/* High-Contrast Gradient Overlays for ultra clean text legibility */}
+        <div className="absolute inset-0 bg-linear-to-r from-black/80 via-black/45 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-linear-to-b from-black/40 via-transparent to-black/60 pointer-events-none" />
 
-        <div className="relative z-10">
-          <img
-            src={logo}
-            alt="Kickserve"
-            className="h-10 w-auto max-w-56 object-contain drop-shadow-sm brightness-105"
-          />
-          <div className="mt-3.5 space-y-0.5">
-            <p className="text-sm font-bold text-chalk-100 tracking-tight">
-              Minimalist Tennis Host Assistant
-            </p>
-            <p className="text-xs text-court-100/70 font-medium">
-              Fair rotations, live standings & match schedules.
-            </p>
+        {/* Content Container (z-10) */}
+        <div className="relative z-10 flex flex-col justify-between h-full flex-1">
+          {/* Top Brand Bar */}
+          <div className="pt-2 flex items-center gap-2">
+            <img
+              src={logo}
+              alt="Kickserve"
+              className="h-6.5 w-auto object-contain drop-shadow-sm brightness-110"
+            />
+            <div className="flex items-center gap-1.5 pl-1.5 border-l border-white/20">
+              <span className="text-[10px] font-semibold tracking-wider text-slate-300 uppercase">
+                BY
+              </span>
+              <span className="text-[10px] font-extrabold tracking-widest text-white uppercase">
+                ENVIENSTUDIO
+              </span>
+            </div>
+          </div>
+
+          {/* Hero Headline & Subtitle */}
+          <div className="my-auto pt-8 pb-4">
+            <h1 className="text-[54px] sm:text-[60px] font-black italic tracking-tighter leading-[0.92] text-left">
+              <span className="block text-white drop-shadow-md">Plan</span>
+              <span className="block text-white drop-shadow-md">Less,</span>
+              <span className="block text-volt-500 drop-shadow-md">Play</span>
+              <span className="block text-volt-500 drop-shadow-md">More.</span>
+            </h1>
+
+            <div className="mt-5 space-y-0.5 text-xs sm:text-sm font-medium leading-relaxed drop-shadow-sm text-left max-w-xs">
+              <p className="text-white/90">Kickserve handles</p>
+              <p className="text-white/90">the matchups, scores,</p>
+              <p className="text-white/90">and standings.</p>
+              <p className="text-volt-400 font-bold pt-0.5">
+                You just bring your game.
+              </p>
+            </div>
+          </div>
+
+          {/* Bottom Action CTAs in Hero */}
+          <div className="space-y-3 w-full max-w-70 sm:max-w-xs pb-2">
+            {/* Primary Action Button */}
+            <button
+              type="button"
+              onClick={() => navigate("/create-session")}
+              className="w-full flex items-center justify-between rounded-full bg-volt-500 hover:bg-volt-400 px-6 py-4 text-slate-950 font-black text-sm shadow-2xl shadow-black/40 active:scale-[0.98] transition cursor-pointer"
+            >
+              <span>Start a Session</span>
+              <span className="text-base font-black">→</span>
+            </button>
+
+            {/* PWA App Install Button */}
+            <button
+              type="button"
+              onClick={handleOpenPwaGuide}
+              className="w-full flex items-center justify-center rounded-full bg-white hover:bg-slate-100 px-6 py-3.5 text-slate-950 font-bold text-xs shadow-lg shadow-black/20 active:scale-[0.98] transition cursor-pointer"
+            >
+              <span>Use Kickserve as App</span>
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Center Actions Section */}
-      <div className="space-y-4 my-auto py-6">
-        {/* Active Session Card */}
+      {/* 🎾 SESSIONS SECTION UNDER THE HERO */}
+      <div className="px-5 py-6 bg-[#fcfbf7] space-y-5 border-t border-chalk-300">
+        {/* Active Session in Progress Card */}
         {hasActiveSession && (
-          <div className="rounded-3xl border-2 border-volt-500/60 bg-white p-4.5 shadow-md shadow-court-900/5 relative overflow-hidden transition-all hover:border-volt-500">
+          <div className="rounded-3xl border-2 border-volt-500/70 bg-white p-4.5 shadow-md shadow-court-900/5 relative overflow-hidden transition-all hover:border-volt-500">
             <div className="flex items-center justify-between mb-2">
               <div className="inline-flex items-center gap-2">
                 <span className="flex h-2.5 w-2.5 relative">
@@ -113,43 +152,19 @@ export const HomeFeature: React.FC = () => {
           </div>
         )}
 
-        {/* Primary CTA: Create Session */}
-        <button
-          type="button"
-          onClick={() => navigate("/create-session")}
-          className="group flex w-full items-center justify-between rounded-3xl bg-court-850 hover:bg-court-900 p-4 text-white shadow-xl shadow-court-900/15 active:scale-[0.98] transition-all cursor-pointer border border-court-700/40"
-        >
-          <div className="flex items-center gap-3.5">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-volt-500 text-court-950 text-xl font-bold shadow-sm group-hover:scale-105 transition">
-              🎾
-            </div>
-            <div className="text-left">
-              <span className="block text-sm font-black tracking-tight text-white">
-                Create New Session
-              </span>
-              <span className="block text-[11px] font-semibold text-court-100/70">
-                Setup players & format
-              </span>
-            </div>
-          </div>
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-volt-400 group-hover:translate-x-0.5 transition font-bold text-sm">
-            →
-          </div>
-        </button>
-
         {/* Past Sessions History */}
         {historyNewestFirst.length > 0 && (
-          <div className="pt-2">
-            <div className="flex items-center justify-between mb-2.5 px-1">
+          <div>
+            <div className="flex items-center justify-between mb-3 px-1">
               <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">
                 Recent Sessions
               </span>
-              <span className="text-[10px] font-bold text-court-700 bg-court-100/60 px-2 py-0.5 rounded-full">
+              <span className="text-[10px] font-bold text-court-700 bg-court-100/70 px-2.5 py-0.5 rounded-full border border-court-500/20">
                 {historyNewestFirst.length} Saved
               </span>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {historyNewestFirst.map((s) => (
                 <div
                   key={s.id}
@@ -185,7 +200,7 @@ export const HomeFeature: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => deleteHistorySession(s.id)}
-                    className="shrink-0 px-3.5 text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition text-sm border-l border-slate-100 cursor-pointer"
+                    className="shrink-0 px-3.5 text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition text-sm border-l border-chalk-100 cursor-pointer"
                     title="Delete session from history"
                     aria-label="Delete session from history"
                   >
@@ -196,13 +211,13 @@ export const HomeFeature: React.FC = () => {
             </div>
           </div>
         )}
-      </div>
 
-      {/* Footer minimal info */}
-      <div className="text-center pt-2">
-        <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
-          🎾 Kickserve · Powered by envienstudio.com
-        </span>
+        {/* Footer info */}
+        <div className="text-center pt-3 pb-2">
+          <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
+            🎾 Kickserve · by envienstudio.com
+          </span>
+        </div>
       </div>
     </div>
   );
