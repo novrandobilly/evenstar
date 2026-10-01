@@ -46,7 +46,7 @@ export const HomeFeature: React.FC = () => {
         {/* Background Image Asset */}
         <div
           className="absolute inset-0 bg-cover bg-position-[center_right_-20px] sm:bg-center"
-          style={{ backgroundImage: "url('/home-background.png')" }}
+          style={{ backgroundImage: "url('/home-background.webp')" }}
         />
 
         {/* High-Contrast Gradient Overlays for ultra clean text legibility */}
