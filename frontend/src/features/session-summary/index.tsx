@@ -117,8 +117,8 @@ export const SessionSummaryFeature: React.FC = () => {
     });
   };
 
-  const handleBackToHome = () => {
-    navigate("/");
+  const handleBackToDashboard = () => {
+    navigate("/account");
   };
 
   if (isLoading) {
@@ -140,10 +140,10 @@ export const SessionSummaryFeature: React.FC = () => {
         </p>
         <button
           type="button"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/account")}
           className="mt-6 rounded-2xl bg-court-850 hover:bg-court-900 px-6 py-3.5 text-xs font-black text-volt-300 shadow-md cursor-pointer"
         >
-          Back to Home
+          Back to Dashboard
         </button>
       </div>
     );
@@ -158,7 +158,7 @@ export const SessionSummaryFeature: React.FC = () => {
             🏆
           </div>
           <h1 className="text-2xl font-black tracking-tight text-slate-900">
-            Tournament Complete!
+            Session Complete!
           </h1>
           <p className="text-xs font-bold text-court-700 mt-0.5">
             {session.title || "Tennis Session"} · {formatLabel}
@@ -382,10 +382,10 @@ export const SessionSummaryFeature: React.FC = () => {
         </button>
         <button
           type="button"
-          onClick={handleBackToHome}
+          onClick={handleBackToDashboard}
           className="flex w-full items-center justify-center py-2.5 text-xs font-bold text-slate-500 hover:text-slate-900 transition cursor-pointer"
         >
-          Back to Home
+          Back to Dashboard
         </button>
       </div>
     </div>

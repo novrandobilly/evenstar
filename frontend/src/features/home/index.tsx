@@ -1,28 +1,19 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { useSession } from "../../context/SessionContext";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { useModal } from "../../context/modal";
-import { useTProfile } from "../../api/auth/useTProfile";
-import { useTGetSessions } from "../../api/sessions/useTGetSessions";
-import { useTDeleteSession } from "../../api/sessions/useTDeleteSession";
+import { useTGoogleLogin } from "../../api/auth/useTGoogleLogin";
+import { useTLogin } from "../../api/auth/useTLogin";
 import PWAGuide from "../../components/PWAGuide";
 import logo from "../../assets/logo.svg";
 
 export const HomeFeature: React.FC = () => {
-  const navigate = useNavigate();
-  const { session, hasActiveSession } = useSession();
   const { showModal, hideModal } = useModal();
-  const { data: profile } = useTProfile();
-  const { data: sessions, isLoading: isLoadingSessions } = useTGetSessions();
-  const deleteSessionMutation = useTDeleteSession();
+  const googleLoginMutation = useTGoogleLogin();
+  const loginMutation = useTLogin();
 
-  const handleResume = () => {
-    if (session.matches.length > 0) {
-      navigate("/in-session");
-    } else {
-      navigate("/create-session");
-    }
-  };
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [identity, setIdentity] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleOpenPwaGuide = () => {
     showModal({
@@ -32,256 +23,211 @@ export const HomeFeature: React.FC = () => {
     });
   };
 
-  const handleDeleteHistory = (sessionId: string, sessionTitle: string) => {
-    showModal({
-      title: "Delete Tournament Record?",
-      description: `Are you sure you want to permanently delete "${sessionTitle || "Tennis Session"}" from your history?`,
-      confirmText: "Delete",
-      cancelText: "Cancel",
-      type: "danger",
-      onConfirm: () => {
-        deleteSessionMutation.mutate(sessionId);
-      },
-    });
+  const handleGoogleSignIn = () => {
+    googleLoginMutation.mutate();
   };
 
-  const formatDate = (iso: string) => {
-    const d = new Date(iso);
-    return d.toLocaleDateString(undefined, {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+  const handleEmailSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!identity.trim() || !password) return;
+    loginMutation.mutate({ identity: identity.trim(), password });
   };
-
-  const savedSessions = sessions || [];
 
   return (
     <div className="flex flex-1 flex-col w-full font-sans select-none">
-      {/* 🎾 HERO SECTION */}
-      <div className="relative w-full min-h-[88vh] sm:min-h-160 flex flex-col justify-between p-6 overflow-hidden bg-slate-900">
-        {/* Background Image Asset */}
+      {/* 🎾 HERO SECTION / LOGIN PAGE */}
+      <div className="relative w-full min-h-[100dvh] flex flex-col justify-between p-6 sm:p-8 overflow-hidden bg-slate-900">
+        {/* Background Image Asset - Fixed to .webp */}
         <div
           className="absolute inset-0 bg-cover bg-position-[center_right_-20px] sm:bg-center"
-          style={{ backgroundImage: "url('/home-background.png')" }}
+          style={{ backgroundImage: "url('/home-background.webp')" }}
         />
 
         {/* High-Contrast Gradient Overlays */}
-        <div className="absolute inset-0 bg-linear-to-r from-black/80 via-black/45 to-transparent pointer-events-none" />
-        <div className="absolute inset-0 bg-linear-to-b from-black/40 via-transparent to-black/60 pointer-events-none" />
+        <div className="absolute inset-0 bg-linear-to-r from-black/90 via-black/60 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-linear-to-b from-black/50 via-transparent to-black/80 pointer-events-none" />
 
-        {/* Content Container (z-10) */}
-        <div className="relative z-10 flex flex-col justify-between h-full flex-1">
-          {/* Top Brand & Host Profile Bar */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-end gap-2">
-              <img
-                src={logo}
-                alt="Kickserve"
-                className="h-5 w-auto object-contain drop-shadow-sm brightness-110"
-              />
-              <div className="flex items-end gap-1.5 pl-1.5 border-l border-white/20">
-                <span className="text-[10px] font-normal tracking-wider text-slate-300 uppercase leading-none">
-                  BY
-                </span>
-                <span className="text-[10px] font-normal tracking-widest text-white uppercase leading-none">
-                  <span className="font-black">ENVIEN</span>
-                  STUDIO
-                </span>
-              </div>
-            </div>
-
-            {/* Host Profile Chip */}
-            <button
-              type="button"
-              onClick={() => navigate("/account")}
-              className="flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md px-2.5 py-1.5 rounded-full border border-white/15 transition cursor-pointer active:scale-95"
-            >
-              <div className="h-5 w-5 rounded-full bg-volt-500 text-slate-950 font-black text-[10px] flex items-center justify-center">
-                {profile?.name ? profile.name.charAt(0).toUpperCase() : "H"}
-              </div>
-              <span className="text-white text-xs font-bold truncate max-w-28">
-                {profile?.name || "Host"}
+        {/* Top Brand Bar */}
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex items-end gap-2">
+            <img
+              src={logo}
+              alt="Kickserve"
+              className="h-5 w-auto object-contain drop-shadow-sm brightness-110"
+            />
+            <div className="flex items-end gap-1.5 pl-1.5 border-l border-white/20">
+              <span className="text-[10px] font-normal tracking-wider text-slate-300 uppercase leading-none">
+                BY
               </span>
-            </button>
-          </div>
-
-          {/* Hero Headline & Subtitle */}
-          <div className="my-auto pt-8 pb-4">
-            <h1 className="text-[54px] sm:text-[60px] font-black italic tracking-tighter leading-[0.92] text-left">
-              <span className="block text-white drop-shadow-md -rotate-5">
-                Plan
-              </span>
-              <span className="block text-white drop-shadow-md -rotate-5 pl-1.5">
-                Less,
-              </span>
-              <span className="block text-volt-500 drop-shadow-md -rotate-5 pl-3">
-                Play
-              </span>
-              <span className="block text-volt-500 drop-shadow-md -rotate-5 pl-4.5">
-                More.
-              </span>
-            </h1>
-
-            <div className="flex flex-col gap-1 leading-none mt-10 space-y-0.5 text-xs sm:text-sm font-medium drop-shadow-sm text-left max-w-xs">
-              <span className="text-white/90">Kickserve handles</span>
-              <span className="text-white/90">the matchups, scores,</span>
-              <span className="text-white/90">and standings.</span>
-              <span className="text-volt-400 font-extrabold mt-2">
-                You just bring your game.
+              <span className="text-[10px] font-normal tracking-widest text-white uppercase leading-none">
+                <span className="font-black">ENVIEN</span>
+                STUDIO
               </span>
             </div>
           </div>
 
-          {/* Bottom Action CTAs in Hero */}
-          <div className="space-y-3 w-full max-w-70 sm:max-w-xs pb-2">
-            {/* Primary Action Button */}
-            <button
-              type="button"
-              onClick={() => navigate("/create-session")}
-              className="w-fit flex items-center gap-4 justify-start rounded-full bg-volt-500 hover:bg-volt-400 px-4 py-2 text-slate-950 font-black text-sm shadow-2xl shadow-black/40 active:scale-[0.98] transition cursor-pointer"
+          <button
+            type="button"
+            onClick={handleOpenPwaGuide}
+            className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-300 hover:text-white bg-white/10 hover:bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 transition cursor-pointer active:scale-95 shadow-sm"
+          >
+            <svg
+              className="w-3.5 h-3.5 text-slate-300"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
             >
-              <span>Start a Session</span>
-              <span className="text-base font-black">→</span>
-            </button>
-
-            {/* PWA App Install Button */}
-            <button
-              type="button"
-              onClick={handleOpenPwaGuide}
-              className="w-fit flex items-center gap-2 justify-start rounded-full bg-white hover:bg-slate-100 px-4 py-2 text-slate-950 font-bold text-xs shadow-lg shadow-black/20 active:scale-[0.98] transition cursor-pointer"
-            >
-              <svg
-                className="w-3.5 h-3.5 text-slate-800 shrink-0"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="5" y="2" width="14" height="20" rx="3" ry="3" />
-                <line x1="12" y1="18" x2="12.01" y2="18" />
-              </svg>
-              <span>Use as App</span>
-            </button>
-          </div>
+              <rect x="5" y="2" width="14" height="20" rx="3" ry="3" />
+              <line x1="12" y1="18" x2="12.01" y2="18" />
+            </svg>
+            <span>Install App</span>
+          </button>
         </div>
-      </div>
 
-      {/* 🎾 SESSIONS SECTION UNDER THE HERO */}
-      <div className="px-5 py-6 bg-[#fcfbf7] space-y-5 border-t border-chalk-300">
-        {/* Active Session in Progress Card */}
-        {hasActiveSession && (
-          <div className="rounded-3xl border-2 border-volt-500/70 bg-white p-4.5 shadow-md shadow-court-900/5 relative overflow-hidden transition-all hover:border-volt-500">
-            <div className="flex items-center justify-between mb-2">
-              <div className="inline-flex items-center gap-2">
-                <span className="flex h-2.5 w-2.5 relative">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-volt-500 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-court-600" />
-                </span>
-                <span className="text-[11px] font-black uppercase tracking-wider text-court-700">
-                  {session.matches.length > 0
-                    ? "Session in Play"
-                    : "Active Draft"}
-                </span>
-              </div>
-              <span className="px-2 py-0.5 rounded-full bg-chalk-100 text-[10px] font-extrabold text-slate-600 border border-chalk-200">
-                {session.players.length} Players
-              </span>
-            </div>
-
-            <div className="text-base font-extrabold text-slate-900 truncate mb-3">
-              {session.title || "Tennis Session"}
-            </div>
-
-            <button
-              type="button"
-              onClick={handleResume}
-              className="w-full rounded-2xl bg-court-850 hover:bg-court-900 py-3.5 text-xs font-black text-volt-300 active:scale-[0.99] transition shadow-sm flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <span>Resume Session</span>
-              <span>→</span>
-            </button>
-          </div>
-        )}
-
-        {/* Cloud Saved Sessions History from PocketBase */}
-        <div>
-          <div className="flex items-center justify-between mb-3 px-1">
-            <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">
-              Host Match History
+        {/* Hero Middle Content: Headline, Subtitle, and Sign-In Actions */}
+        <div className="relative z-10 my-auto pt-6 pb-6 max-w-sm">
+          <h1 className="text-[50px] sm:text-[56px] font-black italic tracking-tighter leading-[0.92] text-left">
+            <span className="block text-white drop-shadow-md -rotate-5">
+              Plan
             </span>
-            <span className="text-[10px] font-bold text-court-700 bg-court-100/70 px-2.5 py-0.5 rounded-full border border-court-500/20">
-              {savedSessions.length} Tournaments
+            <span className="block text-white drop-shadow-md -rotate-5 pl-1.5">
+              Less,
+            </span>
+            <span className="block text-volt-500 drop-shadow-md -rotate-5 pl-3">
+              Play
+            </span>
+            <span className="block text-volt-500 drop-shadow-md -rotate-5 pl-4.5">
+              More.
+            </span>
+          </h1>
+
+          <div className="flex flex-col gap-1 leading-none mt-8 space-y-0.5 text-xs sm:text-sm font-medium drop-shadow-sm text-left">
+            <span className="text-white/90">Kickserve handles</span>
+            <span className="text-white/90">the matchups, scores,</span>
+            <span className="text-white/90">and standings.</span>
+            <span className="text-volt-400 font-extrabold mt-2 text-sm sm:text-base">
+              You just bring your game.
             </span>
           </div>
 
-          {isLoadingSessions ? (
-            <div className="p-4 text-center text-xs font-bold text-slate-400 animate-pulse bg-white rounded-2xl border border-chalk-200">
-              Loading tournaments from cloud...
-            </div>
-          ) : savedSessions.length === 0 ? (
-            <div className="p-6 text-center bg-white rounded-2xl border border-[#ded7c4] shadow-2xs">
-              <span className="text-2xl block mb-1">🎾</span>
-              <p className="text-xs font-bold text-slate-700">No completed sessions yet</p>
-              <p className="text-[11px] text-slate-400 mt-0.5">
-                Complete a session to archive it to your cloud history.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2.5">
-              {savedSessions.map((s) => (
-                <div
-                  key={s.id}
-                  className="rounded-2xl border border-chalk-300 bg-white shadow-2xs flex items-stretch overflow-hidden hover:border-court-500/40 transition group"
+          {/* 🎾 SIGN IN ACTIONS PLACED RIGHT UNDER "YOU JUST BRING YOUR GAME" */}
+          <div className="mt-6 space-y-3">
+            {!showEmailForm ? (
+              <>
+                {/* 1. Google Sign-In */}
+                <button
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                  disabled={googleLoginMutation.isPending}
+                  className="w-full flex items-center justify-center gap-3 rounded-full bg-white hover:bg-slate-100 px-4 py-3.5 text-slate-900 font-extrabold text-xs shadow-xl active:scale-[0.98] transition cursor-pointer disabled:opacity-60"
                 >
-                  {/* Tappable card area */}
-                  <button
-                    type="button"
-                    onClick={() => navigate(`/history/${s.id}`)}
-                    className="flex-1 text-left p-3.5 hover:bg-chalk-50 transition active:scale-[0.99] cursor-pointer"
-                  >
-                    <div className="text-xs font-black text-slate-900 truncate">
-                      {s.title || "Tennis Session"}
-                    </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-[10px] font-bold text-court-700 bg-court-50 px-1.5 py-0.5 rounded">
-                        {s.players.length} players
-                      </span>
-                      <span className="text-[10px] text-slate-300">·</span>
-                      <span className="text-[10px] font-semibold text-slate-400">
-                        {s.completedAt
-                          ? formatDate(s.completedAt)
-                          : formatDate(s.createdAt)}
-                      </span>
-                      <span className="text-[10px] text-slate-300">·</span>
-                      <span className="text-[10px] font-bold text-court-600 group-hover:text-court-800 transition">
-                        View →
-                      </span>
-                    </div>
-                  </button>
+                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                    <path
+                      fill="#4285F4"
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                    />
+                  </svg>
+                  <span>
+                    {googleLoginMutation.isPending
+                      ? "Connecting..."
+                      : "Continue with Google"}
+                  </span>
+                </button>
 
-                  {/* Delete button */}
+                {/* 2. Sign In with Email Toggle */}
+                <button
+                  type="button"
+                  onClick={() => setShowEmailForm(true)}
+                  className="w-full flex items-center justify-center gap-2 rounded-full bg-volt-500 hover:bg-volt-400 px-4 py-3.5 text-slate-950 font-black text-xs shadow-xl active:scale-[0.98] transition cursor-pointer"
+                >
+                  <span>Sign In with Email</span>
+                  <span className="text-sm">→</span>
+                </button>
+              </>
+            ) : (
+              /* Inline Email Form */
+              <form
+                onSubmit={handleEmailSubmit}
+                className="space-y-2.5 bg-black/60 backdrop-blur-md p-4 rounded-2xl border border-white/20 shadow-2xl"
+              >
+                <div className="flex items-center justify-between pb-1">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-300">
+                    Host Sign In
+                  </span>
                   <button
                     type="button"
-                    onClick={() => handleDeleteHistory(s.id, s.title)}
-                    className="shrink-0 px-3.5 text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition text-sm border-l border-chalk-100 cursor-pointer"
-                    title="Delete tournament record"
-                    aria-label="Delete tournament record"
+                    onClick={() => setShowEmailForm(false)}
+                    className="text-[11px] font-bold text-slate-400 hover:text-white cursor-pointer"
                   >
-                    ✕
+                    ← Options
                   </button>
                 </div>
-              ))}
+
+                <input
+                  type="text"
+                  required
+                  autoFocus
+                  value={identity}
+                  onChange={(e) => setIdentity(e.target.value)}
+                  placeholder="Email or Username"
+                  className="w-full rounded-xl bg-slate-900/90 border border-white/20 px-3.5 py-2.5 text-xs font-bold text-white placeholder:text-slate-500 focus:outline-none focus:border-volt-400 transition"
+                />
+
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password"
+                  className="w-full rounded-xl bg-slate-900/90 border border-white/20 px-3.5 py-2.5 text-xs font-bold text-white placeholder:text-slate-500 focus:outline-none focus:border-volt-400 transition"
+                />
+
+                <button
+                  type="submit"
+                  disabled={loginMutation.isPending || !identity.trim() || !password}
+                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-volt-500 hover:bg-volt-400 px-4 py-3 text-slate-950 font-black text-xs shadow-lg active:scale-[0.98] transition cursor-pointer disabled:opacity-60"
+                >
+                  {loginMutation.isPending ? (
+                    <span>Signing In...</span>
+                  ) : (
+                    <>
+                      <span>Sign In with Password</span>
+                      <span>→</span>
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
+
+            {/* Account registration link */}
+            <div className="flex items-center justify-between pt-1 px-1">
+              <Link
+                to="/register"
+                className="text-[11px] font-bold text-slate-300 hover:text-white underline underline-offset-2"
+              >
+                Don't have an account? Sign up
+              </Link>
             </div>
-          )}
+          </div>
         </div>
 
-        {/* Footer info */}
-        <div className="text-center pt-3 pb-2">
+        {/* Bottom Footer Attribution */}
+        <div className="relative z-10 text-left pt-2 pb-1">
           <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
-            🎾 Kickserve · by envienstudio.com
+            🎾 Kickserve · Session Assistant
           </span>
         </div>
       </div>

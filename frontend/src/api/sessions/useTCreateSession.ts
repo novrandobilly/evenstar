@@ -28,13 +28,13 @@ export const useTCreateSession = () => {
       return record;
     },
     onSuccess: () => {
-      showToast({ message: "Tournament saved to your host history!" });
+      showToast({ message: "Session saved to your host history!" });
       queryClient.invalidateQueries({ queryKey: ["sessions"] });
     },
     onError: (error: unknown) => {
       console.error("Failed to save session to PocketBase:", error);
       const err = error as { response?: { message?: string }; message?: string };
-      const msg = err?.response?.message || err?.message || "Could not save tournament history.";
+      const msg = err?.response?.message || err?.message || "Could not save session history.";
       showGeneralErrorToast(msg);
     },
   });

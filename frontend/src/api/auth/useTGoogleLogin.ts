@@ -2,30 +2,33 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { pb } from "../../lib/pocketbase";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
-import type { LoginPayload, HostUser } from "../../types/auth";
+import type { HostUser } from "../../types/auth";
 
-export const useTLogin = () => {
+export const useTGoogleLogin = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { showToast, showGeneralErrorToast } = useToast();
 
   return useMutation({
-    mutationKey: ["auth"],
-    mutationFn: async ({ identity, password }: LoginPayload) => {
-      const response = await pb
+    mutationKey: ["auth-google"],
+    mutationFn: async () => {
+      const authData = await pb
         .collection("users")
-        .authWithPassword<HostUser>(identity, password);
-      return response;
+        .authWithOAuth2<HostUser>({ provider: "google" });
+      return authData;
     },
     onSuccess: (data) => {
-      showToast({ message: `Welcome back, ${data.record.name || "Host"}!` });
+      showToast({ message: `Signed in as ${data.record.name || "Host"}!` });
       queryClient.invalidateQueries({ queryKey: ["auth"] });
       queryClient.invalidateQueries({ queryKey: ["sessions"] });
       navigate("/account");
     },
     onError: (error: unknown) => {
       const err = error as { response?: { message?: string }; message?: string };
-      const msg = err?.response?.message || err?.message || "Invalid email or password.";
+      const msg =
+        err?.response?.message ||
+        err?.message ||
+        "Google Sign-In was cancelled or not configured in PocketBase.";
       showGeneralErrorToast(msg);
     },
   });

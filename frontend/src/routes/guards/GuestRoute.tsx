@@ -6,7 +6,7 @@ export const GuestRoute: React.FC = () => {
   const isAuthenticated = pb.authStore.isValid;
 
   if (isAuthenticated) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/account" replace />;
   }
 
   return <Outlet />;

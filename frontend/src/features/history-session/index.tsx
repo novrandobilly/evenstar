@@ -102,7 +102,7 @@ export const HistorySessionFeature: React.FC = () => {
     return (
       <div className="flex flex-1 flex-col items-center justify-center p-6 text-center">
         <div className="text-2xl animate-spin mb-2">🎾</div>
-        <p className="text-xs font-bold text-slate-400">Loading tournament details...</p>
+        <p className="text-xs font-bold text-slate-400">Loading session details...</p>
       </div>
     );
   }
@@ -133,14 +133,14 @@ export const HistorySessionFeature: React.FC = () => {
         <div className="flex items-center justify-between mb-1">
           <button
             type="button"
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/account")}
             className="inline-flex items-center gap-1 text-xs font-bold text-slate-500 hover:text-court-900 transition cursor-pointer px-2 py-1 -ml-2 rounded-lg hover:bg-chalk-100"
           >
             <span>←</span>
-            <span>Home</span>
+            <span>Dashboard</span>
           </button>
           <span className="text-[10px] font-black tracking-widest uppercase text-court-700 bg-court-100/70 px-2.5 py-1 rounded-full border border-court-500/20">
-            Tournament Archive
+            Session Archive
           </span>
         </div>
 
@@ -368,10 +368,10 @@ export const HistorySessionFeature: React.FC = () => {
       <div className="pt-6 pb-2">
         <button
           type="button"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/account")}
           className="flex w-full items-center justify-center py-3 text-xs font-bold text-slate-500 hover:text-slate-900 transition cursor-pointer"
         >
-          Back to Home
+          Back to Dashboard
         </button>
       </div>
     </div>

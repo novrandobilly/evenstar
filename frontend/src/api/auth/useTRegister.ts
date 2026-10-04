@@ -32,7 +32,7 @@ export const useTRegister = () => {
       showToast({ message: `Account created! Welcome, ${data.record.name || "Host"}!` });
       queryClient.invalidateQueries({ queryKey: ["auth"] });
       queryClient.invalidateQueries({ queryKey: ["sessions"] });
-      navigate("/");
+      navigate("/account");
     },
     onError: (error: unknown) => {
       const err = error as {
