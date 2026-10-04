@@ -2,14 +2,19 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useSession } from "../../context/SessionContext";
 import { useModal } from "../../context/modal";
+import { useTProfile } from "../../api/auth/useTProfile";
+import { useTGetSessions } from "../../api/sessions/useTGetSessions";
+import { useTDeleteSession } from "../../api/sessions/useTDeleteSession";
 import PWAGuide from "../../components/PWAGuide";
 import logo from "../../assets/logo.svg";
 
 export const HomeFeature: React.FC = () => {
   const navigate = useNavigate();
-  const { session, hasActiveSession, sessionHistory, deleteHistorySession } =
-    useSession();
+  const { session, hasActiveSession } = useSession();
   const { showModal, hideModal } = useModal();
+  const { data: profile } = useTProfile();
+  const { data: sessions, isLoading: isLoadingSessions } = useTGetSessions();
+  const deleteSessionMutation = useTDeleteSession();
 
   const handleResume = () => {
     if (session.matches.length > 0) {
@@ -27,8 +32,18 @@ export const HomeFeature: React.FC = () => {
     });
   };
 
-  // Show newest first
-  const historyNewestFirst = [...sessionHistory].reverse();
+  const handleDeleteHistory = (sessionId: string, sessionTitle: string) => {
+    showModal({
+      title: "Delete Tournament Record?",
+      description: `Are you sure you want to permanently delete "${sessionTitle || "Tennis Session"}" from your history?`,
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      type: "danger",
+      onConfirm: () => {
+        deleteSessionMutation.mutate(sessionId);
+      },
+    });
+  };
 
   const formatDate = (iso: string) => {
     const d = new Date(iso);
@@ -39,38 +54,56 @@ export const HomeFeature: React.FC = () => {
     });
   };
 
+  const savedSessions = sessions || [];
+
   return (
     <div className="flex flex-1 flex-col w-full font-sans select-none">
-      {/* 🎾 HERO SECTION MATCHING SCREENSHOT */}
+      {/* 🎾 HERO SECTION */}
       <div className="relative w-full min-h-[88vh] sm:min-h-160 flex flex-col justify-between p-6 overflow-hidden bg-slate-900">
         {/* Background Image Asset */}
         <div
           className="absolute inset-0 bg-cover bg-position-[center_right_-20px] sm:bg-center"
-          style={{ backgroundImage: "url('/home-background.webp')" }}
+          style={{ backgroundImage: "url('/home-background.png')" }}
         />
 
-        {/* High-Contrast Gradient Overlays for ultra clean text legibility */}
+        {/* High-Contrast Gradient Overlays */}
         <div className="absolute inset-0 bg-linear-to-r from-black/80 via-black/45 to-transparent pointer-events-none" />
         <div className="absolute inset-0 bg-linear-to-b from-black/40 via-transparent to-black/60 pointer-events-none" />
 
         {/* Content Container (z-10) */}
         <div className="relative z-10 flex flex-col justify-between h-full flex-1">
-          {/* Top Brand Bar */}
-          <div className="flex items-end gap-2">
-            <img
-              src={logo}
-              alt="Kickserve"
-              className="h-5 w-auto object-contain drop-shadow-sm brightness-110"
-            />
-            <div className="flex items-end gap-1.5 pl-1.5 border-l border-white/20">
-              <span className="text-[10px] font-normal tracking-wider text-slate-300 uppercase leading-none">
-                BY
-              </span>
-              <span className="text-[10px] font-normal tracking-widest text-white uppercase leading-none">
-                <span className="font-black">ENVIEN</span>
-                STUDIO
-              </span>
+          {/* Top Brand & Host Profile Bar */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-end gap-2">
+              <img
+                src={logo}
+                alt="Kickserve"
+                className="h-5 w-auto object-contain drop-shadow-sm brightness-110"
+              />
+              <div className="flex items-end gap-1.5 pl-1.5 border-l border-white/20">
+                <span className="text-[10px] font-normal tracking-wider text-slate-300 uppercase leading-none">
+                  BY
+                </span>
+                <span className="text-[10px] font-normal tracking-widest text-white uppercase leading-none">
+                  <span className="font-black">ENVIEN</span>
+                  STUDIO
+                </span>
+              </div>
             </div>
+
+            {/* Host Profile Chip */}
+            <button
+              type="button"
+              onClick={() => navigate("/account")}
+              className="flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md px-2.5 py-1.5 rounded-full border border-white/15 transition cursor-pointer active:scale-95"
+            >
+              <div className="h-5 w-5 rounded-full bg-volt-500 text-slate-950 font-black text-[10px] flex items-center justify-center">
+                {profile?.name ? profile.name.charAt(0).toUpperCase() : "H"}
+              </div>
+              <span className="text-white text-xs font-bold truncate max-w-28">
+                {profile?.name || "Host"}
+              </span>
+            </button>
           </div>
 
           {/* Hero Headline & Subtitle */}
@@ -173,20 +206,32 @@ export const HomeFeature: React.FC = () => {
           </div>
         )}
 
-        {/* Past Sessions History */}
-        {historyNewestFirst.length > 0 && (
-          <div>
-            <div className="flex items-center justify-between mb-3 px-1">
-              <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">
-                Recent Sessions
-              </span>
-              <span className="text-[10px] font-bold text-court-700 bg-court-100/70 px-2.5 py-0.5 rounded-full border border-court-500/20">
-                {historyNewestFirst.length} Saved
-              </span>
-            </div>
+        {/* Cloud Saved Sessions History from PocketBase */}
+        <div>
+          <div className="flex items-center justify-between mb-3 px-1">
+            <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">
+              Host Match History
+            </span>
+            <span className="text-[10px] font-bold text-court-700 bg-court-100/70 px-2.5 py-0.5 rounded-full border border-court-500/20">
+              {savedSessions.length} Tournaments
+            </span>
+          </div>
 
+          {isLoadingSessions ? (
+            <div className="p-4 text-center text-xs font-bold text-slate-400 animate-pulse bg-white rounded-2xl border border-chalk-200">
+              Loading tournaments from cloud...
+            </div>
+          ) : savedSessions.length === 0 ? (
+            <div className="p-6 text-center bg-white rounded-2xl border border-[#ded7c4] shadow-2xs">
+              <span className="text-2xl block mb-1">🎾</span>
+              <p className="text-xs font-bold text-slate-700">No completed sessions yet</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                Complete a session to archive it to your cloud history.
+              </p>
+            </div>
+          ) : (
             <div className="space-y-2.5">
-              {historyNewestFirst.map((s) => (
+              {savedSessions.map((s) => (
                 <div
                   key={s.id}
                   className="rounded-2xl border border-chalk-300 bg-white shadow-2xs flex items-stretch overflow-hidden hover:border-court-500/40 transition group"
@@ -220,18 +265,18 @@ export const HomeFeature: React.FC = () => {
                   {/* Delete button */}
                   <button
                     type="button"
-                    onClick={() => deleteHistorySession(s.id)}
+                    onClick={() => handleDeleteHistory(s.id, s.title)}
                     className="shrink-0 px-3.5 text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition text-sm border-l border-chalk-100 cursor-pointer"
-                    title="Delete session from history"
-                    aria-label="Delete session from history"
+                    title="Delete tournament record"
+                    aria-label="Delete tournament record"
                   >
                     ✕
                   </button>
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Footer info */}
         <div className="text-center pt-3 pb-2">

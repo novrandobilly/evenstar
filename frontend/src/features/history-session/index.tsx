@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useSession } from "../../context/SessionContext";
+import { useTGetSession } from "../../api/sessions/useTGetSession";
 import { calculateStandings } from "../../utils/standings";
 import { StandingsTable } from "../in-session/features/RunningSession/features/StandingsTable";
 import { generateShareText } from "../session-summary/shareText";
@@ -9,12 +9,10 @@ import { shareStandingsAsImage } from "../../utils/shareImage";
 export const HistorySessionFeature: React.FC = () => {
   const navigate = useNavigate();
   const { sessionId } = useParams<{ sessionId: string }>();
-  const { sessionHistory } = useSession();
+  const { data: session, isLoading } = useTGetSession(sessionId);
   const [showMatchHistory, setShowMatchHistory] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
   const [isSharing, setIsSharing] = useState(false);
-
-  const session = sessionHistory.find((s) => s.id === sessionId);
 
   const standings = session
     ? calculateStandings(session.players, session.matches)
@@ -40,7 +38,7 @@ export const HistorySessionFeature: React.FC = () => {
         await navigator.clipboard.writeText(text);
         return true;
       } catch {
-        // continue to fallback
+        // fallback
       }
     }
     try {
@@ -99,6 +97,15 @@ export const HistorySessionFeature: React.FC = () => {
       setTimeout(() => setNotification(null), 2500);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center p-6 text-center">
+        <div className="text-2xl animate-spin mb-2">🎾</div>
+        <p className="text-xs font-bold text-slate-400">Loading tournament details...</p>
+      </div>
+    );
+  }
 
   if (!session) {
     return (

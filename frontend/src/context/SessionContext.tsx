@@ -15,13 +15,12 @@ import {
 } from '../types/session';
 import { generateAllMatches } from '../utils/matchmaker';
 
+import { useTCreateSession } from '../api/sessions/useTCreateSession';
+
 const ACTIVE_STORAGE_KEY = 'evenstar_tennis_session_config';
-const HISTORY_STORAGE_KEY = 'evenstar_session_history';
-const MAX_HISTORY = 3;
 
 interface SessionContextType {
   session: SessionConfig;
-  sessionHistory: SessionConfig[];
   setSessionTitle: (title: string) => void;
   setMatchFormat: (format: MatchFormat) => void;
   setDoublesMode: (mode: DoublesGameMode) => void;
@@ -33,15 +32,15 @@ interface SessionContextType {
   updateMatchScore: (matchId: string, scoreA: string, scoreB: string) => void;
   toggleMatchCompleted: (matchId: string) => void;
   reorderMatches: (fromIndex: number, toIndex: number) => void;
-  completeSession: () => void;
+  completeSession: () => Promise<string | undefined>;
   /** Discards the current active session without saving to history. */
   resetSession: () => void;
-  deleteHistorySession: (sessionId: string) => void;
   addPlayerWithName: (name: string) => void;
   addCustomMatch: (teamA: Player[], teamB: Player[]) => { success: boolean; error?: string };
   editCustomMatch: (matchId: string, teamA: Player[], teamB: Player[]) => { success: boolean; error?: string };
   deleteMatch: (matchId: string) => void;
   hasActiveSession: boolean;
+  isSavingSession: boolean;
 }
 
 const createInitialPlayers = (count: number) =>
@@ -60,17 +59,6 @@ const createDefaultSession = (): SessionConfig => ({
   createdAt: new Date().toISOString(),
 });
 
-const loadHistory = (): SessionConfig[] => {
-  try {
-    const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) return parsed as SessionConfig[];
-    return [];
-  } catch {
-    return [];
-  }
-};
 
 const findDuplicateMatch = (
   matches: MatchItem[],
@@ -92,6 +80,8 @@ const findDuplicateMatch = (
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
 export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const createSessionMutation = useTCreateSession();
+
   const [session, setSession] = useState<SessionConfig>(() => {
     const saved = localStorage.getItem(ACTIVE_STORAGE_KEY) || sessionStorage.getItem(ACTIVE_STORAGE_KEY);
     if (saved) {
@@ -108,8 +98,6 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return createDefaultSession();
   });
 
-  const [sessionHistory, setSessionHistory] = useState<SessionConfig[]>(() => loadHistory());
-
   // Sync active session to localStorage
   useEffect(() => {
     try {
@@ -118,15 +106,6 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       console.error('Failed to save session to localStorage:', e);
     }
   }, [session]);
-
-  // Sync history to localStorage whenever it changes
-  useEffect(() => {
-    try {
-      localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(sessionHistory));
-    } catch (e) {
-      console.error('Failed to save session history:', e);
-    }
-  }, [sessionHistory]);
 
   const setSessionTitle = (title: string) => {
     setSession((prev) => ({ ...prev, title }));
@@ -331,20 +310,21 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   /**
-   * Archives the current session into history (auto-evicting the oldest if
-   * already at MAX_HISTORY), then resets the active session.
+   * Archives the current session into PocketBase, then resets the active session.
    */
-  const completeSession = () => {
+  const completeSession = async (): Promise<string | undefined> => {
     const completedSession: SessionConfig = {
       ...session,
       completedAt: new Date().toISOString(),
     };
 
-    setSessionHistory((prev) => {
-      // Drop the oldest entry when already at capacity
-      const trimmed = prev.length >= MAX_HISTORY ? prev.slice(1) : prev;
-      return [...trimmed, completedSession];
-    });
+    let savedId: string | undefined;
+    try {
+      const record = await createSessionMutation.mutateAsync(completedSession);
+      savedId = record.id;
+    } catch (e) {
+      console.error('Error saving session to PocketBase:', e);
+    }
 
     try {
       localStorage.removeItem(ACTIVE_STORAGE_KEY);
@@ -353,6 +333,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       console.error('Failed to remove active session from storage:', e);
     }
     setSession(createDefaultSession());
+    return savedId;
   };
 
   /**
@@ -366,10 +347,6 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       console.error('Failed to remove session from storage:', e);
     }
     setSession(createDefaultSession());
-  };
-
-  const deleteHistorySession = (sessionId: string) => {
-    setSessionHistory((prev) => prev.filter((s) => s.id !== sessionId));
   };
 
   const addPlayerWithName = (name: string) => {
@@ -390,7 +367,6 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     <SessionContext.Provider
       value={{
         session,
-        sessionHistory,
         setSessionTitle,
         setMatchFormat,
         setDoublesMode,
@@ -407,15 +383,16 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         deleteMatch,
         completeSession,
         resetSession,
-        deleteHistorySession,
         addPlayerWithName,
         hasActiveSession,
+        isSavingSession: createSessionMutation.isPending,
       }}
     >
       {children}
     </SessionContext.Provider>
   );
 };
+
 
 export const useSession = () => {
   const context = useContext(SessionContext);

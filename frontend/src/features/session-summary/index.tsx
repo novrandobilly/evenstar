@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useSession } from "../../context/SessionContext";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useModal } from "../../context/modal";
+import { useTGetSession } from "../../api/sessions/useTGetSession";
+import { useTGetSessions } from "../../api/sessions/useTGetSessions";
 import { calculateStandings } from "../../utils/standings";
 import { StandingsTable } from "../in-session/features/RunningSession/features/StandingsTable";
 import { generateShareText } from "./shareText";
@@ -9,14 +10,22 @@ import { shareStandingsAsImage } from "../../utils/shareImage";
 
 export const SessionSummaryFeature: React.FC = () => {
   const navigate = useNavigate();
-  const { sessionHistory } = useSession();
+  const [searchParams] = useSearchParams();
+  const sessionIdParam = searchParams.get("sessionId");
+
+  const { data: singleSession, isLoading: isLoadingSingle } = useTGetSession(
+    sessionIdParam || undefined
+  );
+  const { data: allSessions, isLoading: isLoadingAll } = useTGetSessions();
+
   const { showModal } = useModal();
   const [showMatchHistory, setShowMatchHistory] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
   const [isSharing, setIsSharing] = useState(false);
 
-  // The just-completed session is the last entry in history
-  const session = sessionHistory[sessionHistory.length - 1];
+  // Use the session matching URL param, or default to the most recently completed session
+  const session = singleSession || (allSessions && allSessions.length > 0 ? allSessions[0] : null);
+  const isLoading = sessionIdParam ? isLoadingSingle : isLoadingAll;
 
   const standings = session
     ? calculateStandings(session.players, session.matches)
@@ -98,7 +107,7 @@ export const SessionSummaryFeature: React.FC = () => {
     showModal({
       title: "Start New Session?",
       description:
-        "Ready to start a fresh session? Your results have already been saved to history.",
+        "Ready to start a fresh session? Your results have already been saved to your cloud history.",
       confirmText: "Start New Session",
       cancelText: "Cancel",
       type: "danger",
@@ -111,6 +120,15 @@ export const SessionSummaryFeature: React.FC = () => {
   const handleBackToHome = () => {
     navigate("/");
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center p-6 text-center">
+        <div className="text-2xl animate-spin mb-2">🏆</div>
+        <p className="text-xs font-bold text-slate-400">Loading summary...</p>
+      </div>
+    );
+  }
 
   if (!session) {
     return (

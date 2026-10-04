@@ -94,9 +94,13 @@ export const RunningSession: React.FC = () => {
       confirmText: "Complete & View Results",
       cancelText: "Keep Playing",
       type: "primary",
-      onConfirm: () => {
-        completeSession();
-        navigate("/session-summary");
+      onConfirm: async () => {
+        const savedId = await completeSession();
+        if (savedId) {
+          navigate(`/session-summary?sessionId=${savedId}`);
+        } else {
+          navigate("/session-summary");
+        }
       },
     });
   };
