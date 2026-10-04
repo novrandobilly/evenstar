@@ -24,6 +24,15 @@ export const useTUpdateProfile = () => {
       }
 
       const updated = await pb.collection("users").update<HostUser>(currentUserId, formData);
+
+      // If password was updated, immediately re-authenticate to keep the auth token and session active
+      if (payload.password) {
+        const identity = updated.email || updated.username || (pb.authStore.record as HostUser | undefined)?.email;
+        if (identity) {
+          await pb.collection("users").authWithPassword<HostUser>(identity, payload.password);
+        }
+      }
+
       return updated;
     },
     onSuccess: () => {

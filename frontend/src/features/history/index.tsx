@@ -1,15 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useTGetSessions } from "../../api/sessions/useTGetSessions";
-import { useTDeleteSession } from "../../api/sessions/useTDeleteSession";
-import { useModal } from "../../context/modal";
 import BottomNavigation from "../../components/BottomNavigation";
 
 export const HistoryListFeature: React.FC = () => {
   const navigate = useNavigate();
   const { data: sessions, isLoading } = useTGetSessions();
-  const deleteSessionMutation = useTDeleteSession();
-  const { showModal } = useModal();
 
   const savedSessions = sessions || [];
 
@@ -19,19 +15,6 @@ export const HistoryListFeature: React.FC = () => {
       day: "numeric",
       year: "numeric",
     });
-
-  const handleDeleteHistory = (sessionId: string, sessionTitle: string) => {
-    showModal({
-      title: "Delete Session Record?",
-      description: `Are you sure you want to permanently delete "${sessionTitle || "Tennis Session"}" from your history?`,
-      confirmText: "Delete",
-      cancelText: "Cancel",
-      type: "danger",
-      onConfirm: () => {
-        deleteSessionMutation.mutate(sessionId);
-      },
-    });
-  };
 
   return (
     <div className="flex flex-1 flex-col justify-between max-w-md mx-auto w-full font-sans select-none relative">
@@ -66,15 +49,13 @@ export const HistoryListFeature: React.FC = () => {
           ) : (
             <div className="space-y-2.5">
               {savedSessions.map((s) => (
-                <div
+                <button
+                  type="button"
                   key={s.id}
-                  className="rounded-2xl border border-chalk-300 bg-white shadow-2xs flex items-stretch overflow-hidden hover:border-court-500/40 transition group"
+                  onClick={() => navigate(`/history/${s.id}`)}
+                  className="w-full text-left rounded-2xl border border-chalk-300 bg-white p-4 shadow-2xs hover:border-court-500/40 hover:bg-chalk-50 transition active:scale-[0.99] cursor-pointer flex items-center justify-between gap-3 group"
                 >
-                  <button
-                    type="button"
-                    onClick={() => navigate(`/history/${s.id}`)}
-                    className="flex-1 text-left p-4 hover:bg-chalk-50 transition active:scale-[0.99] cursor-pointer"
-                  >
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
                       <h3 className="text-xs font-black text-slate-900 truncate">
                         {s.title || "Tennis Session"}
@@ -96,22 +77,21 @@ export const HistoryListFeature: React.FC = () => {
                       <span className="text-[11px] font-semibold text-slate-400">
                         {s.completedAt ? formatDate(s.completedAt) : formatDate(s.createdAt)}
                       </span>
-                      <span className="text-[11px] font-bold text-court-600 group-hover:text-court-800 transition ml-auto">
-                        View Results →
-                      </span>
                     </div>
-                  </button>
+                  </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteHistory(s.id, s.title)}
-                    className="shrink-0 px-3.5 text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition text-sm border-l border-chalk-100 cursor-pointer"
-                    title="Delete session record"
-                    aria-label="Delete session record"
+                  <svg
+                    className="w-4 h-4 text-slate-400 group-hover:text-slate-700 group-hover:translate-x-0.5 transition shrink-0"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   >
-                    ✕
-                  </button>
-                </div>
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </button>
               ))}
             </div>
           )}
