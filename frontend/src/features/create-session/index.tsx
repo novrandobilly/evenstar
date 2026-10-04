@@ -91,7 +91,7 @@ export const CreateSessionFeature: React.FC = () => {
         </div>
 
         {/* Session Title Input */}
-        <div className="mb-5 bg-white p-4 rounded-2xl border border-[#ded7c4] shadow-2xs focus-within:border-court-600 focus-within:ring-2 focus-within:ring-court-500/20 transition">
+        <div className="mb-5 bg-white p-4 rounded-2xl border border-chalk-300 shadow-2xs focus-within:border-court-600 focus-within:ring-2 focus-within:ring-court-500/20 transition">
           <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">
             Session Title
           </label>
@@ -109,7 +109,7 @@ export const CreateSessionFeature: React.FC = () => {
           <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 px-1">
             Match Format
           </label>
-          <div className="grid grid-cols-2 gap-1.5 p-1.5 bg-chalk-200/80 rounded-2xl border border-[#ded7c4]">
+          <div className="grid grid-cols-2 gap-1.5 p-1.5 bg-chalk-200/80 rounded-2xl border border-chalk-300">
             <button
               type="button"
               onClick={() => setMatchFormat("doubles")}
@@ -174,7 +174,7 @@ export const CreateSessionFeature: React.FC = () => {
           <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 px-1">
             Player Roster
           </label>
-          <div className="rounded-3xl border border-[#ded7c4] bg-white p-4 shadow-xs">
+          <div className="rounded-3xl border border-chalk-300 bg-white p-4 shadow-xs">
             {/* Header with Stepper */}
             <div className="flex items-center justify-between pb-3 border-b border-chalk-200 mb-3">
               <div>
@@ -191,7 +191,7 @@ export const CreateSessionFeature: React.FC = () => {
                   type="button"
                   onClick={handleDecrement}
                   disabled={playerCount <= minRequired}
-                  className="h-8 w-8 rounded-xl bg-chalk-100 text-sm font-black text-slate-700 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition hover:bg-chalk-200 cursor-pointer flex items-center justify-center border border-[#ded7c4]"
+                  className="h-8 w-8 rounded-xl bg-chalk-100 text-sm font-black text-slate-700 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition hover:bg-chalk-200 cursor-pointer flex items-center justify-center border border-chalk-300"
                 >
                   -
                 </button>
@@ -202,14 +202,14 @@ export const CreateSessionFeature: React.FC = () => {
                   max={MAX_PLAYERS}
                   value={playerCount}
                   onChange={handleNumberInputChange}
-                  className="w-11 text-center text-sm font-black text-slate-900 bg-chalk-50 rounded-xl py-1 border border-[#ded7c4] focus:outline-none focus:border-court-600 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="w-11 text-center text-sm font-black text-slate-900 bg-chalk-50 rounded-xl py-1 border border-chalk-300 focus:outline-none focus:border-court-600 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
 
                 <button
                   type="button"
                   onClick={handleIncrement}
                   disabled={playerCount >= MAX_PLAYERS}
-                  className="h-8 w-8 rounded-xl bg-chalk-100 text-sm font-black text-slate-700 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition hover:bg-chalk-200 cursor-pointer flex items-center justify-center border border-[#ded7c4]"
+                  className="h-8 w-8 rounded-xl bg-chalk-100 text-sm font-black text-slate-700 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition hover:bg-chalk-200 cursor-pointer flex items-center justify-center border border-chalk-300"
                 >
                   +
                 </button>
@@ -228,7 +228,7 @@ export const CreateSessionFeature: React.FC = () => {
                     className={`flex items-center gap-2.5 rounded-xl border px-3 py-2 transition-all ${
                       isFilled
                         ? "border-court-500/30 bg-court-50/40"
-                        : "border-[#ded7c4] bg-chalk-50/70 focus-within:border-court-600 focus-within:bg-white"
+                        : "border-chalk-300 bg-chalk-50/70 focus-within:border-court-600 focus-within:bg-white"
                     }`}
                   >
                     <span

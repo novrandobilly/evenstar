@@ -36,7 +36,7 @@ export const HomeFeature: React.FC = () => {
   return (
     <div className="flex flex-1 flex-col w-full font-sans select-none">
       {/* 🎾 HERO SECTION / LOGIN PAGE */}
-      <div className="relative w-full min-h-[100dvh] flex flex-col justify-between p-6 sm:p-8 overflow-hidden bg-slate-900">
+      <div className="relative w-full min-h-dvh flex flex-col justify-between p-6 sm:p-8 overflow-hidden bg-slate-900">
         {/* Background Image Asset - Fixed to .webp */}
         <div
           className="absolute inset-0 bg-cover bg-position-[center_right_-20px] sm:bg-center"
@@ -208,7 +208,9 @@ export const HomeFeature: React.FC = () => {
 
                 <button
                   type="submit"
-                  disabled={loginMutation.isPending || !identity.trim() || !password}
+                  disabled={
+                    loginMutation.isPending || !identity.trim() || !password
+                  }
                   className="w-full h-11 flex items-center justify-center gap-2 rounded-xl bg-volt-500 hover:bg-volt-400 px-4 text-slate-950 font-black text-xs shadow-lg active:scale-[0.98] transition cursor-pointer disabled:opacity-60"
                 >
                   {loginMutation.isPending ? (

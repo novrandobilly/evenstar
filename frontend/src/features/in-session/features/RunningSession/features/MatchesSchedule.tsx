@@ -59,8 +59,7 @@ export const MatchesSchedule: React.FC<MatchesScheduleProps> = ({
             onDrop={(e) => {
               const rect = e.currentTarget.getBoundingClientRect();
               const relativeY = e.clientY - rect.top;
-              const targetGap =
-                relativeY < rect.height / 2 ? index : index + 1;
+              const targetGap = relativeY < rect.height / 2 ? index : index + 1;
               desktopDrag.handleDrop(e, targetGap);
             }}
             className="relative cursor-default rounded-3xl"
@@ -81,7 +80,7 @@ export const MatchesSchedule: React.FC<MatchesScheduleProps> = ({
               } ${
                 match.isCompleted
                   ? "border-court-500/30 bg-court-50/50 shadow-2xs"
-                  : "border-[#ded7c4] bg-white shadow-xs hover:border-court-500/40"
+                  : "border-chalk-300 bg-white shadow-xs hover:border-court-500/40"
               }`}
             >
               {/* Match Number / Status Checkbox */}
@@ -97,7 +96,7 @@ export const MatchesSchedule: React.FC<MatchesScheduleProps> = ({
                 className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl self-start mt-0.5 text-xs font-black transition cursor-pointer active:scale-90 ${
                   match.isCompleted
                     ? "bg-court-850 text-volt-300 shadow-sm"
-                    : "bg-chalk-100 text-slate-700 hover:bg-court-100 hover:text-court-850 border border-[#ded7c4]"
+                    : "bg-chalk-100 text-slate-700 hover:bg-court-100 hover:text-court-850 border border-chalk-300"
                 }`}
               >
                 {match.isCompleted ? "✓" : index + 1}
@@ -124,7 +123,7 @@ export const MatchesSchedule: React.FC<MatchesScheduleProps> = ({
                       updateMatchScore(match.id, e.target.value, match.scoreB)
                     }
                     placeholder="0"
-                    className="w-10 h-8 shrink-0 text-center font-mono text-sm font-black text-slate-900 bg-chalk-100 rounded-xl border border-[#ded7c4] focus:outline-none focus:bg-white focus:border-court-600 focus:ring-2 focus:ring-court-500/20 transition"
+                    className="w-10 h-8 shrink-0 text-center font-mono text-sm font-black text-slate-900 bg-chalk-100 rounded-xl border border-chalk-300 focus:outline-none focus:bg-white focus:border-court-600 focus:ring-2 focus:ring-court-500/20 transition"
                   />
                 </div>
 
@@ -147,7 +146,7 @@ export const MatchesSchedule: React.FC<MatchesScheduleProps> = ({
                       updateMatchScore(match.id, match.scoreA, e.target.value)
                     }
                     placeholder="0"
-                    className="w-10 h-8 shrink-0 text-center font-mono text-sm font-black text-slate-900 bg-chalk-100 rounded-xl border border-[#ded7c4] focus:outline-none focus:bg-white focus:border-court-600 focus:ring-2 focus:ring-court-500/20 transition"
+                    className="w-10 h-8 shrink-0 text-center font-mono text-sm font-black text-slate-900 bg-chalk-100 rounded-xl border border-chalk-300 focus:outline-none focus:bg-white focus:border-court-600 focus:ring-2 focus:ring-court-500/20 transition"
                   />
                 </div>
               </div>
