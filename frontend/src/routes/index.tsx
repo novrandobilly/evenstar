@@ -4,6 +4,7 @@ import CreateSessionFeature from "../features/create-session";
 import InSessionFeature from "../features/in-session";
 import SessionSummaryFeature from "../features/session-summary";
 import HistorySessionFeature from "../features/history-session";
+import HistoryListFeature from "../features/history";
 import RegisterFeature from "../features/auth/register";
 import AccountFeature from "../features/account";
 import ProtectedRoute from "./guards/ProtectedRoute";
@@ -22,6 +23,7 @@ export const AppRoutes = () => {
       {/* Protected Host Routes */}
       <Route element={<ProtectedRoute />}>
         <Route path="/account" element={<AccountFeature />} />
+        <Route path="/history" element={<HistoryListFeature />} />
         <Route path="/create-session" element={<CreateSessionFeature />} />
         <Route path="/in-session" element={<InSessionFeature />} />
         <Route path="/session-summary" element={<SessionSummaryFeature />} />

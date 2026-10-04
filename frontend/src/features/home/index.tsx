@@ -120,7 +120,7 @@ export const HomeFeature: React.FC = () => {
                   type="button"
                   onClick={handleGoogleSignIn}
                   disabled={googleLoginMutation.isPending}
-                  className="w-full flex items-center justify-center gap-3 rounded-full bg-white hover:bg-slate-100 px-4 py-3.5 text-slate-900 font-extrabold text-xs shadow-xl active:scale-[0.98] transition cursor-pointer disabled:opacity-60"
+                  className="w-full h-11 flex items-center justify-center gap-3 rounded-full bg-white hover:bg-slate-100 px-4 text-slate-900 font-extrabold text-xs shadow-xl active:scale-[0.98] transition cursor-pointer disabled:opacity-60"
                 >
                   <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                     <path
@@ -151,10 +151,21 @@ export const HomeFeature: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowEmailForm(true)}
-                  className="w-full flex items-center justify-center gap-2 rounded-full bg-volt-500 hover:bg-volt-400 px-4 py-3.5 text-slate-950 font-black text-xs shadow-xl active:scale-[0.98] transition cursor-pointer"
+                  className="w-full h-11 flex items-center justify-center gap-3 rounded-full bg-volt-500 hover:bg-volt-400 px-4 text-slate-950 font-black text-xs shadow-xl active:scale-[0.98] transition cursor-pointer"
                 >
+                  <svg
+                    className="w-4 h-4 text-slate-950 shrink-0"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect width="20" height="16" x="2" y="4" rx="2" />
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                  </svg>
                   <span>Sign In with Email</span>
-                  <span className="text-sm">→</span>
                 </button>
               </>
             ) : (
@@ -198,7 +209,7 @@ export const HomeFeature: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loginMutation.isPending || !identity.trim() || !password}
-                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-volt-500 hover:bg-volt-400 px-4 py-3 text-slate-950 font-black text-xs shadow-lg active:scale-[0.98] transition cursor-pointer disabled:opacity-60"
+                  className="w-full h-11 flex items-center justify-center gap-2 rounded-xl bg-volt-500 hover:bg-volt-400 px-4 text-slate-950 font-black text-xs shadow-lg active:scale-[0.98] transition cursor-pointer disabled:opacity-60"
                 >
                   {loginMutation.isPending ? (
                     <span>Signing In...</span>
@@ -222,13 +233,6 @@ export const HomeFeature: React.FC = () => {
               </Link>
             </div>
           </div>
-        </div>
-
-        {/* Bottom Footer Attribution */}
-        <div className="relative z-10 text-left pt-2 pb-1">
-          <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
-            🎾 Kickserve · Session Assistant
-          </span>
         </div>
       </div>
     </div>
