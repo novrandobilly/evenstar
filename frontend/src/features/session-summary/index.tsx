@@ -152,6 +152,36 @@ export const SessionSummaryFeature: React.FC = () => {
   return (
     <div className="flex flex-1 flex-col justify-between max-w-md mx-auto w-full px-4 py-6 select-none font-sans">
       <div className="space-y-4">
+        {/* Top Header Bar */}
+        <div className="flex items-center justify-between pt-1 mb-2">
+          <button
+            type="button"
+            onClick={() => navigate("/account")}
+            className="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-chalk-100 transition cursor-pointer active:scale-95 -ml-1"
+            title="Back to Dashboard"
+            aria-label="Back to Dashboard"
+          >
+            <svg
+              className="w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
+          </button>
+
+          <h1 className="text-sm font-black uppercase tracking-widest text-slate-800 text-center flex-1">
+            Session Summary
+          </h1>
+
+          <div className="w-8" />
+        </div>
+
         {/* Header Branding */}
         <div className="text-center pt-2">
           <div className="inline-flex h-14 w-14 items-center justify-center rounded-3xl bg-gradient-to-br from-amber-100 to-amber-200 text-3xl shadow-sm mb-2.5 ring-4 ring-amber-50">

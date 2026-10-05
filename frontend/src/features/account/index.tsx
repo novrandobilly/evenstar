@@ -2,6 +2,8 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useTProfile } from "../../api/auth/useTProfile";
 import { useTGetSessions } from "../../api/sessions/useTGetSessions";
+import { useSession } from "../../context/SessionContext";
+import { useModal } from "../../context/modal";
 import BottomNavigation from "../../components/BottomNavigation";
 
 import ProfileCard from "./features/ProfileCard";
@@ -14,6 +16,8 @@ export const AccountFeature: React.FC = () => {
   const navigate = useNavigate();
   const { data: profile, isLoading: isLoadingProfile } = useTProfile();
   const { data: sessions, isLoading: isLoadingSessions } = useTGetSessions();
+  const { session, resetSession } = useSession();
+  const { showModal } = useModal();
 
   if (isLoadingProfile) {
     return (
@@ -26,6 +30,26 @@ export const AccountFeature: React.FC = () => {
   }
 
   const savedSessions = sessions || [];
+
+  const handleStartNewSession = () => {
+    if (session.matches.length > 0) {
+      showModal({
+        title: "Active Session in Progress",
+        description: `You currently have a running session ("${
+          session.title || "Tennis Session"
+        }") with ${session.matches.length} matches. Starting a new session will discard your current match progress.`,
+        confirmText: "Discard & Start Fresh",
+        cancelText: "Keep Playing",
+        type: "danger",
+        onConfirm: () => {
+          resetSession();
+          navigate("/create-session");
+        },
+      });
+    } else {
+      navigate("/create-session");
+    }
+  };
 
   return (
     <div className="flex flex-1 flex-col justify-between max-w-md mx-auto w-full font-sans select-none relative">
@@ -48,7 +72,7 @@ export const AccountFeature: React.FC = () => {
         {/* 3. Primary CTA: Start a New Session */}
         <button
           type="button"
-          onClick={() => navigate("/create-session")}
+          onClick={handleStartNewSession}
           className="w-full flex items-center justify-center gap-2 rounded-2xl bg-volt-500 hover:bg-volt-400 py-4 text-xs font-black text-slate-950 shadow-lg shadow-court-900/10 active:scale-[0.98] transition cursor-pointer"
         >
           <span>Start a New Session</span>

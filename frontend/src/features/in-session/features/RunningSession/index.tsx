@@ -130,11 +130,7 @@ export const RunningSession: React.FC = () => {
   return (
     <div className="flex flex-1 flex-col justify-between max-w-md mx-auto w-full px-4 py-5 select-none">
       <div>
-        <TopAppBar
-          formatLabel={formatLabel}
-          sessionTitle={session.title}
-          onEndSession={handleEndSession}
-        />
+        <TopAppBar formatLabel={formatLabel} />
 
         <TopActionButtons />
 

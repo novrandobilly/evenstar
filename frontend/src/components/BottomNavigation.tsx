@@ -1,14 +1,38 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useSession } from "../context/SessionContext";
+import { useModal } from "../context/modal";
 import logoSingle from "../assets/logo-single.svg";
 
 export const BottomNavigation: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { session, resetSession } = useSession();
+  const { showModal } = useModal();
 
   const isHistoryActive =
     location.pathname === "/history" || location.pathname.startsWith("/history/");
   const isAccountActive = location.pathname === "/account";
+
+  const handleStartClick = () => {
+    if (session.matches.length > 0) {
+      showModal({
+        title: "Active Session in Progress",
+        description: `You currently have a running session ("${
+          session.title || "Tennis Session"
+        }") with ${session.matches.length} matches. Starting a new session will discard your current match progress.`,
+        confirmText: "Discard & Start Fresh",
+        cancelText: "Keep Playing",
+        type: "danger",
+        onConfirm: () => {
+          resetSession();
+          navigate("/create-session");
+        },
+      });
+    } else {
+      navigate("/create-session");
+    }
+  };
 
   return (
     <nav className="sticky bottom-0 left-0 right-0 w-full bg-white/95 backdrop-blur-md border-t border-[#ded7c4] px-8 py-2 z-30 shadow-[0_-4px_20px_rgba(0,0,0,0.04)]">
@@ -43,7 +67,7 @@ export const BottomNavigation: React.FC = () => {
         <div className="flex flex-col items-center -mt-6">
           <button
             type="button"
-            onClick={() => navigate("/create-session")}
+            onClick={handleStartClick}
             className="h-14 w-14 rounded-full bg-court-850 hover:bg-court-900 border-4 border-[#fcfbf7] shadow-xl shadow-court-950/25 flex items-center justify-center cursor-pointer active:scale-95 transition"
             title="Start a new session"
           >
