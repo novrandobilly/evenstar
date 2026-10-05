@@ -15,3 +15,6 @@ export interface SaveRosterPayload {
   name?: string;
   players: Player[];
 }
+
+export const MAX_ROSTER_PLAYERS = 20;
+

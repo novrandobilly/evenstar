@@ -16,6 +16,7 @@ export const useTSaveRoster = () => {
     }: {
       players: Player[];
       name?: string;
+      successMessage?: string;
     }) => {
       const hostId = pb.authStore.record?.id;
       if (!hostId) throw new Error("Host must be logged in to save roster");
@@ -48,10 +49,16 @@ export const useTSaveRoster = () => {
         });
       }
     },
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       queryClient.setQueryData(["roster"], data);
       queryClient.invalidateQueries({ queryKey: ["roster"] });
-      showToast({ message: "Player roster updated successfully!" });
+      if (variables.successMessage !== undefined) {
+        if (variables.successMessage) {
+          showToast({ message: variables.successMessage });
+        }
+      } else {
+        showToast({ message: "Player roster updated successfully!" });
+      }
     },
     onError: (error: unknown) => {
       console.error("Failed to save roster:", error);

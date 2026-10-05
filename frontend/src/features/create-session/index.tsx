@@ -1,10 +1,12 @@
 import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSession } from "../../context/SessionContext";
+import { useModal } from "../../context/modal";
 import { useTGetRoster } from "../../api/rosters/useTGetRoster";
 import { useTSaveRoster } from "../../api/rosters/useTSaveRoster";
 import { RosterPickerModal } from "./features/RosterPickerModal";
 import type { Player } from "../../types/session";
+import { MAX_ROSTER_PLAYERS } from "../../types/roster";
 import {
   MAX_PLAYERS,
   MIN_PLAYERS_DOUBLES,
@@ -14,6 +16,7 @@ import {
 export const CreateSessionFeature: React.FC = () => {
   const navigate = useNavigate();
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const { showModal } = useModal();
 
   const {
     session,
@@ -39,7 +42,8 @@ export const CreateSessionFeature: React.FC = () => {
   const filledCount = session.players.filter(
     (p) => p.name.trim().length > 0
   ).length;
-  const isAllFilled = filledCount === playerCount && playerCount >= minRequired;
+  const canStart = filledCount >= minRequired;
+  const hasUnfilledSlots = filledCount < playerCount;
 
   const handleDecrement = () => {
     if (playerCount > minRequired) {
@@ -89,7 +93,7 @@ export const CreateSessionFeature: React.FC = () => {
     if (currentNamed.length === 0) return;
 
     const existingPool = roster?.players || [];
-    const newPool = [...existingPool];
+    let newPool = [...existingPool];
 
     currentNamed.forEach((name) => {
       const exists = newPool.some(
@@ -103,15 +107,45 @@ export const CreateSessionFeature: React.FC = () => {
       }
     });
 
+    const isOverLimit = newPool.length > MAX_ROSTER_PLAYERS;
+    if (isOverLimit) {
+      newPool = newPool.slice(0, MAX_ROSTER_PLAYERS);
+    }
+
+    const successMessage = isOverLimit
+      ? `Pool capacity is max ${MAX_ROSTER_PLAYERS} players. Saved first ${MAX_ROSTER_PLAYERS} to your pool!`
+      : "Players saved to your roster pool!";
+
     saveRosterMutation.mutate({
       name: roster?.name || "My Players",
       players: newPool,
+      successMessage,
     });
   };
 
-  const handleStartSession = () => {
+  const proceedWithStart = () => {
     startSession();
     navigate("/in-session");
+  };
+
+  const handleStartSession = () => {
+    if (!canStart) return;
+
+    if (hasUnfilledSlots) {
+      const emptyCount = playerCount - filledCount;
+      showModal({
+        title: `Proceed with ${filledCount} players?`,
+        description: `You have ${emptyCount} unfilled player slot${
+          emptyCount > 1 ? "s" : ""
+        }. The session will proceed with only the ${filledCount} named players.`,
+        confirmText: "Proceed Anyway",
+        cancelText: "Cancel",
+        type: "primary",
+        onConfirm: proceedWithStart,
+      });
+    } else {
+      proceedWithStart();
+    }
   };
 
   const hasSavedRoster = roster && roster.players && roster.players.length > 0;
@@ -120,18 +154,33 @@ export const CreateSessionFeature: React.FC = () => {
     <div className="flex flex-1 flex-col justify-between max-w-md mx-auto w-full px-5 py-6 font-sans select-none">
       <div>
         {/* Top Header Bar */}
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center justify-between pt-1 mb-5">
           <button
             type="button"
             onClick={() => navigate("/account")}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-court-900 transition cursor-pointer px-2 py-1 -ml-2 rounded-lg hover:bg-chalk-100"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-chalk-100 transition cursor-pointer active:scale-95 -ml-1"
+            title="Back to Dashboard"
+            aria-label="Back to Dashboard"
           >
-            <span>←</span>
-            <span>Dashboard</span>
+            <svg
+              className="w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
           </button>
-          <span className="text-[10px] font-black uppercase tracking-widest text-court-700 bg-court-100/70 px-2.5 py-1 rounded-full border border-court-500/20">
-            Session Setup
-          </span>
+
+          <h1 className="text-sm font-black uppercase tracking-widest text-slate-800 text-center flex-1">
+            Pre-Session
+          </h1>
+
+          <div className="w-8" />
         </div>
 
         {/* Session Title Input */}
@@ -215,27 +264,15 @@ export const CreateSessionFeature: React.FC = () => {
 
         {/* Unified Players Container */}
         <div className="mb-5">
-          <div className="flex items-center justify-between mb-2 px-1">
-            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">
-              Player Roster
-            </label>
-
-            {/* Quick Action: Pick from Saved Roster */}
-            <button
-              type="button"
-              onClick={() => setIsRosterPickerOpen(true)}
-              className="inline-flex items-center gap-1 text-[11px] font-bold text-court-800 hover:text-court-950 bg-court-100/90 hover:bg-court-200/90 px-2.5 py-1 rounded-full border border-court-500/20 transition cursor-pointer active:scale-95 shadow-2xs"
-            >
-              <span>⚡</span>
-              <span>{hasSavedRoster ? "Pick from Saved Roster" : "Saved Rosters"}</span>
-            </button>
-          </div>
+          <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 px-1">
+            Player Roster
+          </label>
 
           <div className="rounded-3xl border border-chalk-300 bg-white p-4 shadow-xs">
-            {/* Header with Stepper & Save to pool action */}
-            <div className="flex items-center justify-between pb-3 border-b border-chalk-200 mb-3">
-              <div>
-                <span className="text-xs font-black text-slate-900 block">
+            {/* Header with Stepper & Pick from Saved Roster */}
+            <div className="flex items-center justify-between pb-3 border-b border-chalk-200 mb-3 gap-2">
+              <div className="min-w-0">
+                <span className="text-xs font-black text-slate-900 block truncate">
                   Total Roster
                 </span>
                 <p className="text-[11px] text-court-700 font-bold mt-0.5">
@@ -243,33 +280,52 @@ export const CreateSessionFeature: React.FC = () => {
                 </p>
               </div>
 
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2 shrink-0">
+                {/* Clean Button: Saved Roster */}
                 <button
                   type="button"
-                  onClick={handleDecrement}
-                  disabled={playerCount <= minRequired}
-                  className="h-8 w-8 rounded-xl bg-chalk-100 text-sm font-black text-slate-700 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition hover:bg-chalk-200 cursor-pointer flex items-center justify-center border border-chalk-300"
+                  onClick={() => setIsRosterPickerOpen(true)}
+                  className="inline-flex items-center gap-1.5 bg-court-50 hover:bg-court-100 text-court-850 hover:text-court-950 border border-court-500/30 px-2.5 py-1.5 rounded-xl text-xs font-black transition cursor-pointer active:scale-95 shadow-2xs"
+                  title={
+                    hasSavedRoster
+                      ? `Select from ${roster.players.length} players in your saved pool`
+                      : "Pick players from your saved roster pool"
+                  }
                 >
-                  -
+                  <span className="text-xs">⚡</span>
+                  <span>Saved Roster</span>
                 </button>
 
-                <input
-                  type="number"
-                  min={minRequired}
-                  max={MAX_PLAYERS}
-                  value={playerCount}
-                  onChange={handleNumberInputChange}
-                  className="w-11 text-center text-sm font-black text-slate-900 bg-chalk-50 rounded-xl py-1 border border-chalk-300 focus:outline-none focus:border-court-600 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                />
+                <div className="h-4 w-px bg-chalk-200" />
 
-                <button
-                  type="button"
-                  onClick={handleIncrement}
-                  disabled={playerCount >= MAX_PLAYERS}
-                  className="h-8 w-8 rounded-xl bg-chalk-100 text-sm font-black text-slate-700 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition hover:bg-chalk-200 cursor-pointer flex items-center justify-center border border-chalk-300"
-                >
-                  +
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={handleDecrement}
+                    disabled={playerCount <= minRequired}
+                    className="h-8 w-8 rounded-xl bg-chalk-100 text-sm font-black text-slate-700 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition hover:bg-chalk-200 cursor-pointer flex items-center justify-center border border-chalk-300"
+                  >
+                    -
+                  </button>
+
+                  <input
+                    type="number"
+                    min={minRequired}
+                    max={MAX_PLAYERS}
+                    value={playerCount}
+                    onChange={handleNumberInputChange}
+                    className="w-10 text-center text-sm font-black text-slate-900 bg-chalk-50 rounded-xl py-1 border border-chalk-300 focus:outline-none focus:border-court-600 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={handleIncrement}
+                    disabled={playerCount >= MAX_PLAYERS}
+                    className="h-8 w-8 rounded-xl bg-chalk-100 text-sm font-black text-slate-700 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition hover:bg-chalk-200 cursor-pointer flex items-center justify-center border border-chalk-300"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -351,10 +407,10 @@ export const CreateSessionFeature: React.FC = () => {
       <div className="pt-4 border-t border-chalk-200 mt-2">
         <button
           type="button"
-          disabled={!isAllFilled}
+          disabled={!canStart}
           onClick={handleStartSession}
           className={`flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-sm font-black transition cursor-pointer ${
-            isAllFilled
+            canStart
               ? "bg-court-850 hover:bg-court-900 text-volt-300 shadow-lg shadow-court-900/20 active:scale-[0.98] border border-court-700/50"
               : "bg-chalk-200 text-slate-400 cursor-not-allowed border border-chalk-300"
           }`}
@@ -363,9 +419,9 @@ export const CreateSessionFeature: React.FC = () => {
           <span className="text-base">🎾</span>
         </button>
 
-        {!isAllFilled && (
+        {!canStart && (
           <p className="text-center text-[11px] font-semibold text-slate-400 mt-2">
-            Enter all {playerCount} player names to generate matches
+            Enter at least {minRequired} player names to generate matches
           </p>
         )}
       </div>
@@ -373,7 +429,6 @@ export const CreateSessionFeature: React.FC = () => {
       {/* Roster Picker Modal */}
       <RosterPickerModal
         isOpen={isRosterPickerOpen}
-        minRequired={minRequired}
         currentPlayers={session.players}
         onClose={() => setIsRosterPickerOpen(false)}
         onApplySelected={handleApplySelectedRoster}

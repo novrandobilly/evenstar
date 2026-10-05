@@ -4,7 +4,6 @@ import { useTGetRoster } from "../../../api/rosters/useTGetRoster";
 
 interface RosterPickerModalProps {
   isOpen: boolean;
-  minRequired: number;
   currentPlayers: Player[];
   onClose: () => void;
   onApplySelected: (selectedPlayers: Player[]) => void;
@@ -13,7 +12,6 @@ interface RosterPickerModalProps {
 interface RosterModalContentProps {
   pool: Player[];
   isLoading: boolean;
-  minRequired: number;
   currentPlayers: Player[];
   onClose: () => void;
   onApplySelected: (selectedPlayers: Player[]) => void;
@@ -36,7 +34,6 @@ const getInitialSelected = (pool: Player[], currentPlayers: Player[]): Set<strin
 const RosterModalContent: React.FC<RosterModalContentProps> = ({
   pool,
   isLoading,
-  minRequired,
   currentPlayers,
   onClose,
   onApplySelected,
@@ -78,7 +75,7 @@ const RosterModalContent: React.FC<RosterModalContentProps> = ({
   );
 
   const selectedCount = selectedIds.size;
-  const isEnough = selectedCount >= minRequired;
+  const hasSelection = selectedCount > 0;
 
   return (
     <div className="w-full max-w-sm rounded-3xl bg-white p-5 shadow-2xl space-y-3.5 border border-[#ded7c4] animate-modal-in flex flex-col max-h-[85vh]">
@@ -123,12 +120,12 @@ const RosterModalContent: React.FC<RosterModalContentProps> = ({
 
         <span
           className={`text-[10px] font-black px-2.5 py-0.5 rounded-full border ${
-            isEnough
+            hasSelection
               ? "bg-court-100 text-court-800 border-court-500/20"
-              : "bg-amber-50 text-amber-800 border-amber-300"
+              : "bg-chalk-100 text-slate-500 border-chalk-200"
           }`}
         >
-          {selectedCount} Selected (Min {minRequired})
+          {selectedCount} Selected
         </span>
       </div>
 
@@ -203,7 +200,7 @@ const RosterModalContent: React.FC<RosterModalContentProps> = ({
         </button>
         <button
           type="button"
-          disabled={!isEnough}
+          disabled={!hasSelection}
           onClick={handleApply}
           className="flex-[2] rounded-2xl bg-court-850 hover:bg-court-900 py-3 text-xs font-black text-volt-300 shadow-md shadow-court-900/15 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer border border-court-700/50"
         >
@@ -216,7 +213,6 @@ const RosterModalContent: React.FC<RosterModalContentProps> = ({
 
 export const RosterPickerModal: React.FC<RosterPickerModalProps> = ({
   isOpen,
-  minRequired,
   currentPlayers,
   onClose,
   onApplySelected,
@@ -232,7 +228,6 @@ export const RosterPickerModal: React.FC<RosterPickerModalProps> = ({
         key={isOpen ? "open" : "closed"}
         pool={pool}
         isLoading={isLoading}
-        minRequired={minRequired}
         currentPlayers={currentPlayers}
         onClose={onClose}
         onApplySelected={onApplySelected}

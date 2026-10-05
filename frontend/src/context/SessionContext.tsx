@@ -239,9 +239,11 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const startSession = () => {
-    const matches = generateAllMatches(session.players, session.matchFormat);
+    const activePlayers = session.players.filter((p) => p.name.trim().length > 0);
+    const matches = generateAllMatches(activePlayers, session.matchFormat);
     setSession((prev) => ({
       ...prev,
+      players: activePlayers,
       matches,
     }));
   };
