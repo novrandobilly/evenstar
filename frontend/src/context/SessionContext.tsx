@@ -25,6 +25,7 @@ interface SessionContextType {
   setMatchFormat: (format: MatchFormat) => void;
   setDoublesMode: (mode: DoublesGameMode) => void;
   setPlayerCount: (count: number) => void;
+  setRosterPlayers: (players: Player[]) => void;
   addPlayer: () => void;
   removePlayer: (index: number) => void;
   updatePlayerName: (index: number, name: string) => void;
@@ -163,6 +164,39 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         updatedPlayers = [...updatedPlayers, ...additional];
       } else if (count < updatedPlayers.length) {
         updatedPlayers = updatedPlayers.slice(0, count);
+      }
+
+      return {
+        ...prev,
+        players: updatedPlayers,
+      };
+    });
+  };
+
+  const setRosterPlayers = (selectedPlayers: Player[]) => {
+    setSession((prev) => {
+      const minRequired =
+        prev.matchFormat === 'doubles' ? MIN_PLAYERS_DOUBLES : MIN_PLAYERS_SINGLES;
+      const targetCount = Math.min(
+        MAX_PLAYERS,
+        Math.max(minRequired, selectedPlayers.length)
+      );
+
+      let updatedPlayers: Player[] = selectedPlayers.slice(0, MAX_PLAYERS).map((p, idx) => ({
+        id: `p-${Date.now()}-${idx}`,
+        name: p.name,
+      }));
+
+      // If selected count is less than minRequired, fill the remainder with blank player slots
+      if (updatedPlayers.length < targetCount) {
+        const additional = Array.from(
+          { length: targetCount - updatedPlayers.length },
+          (_, i) => ({
+            id: `p-${Date.now()}-blank-${i}`,
+            name: '',
+          })
+        );
+        updatedPlayers = [...updatedPlayers, ...additional];
       }
 
       return {
@@ -371,6 +405,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setMatchFormat,
         setDoublesMode,
         setPlayerCount,
+        setRosterPlayers,
         addPlayer,
         removePlayer,
         updatePlayerName,

@@ -39,11 +39,14 @@ export const HistoryListFeature: React.FC = () => {
               Loading session records...
             </div>
           ) : savedSessions.length === 0 ? (
-            <div className="p-8 text-center bg-white rounded-2xl border border-[#ded7c4] shadow-2xs">
+            <div className="p-8 text-center bg-white rounded-2xl border border-chalk-300 shadow-2xs">
               <span className="text-3xl block mb-2">🎾</span>
-              <p className="text-xs font-bold text-slate-800">No session history yet</p>
+              <p className="text-xs font-bold text-slate-800">
+                No session history yet
+              </p>
               <p className="text-[11px] text-slate-400 mt-1 max-w-xs mx-auto">
-                Completed matches and standings will be archived here automatically.
+                Completed matches and standings will be archived here
+                automatically.
               </p>
             </div>
           ) : (
@@ -75,7 +78,9 @@ export const HistoryListFeature: React.FC = () => {
                       </span>
                       <span className="text-slate-300">·</span>
                       <span className="text-[11px] font-semibold text-slate-400">
-                        {s.completedAt ? formatDate(s.completedAt) : formatDate(s.createdAt)}
+                        {s.completedAt
+                          ? formatDate(s.completedAt)
+                          : formatDate(s.createdAt)}
                       </span>
                     </div>
                   </div>

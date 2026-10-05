@@ -1,6 +1,10 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSession } from "../../context/SessionContext";
+import { useTGetRoster } from "../../api/rosters/useTGetRoster";
+import { useTSaveRoster } from "../../api/rosters/useTSaveRoster";
+import { RosterPickerModal } from "./features/RosterPickerModal";
+import type { Player } from "../../types/session";
 import {
   MAX_PLAYERS,
   MIN_PLAYERS_DOUBLES,
@@ -17,17 +21,23 @@ export const CreateSessionFeature: React.FC = () => {
     setMatchFormat,
     setDoublesMode,
     setPlayerCount,
+    setRosterPlayers,
     addPlayer,
     removePlayer,
     updatePlayerName,
     startSession,
   } = useSession();
 
+  const { data: roster } = useTGetRoster();
+  const saveRosterMutation = useTSaveRoster();
+
+  const [isRosterPickerOpen, setIsRosterPickerOpen] = useState(false);
+
   const isDoubles = session.matchFormat === "doubles";
   const minRequired = isDoubles ? MIN_PLAYERS_DOUBLES : MIN_PLAYERS_SINGLES;
   const playerCount = session.players.length;
   const filledCount = session.players.filter(
-    (p) => p.name.trim().length > 0,
+    (p) => p.name.trim().length > 0
   ).length;
   const isAllFilled = filledCount === playerCount && playerCount >= minRequired;
 
@@ -52,7 +62,7 @@ export const CreateSessionFeature: React.FC = () => {
 
   const handleKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement>,
-    index: number,
+    index: number
   ) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -67,23 +77,57 @@ export const CreateSessionFeature: React.FC = () => {
     }
   };
 
+  const handleApplySelectedRoster = (selected: Player[]) => {
+    setRosterPlayers(selected);
+  };
+
+  const handleSaveCurrentToPool = () => {
+    const currentNamed = session.players
+      .map((p) => p.name.trim())
+      .filter((n) => n.length > 0);
+
+    if (currentNamed.length === 0) return;
+
+    const existingPool = roster?.players || [];
+    const newPool = [...existingPool];
+
+    currentNamed.forEach((name) => {
+      const exists = newPool.some(
+        (p) => p.name.toLowerCase() === name.toLowerCase()
+      );
+      if (!exists) {
+        newPool.push({
+          id: `p-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          name,
+        });
+      }
+    });
+
+    saveRosterMutation.mutate({
+      name: roster?.name || "My Players",
+      players: newPool,
+    });
+  };
+
   const handleStartSession = () => {
     startSession();
     navigate("/in-session");
   };
 
+  const hasSavedRoster = roster && roster.players && roster.players.length > 0;
+
   return (
-    <div className="flex flex-1 flex-col justify-between max-w-md mx-auto w-full px-5 py-6 font-sans">
+    <div className="flex flex-1 flex-col justify-between max-w-md mx-auto w-full px-5 py-6 font-sans select-none">
       <div>
         {/* Top Header Bar */}
         <div className="flex items-center justify-between mb-5">
           <button
             type="button"
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/account")}
             className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-court-900 transition cursor-pointer px-2 py-1 -ml-2 rounded-lg hover:bg-chalk-100"
           >
             <span>←</span>
-            <span>Home</span>
+            <span>Dashboard</span>
           </button>
           <span className="text-[10px] font-black uppercase tracking-widest text-court-700 bg-court-100/70 px-2.5 py-1 rounded-full border border-court-500/20">
             Session Setup
@@ -171,11 +215,24 @@ export const CreateSessionFeature: React.FC = () => {
 
         {/* Unified Players Container */}
         <div className="mb-5">
-          <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 px-1">
-            Player Roster
-          </label>
+          <div className="flex items-center justify-between mb-2 px-1">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+              Player Roster
+            </label>
+
+            {/* Quick Action: Pick from Saved Roster */}
+            <button
+              type="button"
+              onClick={() => setIsRosterPickerOpen(true)}
+              className="inline-flex items-center gap-1 text-[11px] font-bold text-court-800 hover:text-court-950 bg-court-100/90 hover:bg-court-200/90 px-2.5 py-1 rounded-full border border-court-500/20 transition cursor-pointer active:scale-95 shadow-2xs"
+            >
+              <span>⚡</span>
+              <span>{hasSavedRoster ? "Pick from Saved Roster" : "Saved Rosters"}</span>
+            </button>
+          </div>
+
           <div className="rounded-3xl border border-chalk-300 bg-white p-4 shadow-xs">
-            {/* Header with Stepper */}
+            {/* Header with Stepper & Save to pool action */}
             <div className="flex items-center justify-between pb-3 border-b border-chalk-200 mb-3">
               <div>
                 <span className="text-xs font-black text-slate-900 block">
@@ -267,6 +324,25 @@ export const CreateSessionFeature: React.FC = () => {
                 );
               })}
             </div>
+
+            {/* Save Current Players to Pool Link */}
+            {filledCount > 0 && (
+              <div className="pt-3 mt-2 border-t border-chalk-100 flex items-center justify-end">
+                <button
+                  type="button"
+                  onClick={handleSaveCurrentToPool}
+                  disabled={saveRosterMutation.isPending}
+                  className="text-[11px] font-bold text-court-800 hover:underline inline-flex items-center gap-1 cursor-pointer"
+                >
+                  <span>💾</span>
+                  <span>
+                    {saveRosterMutation.isPending
+                      ? "Saving to Pool..."
+                      : "Save these players to my pool"}
+                  </span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -293,6 +369,15 @@ export const CreateSessionFeature: React.FC = () => {
           </p>
         )}
       </div>
+
+      {/* Roster Picker Modal */}
+      <RosterPickerModal
+        isOpen={isRosterPickerOpen}
+        minRequired={minRequired}
+        currentPlayers={session.players}
+        onClose={() => setIsRosterPickerOpen(false)}
+        onApplySelected={handleApplySelectedRoster}
+      />
     </div>
   );
 };
