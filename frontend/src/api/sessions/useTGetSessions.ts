@@ -12,6 +12,7 @@ export const sessionRecordToConfig = (record: SessionRecord): SessionConfig => (
   createdAt: record.created,
   completedAt: record.completed_at || record.updated,
   sport: record.sport,
+  status: record.status,
 });
 
 export const useTGetSessions = () => {

@@ -26,6 +26,7 @@ export interface SessionConfig {
   createdAt: string;
   completedAt?: string;
   sport?: string;
+  status?: "in_progress" | "completed";
 }
 
 export interface SessionRecord {

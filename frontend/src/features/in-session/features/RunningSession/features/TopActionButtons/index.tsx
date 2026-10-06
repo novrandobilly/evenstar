@@ -2,58 +2,43 @@ import React, { useState } from "react";
 import { useSession } from "../../../../../../context/SessionContext";
 import { AddMatchModal } from "./features/AddMatchModal";
 import { AddPlayerModal } from "./features/AddPlayerModal";
+import { LiveShareModal } from "./features/LiveShareModal";
 
 export const TopActionButtons: React.FC = () => {
   const { session, addCustomMatch, addPlayerWithName } = useSession();
   const [isAddMatchModalOpen, setIsAddMatchModalOpen] = useState(false);
   const [isAddPlayerModalOpen, setIsAddPlayerModalOpen] = useState(false);
+  const [isLiveShareModalOpen, setIsLiveShareModalOpen] = useState(false);
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-2 mb-3.5">
+      <div className="grid grid-cols-3 gap-2 mb-3.5">
         <button
           type="button"
           onClick={() => setIsAddMatchModalOpen(true)}
-          className="flex items-center justify-center gap-2 rounded-2xl bg-white border border-[#ded7c4] hover:border-court-500 hover:bg-court-50/50 py-2.5 px-4 text-xs font-bold text-slate-800 shadow-2xs active:scale-[0.98] transition cursor-pointer"
+          className="flex items-center justify-center gap-1.5 rounded-2xl bg-white border border-[#ded7c4] hover:border-court-500 hover:bg-court-50/50 py-2.5 px-2 text-xs font-bold text-slate-800 shadow-2xs active:scale-[0.98] transition cursor-pointer"
         >
-          <div className="flex h-5 w-5 items-center justify-center rounded-lg bg-court-100 text-court-800">
-            <svg
-              className="w-3.5 h-3.5 shrink-0"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-          </div>
-          <span>Add Match</span>
+          <span className="text-xs">🎾</span>
+          <span>+ Match</span>
         </button>
+
         <button
           type="button"
           onClick={() => setIsAddPlayerModalOpen(true)}
-          className="flex items-center justify-center gap-2 rounded-2xl bg-white border border-[#ded7c4] hover:border-court-500 hover:bg-court-50/50 py-2.5 px-4 text-xs font-bold text-slate-800 shadow-2xs active:scale-[0.98] transition cursor-pointer"
+          className="flex items-center justify-center gap-1.5 rounded-2xl bg-white border border-[#ded7c4] hover:border-court-500 hover:bg-court-50/50 py-2.5 px-2 text-xs font-bold text-slate-800 shadow-2xs active:scale-[0.98] transition cursor-pointer"
         >
-          <div className="flex h-5 w-5 items-center justify-center rounded-lg bg-court-100 text-court-800">
-            <svg
-              className="w-3.5 h-3.5 shrink-0"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-              <circle cx="8.5" cy="7" r="4" />
-              <line x1="20" y1="8" x2="20" y2="14" />
-              <line x1="23" y1="11" x2="17" y2="11" />
-            </svg>
-          </div>
-          <span>Add Player</span>
+          <span className="text-xs">👤</span>
+          <span>+ Player</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setIsLiveShareModalOpen(true)}
+          className="flex items-center justify-center gap-1.5 rounded-2xl bg-court-50 border border-court-500/30 hover:bg-court-100 text-court-900 py-2.5 px-2 text-xs font-black shadow-2xs active:scale-[0.98] transition cursor-pointer"
+          title="Share live court schedule & standings via QR code"
+        >
+          <span className="text-xs">📱</span>
+          <span>Live QR</span>
         </button>
       </div>
 
@@ -69,6 +54,11 @@ export const TopActionButtons: React.FC = () => {
         session={session}
         onClose={() => setIsAddPlayerModalOpen(false)}
         onAddPlayerWithName={addPlayerWithName}
+      />
+
+      <LiveShareModal
+        isOpen={isLiveShareModalOpen}
+        onClose={() => setIsLiveShareModalOpen(false)}
       />
     </>
   );

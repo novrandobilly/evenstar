@@ -7,6 +7,7 @@ import HistorySessionFeature from "../features/history-session";
 import HistoryListFeature from "../features/history";
 import RegisterFeature from "../features/auth/register";
 import AccountFeature from "../features/account";
+import LiveSessionFeature from "../features/live-session";
 import ProtectedRoute from "./guards/ProtectedRoute";
 import GuestRoute from "./guards/GuestRoute";
 
@@ -19,6 +20,9 @@ export const AppRoutes = () => {
         <Route path="/login" element={<HomeFeature />} />
         <Route path="/register" element={<RegisterFeature />} />
       </Route>
+
+      {/* Public Live Spectator Route (No Auth Required) */}
+      <Route path="/live/:sessionId" element={<LiveSessionFeature />} />
 
       {/* Protected Host Routes */}
       <Route element={<ProtectedRoute />}>
