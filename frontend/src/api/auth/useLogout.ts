@@ -10,6 +10,10 @@ export function useLogout() {
 
   return () => {
     pb.authStore.clear();
+    try {
+      localStorage.removeItem("evenstar_tennis_session_config");
+      sessionStorage.removeItem("evenstar_tennis_session_config");
+    } catch {}
     queryClient.clear();
     showToast({ message: "Logged out successfully." });
     navigate("/login");

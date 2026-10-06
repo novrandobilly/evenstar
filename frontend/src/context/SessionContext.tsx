@@ -110,6 +110,23 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [session]);
 
+  // Clean up session and storage when user logs out
+  useEffect(() => {
+    const unsubscribe = pb.authStore.onChange((token, model) => {
+      if (!token || !model) {
+        setSession(createDefaultSession());
+        try {
+          localStorage.removeItem(ACTIVE_STORAGE_KEY);
+          sessionStorage.removeItem(ACTIVE_STORAGE_KEY);
+        } catch {}
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
   const setSessionTitle = (title: string) => {
     setSession((prev) => ({ ...prev, title }));
   };
