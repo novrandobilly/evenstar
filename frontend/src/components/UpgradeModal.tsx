@@ -65,7 +65,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-court-950/75 p-4 backdrop-blur-xs transition-all duration-300">
-      <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl space-y-4 border border-[#ded7c4] animate-modal-in flex flex-col text-left relative overflow-hidden">
+      <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl space-y-4 border border-chalk-300 animate-modal-in flex flex-col text-left relative overflow-hidden">
         {/* Decorative Top Accent Glow */}
         <div className="absolute -top-12 -right-12 w-32 h-32 bg-volt-400/20 rounded-full blur-2xl pointer-events-none" />
 
