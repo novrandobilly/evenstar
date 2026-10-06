@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useSession } from "../../context/SessionContext";
+import { useTGetSession } from "../../api/sessions/useTGetSession";
 import { calculateStandings } from "../../utils/standings";
 import { StandingsTable } from "../in-session/features/RunningSession/features/StandingsTable";
 import { generateShareText } from "../session-summary/shareText";
@@ -9,12 +9,10 @@ import { shareStandingsAsImage } from "../../utils/shareImage";
 export const HistorySessionFeature: React.FC = () => {
   const navigate = useNavigate();
   const { sessionId } = useParams<{ sessionId: string }>();
-  const { sessionHistory } = useSession();
+  const { data: session, isLoading } = useTGetSession(sessionId);
   const [showMatchHistory, setShowMatchHistory] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
   const [isSharing, setIsSharing] = useState(false);
-
-  const session = sessionHistory.find((s) => s.id === sessionId);
 
   const standings = session
     ? calculateStandings(session.players, session.matches)
@@ -40,7 +38,7 @@ export const HistorySessionFeature: React.FC = () => {
         await navigator.clipboard.writeText(text);
         return true;
       } catch {
-        // continue to fallback
+        // fallback
       }
     }
     try {
@@ -100,6 +98,17 @@ export const HistorySessionFeature: React.FC = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center p-6 text-center">
+        <div className="text-2xl animate-spin mb-2">🎾</div>
+        <p className="text-xs font-bold text-slate-400">
+          Loading session details...
+        </p>
+      </div>
+    );
+  }
+
   if (!session) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center p-6 text-center">
@@ -122,19 +131,34 @@ export const HistorySessionFeature: React.FC = () => {
   return (
     <div className="flex flex-1 flex-col justify-between max-w-md mx-auto w-full px-4 py-6 select-none font-sans">
       <div className="space-y-4">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-1">
+        {/* Top Header Bar */}
+        <div className="flex items-center justify-between pt-1 mb-2">
           <button
             type="button"
-            onClick={() => navigate("/")}
-            className="inline-flex items-center gap-1 text-xs font-bold text-slate-500 hover:text-court-900 transition cursor-pointer px-2 py-1 -ml-2 rounded-lg hover:bg-chalk-100"
+            onClick={() => navigate("/account")}
+            className="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-chalk-100 transition cursor-pointer active:scale-95 -ml-1"
+            title="Back to Dashboard"
+            aria-label="Back to Dashboard"
           >
-            <span>←</span>
-            <span>Home</span>
+            <svg
+              className="w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
           </button>
-          <span className="text-[10px] font-black tracking-widest uppercase text-court-700 bg-court-100/70 px-2.5 py-1 rounded-full border border-court-500/20">
-            Tournament Archive
-          </span>
+
+          <h1 className="text-sm font-black uppercase tracking-widest text-slate-800 text-center flex-1">
+            Session Archive
+          </h1>
+
+          <div className="w-8" />
         </div>
 
         {/* Title block */}
@@ -152,7 +176,7 @@ export const HistorySessionFeature: React.FC = () => {
               : formatDate(session.createdAt)}
           </p>
           {/* Read-only badge */}
-          <span className="inline-flex items-center gap-1 mt-2 px-2.5 py-0.5 rounded-full bg-chalk-200/80 text-[10px] font-bold text-slate-600 uppercase tracking-wider border border-[#ded7c4]">
+          <span className="inline-flex items-center gap-1 mt-2 px-2.5 py-0.5 rounded-full bg-chalk-200/80 text-[10px] font-bold text-slate-600 uppercase tracking-wider border border-chalk-300">
             <span>🔒</span> Archived Record
           </span>
         </div>
@@ -211,7 +235,7 @@ export const HistorySessionFeature: React.FC = () => {
           <button
             type="button"
             onClick={handleCopyText}
-            className="flex items-center justify-center gap-2 rounded-2xl border border-[#ded7c4] bg-white px-4 py-3.5 text-xs font-bold text-slate-800 shadow-2xs hover:bg-chalk-50 hover:border-court-500/40 active:scale-[0.98] transition cursor-pointer"
+            className="flex items-center justify-center gap-2 rounded-2xl border border-chalk-300 bg-white px-4 py-3.5 text-xs font-bold text-slate-800 shadow-2xs hover:bg-chalk-50 hover:border-court-500/40 active:scale-[0.98] transition cursor-pointer"
           >
             <svg
               className="w-4 h-4 text-court-700"
@@ -240,7 +264,7 @@ export const HistorySessionFeature: React.FC = () => {
 
         {/* Podium */}
         {firstPlace && (
-          <div className="rounded-3xl border border-[#ded7c4] bg-white p-4 shadow-xs">
+          <div className="rounded-3xl border border-chalk-300 bg-white p-4 shadow-xs">
             <span className="text-[10px] font-black uppercase tracking-widest text-court-800 block text-center mb-3">
               Podium Finishers
             </span>
@@ -258,7 +282,7 @@ export const HistorySessionFeature: React.FC = () => {
                         ? `+${secondPlace.diff}`
                         : secondPlace.diff}
                     </span>
-                    <div className="w-full h-14 bg-gradient-to-t from-slate-200 to-slate-100 rounded-t-2xl mt-2 flex items-center justify-center font-mono font-black text-slate-500 text-sm border-t-2 border-slate-300">
+                    <div className="w-full h-14 bg-linear-to-t from-slate-200 to-slate-100 rounded-t-2xl mt-2 flex items-center justify-center font-mono font-black text-slate-500 text-sm border-t-2 border-slate-300">
                       2
                     </div>
                   </>
@@ -277,7 +301,7 @@ export const HistorySessionFeature: React.FC = () => {
                     ? `+${firstPlace.diff}`
                     : firstPlace.diff}
                 </span>
-                <div className="w-full h-20 bg-gradient-to-t from-amber-300/40 via-amber-200/30 to-amber-100/30 border-t-2 border-amber-400 rounded-t-2xl mt-2 flex items-center justify-center font-mono font-black text-amber-800 text-base shadow-xs">
+                <div className="w-full h-20 bg-linear-to-t from-amber-300/40 via-amber-200/30 to-amber-100/30 border-t-2 border-amber-400 rounded-t-2xl mt-2 flex items-center justify-center font-mono font-black text-amber-800 text-base shadow-xs">
                   1
                 </div>
               </div>
@@ -294,7 +318,7 @@ export const HistorySessionFeature: React.FC = () => {
                         ? `+${thirdPlace.diff}`
                         : thirdPlace.diff}
                     </span>
-                    <div className="w-full h-10 bg-gradient-to-t from-amber-200/40 to-amber-100/20 rounded-t-2xl mt-2 flex items-center justify-center font-mono font-black text-amber-900 text-sm border-t-2 border-amber-300">
+                    <div className="w-full h-10 bg-linear-to-t from-amber-200/40 to-amber-100/20 rounded-t-2xl mt-2 flex items-center justify-center font-mono font-black text-amber-900 text-sm border-t-2 border-amber-300">
                       3
                     </div>
                   </>
@@ -320,7 +344,7 @@ export const HistorySessionFeature: React.FC = () => {
         </div>
 
         {/* Collapsible Match Breakdown */}
-        <div className="rounded-3xl border border-[#ded7c4] bg-white overflow-hidden shadow-2xs">
+        <div className="rounded-3xl border border-chalk-300 bg-white overflow-hidden shadow-2xs">
           <button
             type="button"
             onClick={() => setShowMatchHistory(!showMatchHistory)}
@@ -344,7 +368,7 @@ export const HistorySessionFeature: React.FC = () => {
                   <div className="flex-1 text-right font-extrabold truncate text-slate-800 pr-2.5">
                     {m.teamA.map((p) => p.name).join(" / ")}
                   </div>
-                  <div className="font-mono font-black bg-chalk-100 px-2.5 py-1 rounded-lg text-slate-900 text-[11px] border border-[#ded7c4]">
+                  <div className="font-mono font-black bg-chalk-100 px-2.5 py-1 rounded-lg text-slate-900 text-[11px] border border-chalk-300">
                     {m.scoreA || "0"} - {m.scoreB || "0"}
                   </div>
                   <div className="flex-1 text-left font-extrabold truncate text-slate-800 pl-2.5">
@@ -361,10 +385,10 @@ export const HistorySessionFeature: React.FC = () => {
       <div className="pt-6 pb-2">
         <button
           type="button"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/account")}
           className="flex w-full items-center justify-center py-3 text-xs font-bold text-slate-500 hover:text-slate-900 transition cursor-pointer"
         >
-          Back to Home
+          Back to Dashboard
         </button>
       </div>
     </div>

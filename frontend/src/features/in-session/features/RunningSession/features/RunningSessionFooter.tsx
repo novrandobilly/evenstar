@@ -2,13 +2,15 @@ import React from "react";
 
 interface RunningSessionFooterProps {
   onEndSession: () => void;
+  onDiscardSession?: () => void;
 }
 
 export const RunningSessionFooter: React.FC<RunningSessionFooterProps> = ({
   onEndSession,
+  onDiscardSession,
 }) => {
   return (
-    <div className="pt-3 border-t border-chalk-200 mt-2 sticky bottom-0 bg-[#fcfbf7]/90 backdrop-blur-md py-3">
+    <div className="pt-3 border-t border-chalk-200 mt-2 sticky bottom-0 bg-[#fcfbf7]/95 backdrop-blur-md py-3 space-y-2">
       <button
         type="button"
         onClick={onEndSession}
@@ -17,6 +19,16 @@ export const RunningSessionFooter: React.FC<RunningSessionFooterProps> = ({
         <span>Complete & View Summary</span>
         <span className="text-sm">🏆</span>
       </button>
+
+      {onDiscardSession && (
+        <button
+          type="button"
+          onClick={onDiscardSession}
+          className="w-full text-center text-[11px] font-bold text-slate-400 hover:text-rose-600 transition cursor-pointer py-0.5"
+        >
+          End & discard session without saving
+        </button>
+      )}
     </div>
   );
 };

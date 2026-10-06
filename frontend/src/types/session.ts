@@ -25,6 +25,25 @@ export interface SessionConfig {
   matches: MatchItem[];
   createdAt: string;
   completedAt?: string;
+  sport?: string;
+  status?: "in_progress" | "completed";
+}
+
+export interface SessionRecord {
+  id: string;
+  collectionId: string;
+  collectionName: "sessions";
+  host: string;
+  title: string;
+  sport?: string;
+  match_format: MatchFormat;
+  doubles_mode: DoublesGameMode;
+  players: Player[];
+  matches: MatchItem[];
+  status: "in_progress" | "completed";
+  completed_at?: string;
+  created: string;
+  updated: string;
 }
 
 export const MIN_PLAYERS_DOUBLES = 4;
@@ -32,3 +51,4 @@ export const MIN_PLAYERS_SINGLES = 2;
 export const DEFAULT_PLAYERS_DOUBLES = 8;
 export const DEFAULT_PLAYERS_SINGLES = 4;
 export const MAX_PLAYERS = 32;
+

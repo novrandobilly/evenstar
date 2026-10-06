@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useSession } from "../../../../context/SessionContext";
 import { calculateStandings } from "../../../../utils/standings";
 import { useModal } from "../../../../context/modal";
+import { useToast } from "../../../../context/ToastContext";
 
 import { useDragDropDesktop } from "../../hooks/useDragDropDesktop";
 import { useDragDropMobile } from "../../hooks/useDragDropMobile";
@@ -19,10 +20,12 @@ import type { MatchItem } from "../../../../types/session";
 export const RunningSession: React.FC = () => {
   const navigate = useNavigate();
   const { showModal } = useModal();
+  const { showToast } = useToast();
   const {
     session,
     reorderMatches,
     completeSession,
+    resetSession,
     editCustomMatch,
     deleteMatch,
   } = useSession();
@@ -94,9 +97,32 @@ export const RunningSession: React.FC = () => {
       confirmText: "Complete & View Results",
       cancelText: "Keep Playing",
       type: "primary",
+      onConfirm: async () => {
+        const savedId = await completeSession();
+        if (savedId) {
+          navigate(`/session-summary?sessionId=${savedId}`);
+        } else {
+          navigate("/session-summary");
+        }
+      },
+    });
+  };
+
+  const handleDiscardSession = () => {
+    showModal({
+      title: "End & Discard Session?",
+      description:
+        "Are you sure you want to end and delete this running session? All match progress will be permanently cleared.",
+      confirmText: "Discard Session",
+      cancelText: "Keep Playing",
+      type: "danger",
       onConfirm: () => {
-        completeSession();
-        navigate("/session-summary");
+        resetSession();
+        showToast({
+          message: "Session ended and cleared.",
+          type: "info",
+        });
+        navigate("/account");
       },
     });
   };
@@ -104,11 +130,7 @@ export const RunningSession: React.FC = () => {
   return (
     <div className="flex flex-1 flex-col justify-between max-w-md mx-auto w-full px-4 py-5 select-none">
       <div>
-        <TopAppBar
-          formatLabel={formatLabel}
-          sessionTitle={session.title}
-          onEndSession={handleEndSession}
-        />
+        <TopAppBar formatLabel={formatLabel} />
 
         <TopActionButtons />
 
@@ -139,7 +161,10 @@ export const RunningSession: React.FC = () => {
         )}
       </div>
 
-      <RunningSessionFooter onEndSession={handleEndSession} />
+      <RunningSessionFooter
+        onEndSession={handleEndSession}
+        onDiscardSession={handleDiscardSession}
+      />
 
       <EditMatchModal
         isOpen={isFormModalOpen}

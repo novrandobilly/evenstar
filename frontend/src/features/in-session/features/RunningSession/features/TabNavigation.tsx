@@ -16,7 +16,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
   hasWins,
 }) => {
   return (
-    <div className="grid grid-cols-2 gap-1.5 p-1 bg-chalk-200/90 rounded-2xl mb-4 text-xs font-bold border border-[#ded7c4]">
+    <div className="grid grid-cols-2 gap-1.5 p-1 bg-chalk-200/90 rounded-2xl mb-4 text-xs font-bold border border-chalk-300">
       <button
         type="button"
         onClick={() => setActiveTab("matches")}

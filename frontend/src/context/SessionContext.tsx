@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type {
   SessionConfig,
+  SessionRecord,
   MatchFormat,
   DoublesGameMode,
   Player,
@@ -14,34 +15,35 @@ import {
   MAX_PLAYERS,
 } from '../types/session';
 import { generateAllMatches } from '../utils/matchmaker';
+import { pb } from '../lib/pocketbase';
+import { useTCreateSession } from '../api/sessions/useTCreateSession';
 
 const ACTIVE_STORAGE_KEY = 'evenstar_tennis_session_config';
-const HISTORY_STORAGE_KEY = 'evenstar_session_history';
-const MAX_HISTORY = 3;
 
 interface SessionContextType {
   session: SessionConfig;
-  sessionHistory: SessionConfig[];
   setSessionTitle: (title: string) => void;
   setMatchFormat: (format: MatchFormat) => void;
   setDoublesMode: (mode: DoublesGameMode) => void;
   setPlayerCount: (count: number) => void;
+  setRosterPlayers: (players: Player[]) => void;
   addPlayer: () => void;
   removePlayer: (index: number) => void;
   updatePlayerName: (index: number, name: string) => void;
   startSession: () => void;
+  ensureLiveSessionSynced: () => Promise<string>;
   updateMatchScore: (matchId: string, scoreA: string, scoreB: string) => void;
   toggleMatchCompleted: (matchId: string) => void;
   reorderMatches: (fromIndex: number, toIndex: number) => void;
-  completeSession: () => void;
+  completeSession: () => Promise<string | undefined>;
   /** Discards the current active session without saving to history. */
   resetSession: () => void;
-  deleteHistorySession: (sessionId: string) => void;
   addPlayerWithName: (name: string) => void;
   addCustomMatch: (teamA: Player[], teamB: Player[]) => { success: boolean; error?: string };
   editCustomMatch: (matchId: string, teamA: Player[], teamB: Player[]) => { success: boolean; error?: string };
   deleteMatch: (matchId: string) => void;
   hasActiveSession: boolean;
+  isSavingSession: boolean;
 }
 
 const createInitialPlayers = (count: number) =>
@@ -60,17 +62,6 @@ const createDefaultSession = (): SessionConfig => ({
   createdAt: new Date().toISOString(),
 });
 
-const loadHistory = (): SessionConfig[] => {
-  try {
-    const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) return parsed as SessionConfig[];
-    return [];
-  } catch {
-    return [];
-  }
-};
 
 const findDuplicateMatch = (
   matches: MatchItem[],
@@ -92,6 +83,8 @@ const findDuplicateMatch = (
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
 export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const createSessionMutation = useTCreateSession();
+
   const [session, setSession] = useState<SessionConfig>(() => {
     const saved = localStorage.getItem(ACTIVE_STORAGE_KEY) || sessionStorage.getItem(ACTIVE_STORAGE_KEY);
     if (saved) {
@@ -108,8 +101,6 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return createDefaultSession();
   });
 
-  const [sessionHistory, setSessionHistory] = useState<SessionConfig[]>(() => loadHistory());
-
   // Sync active session to localStorage
   useEffect(() => {
     try {
@@ -118,15 +109,6 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       console.error('Failed to save session to localStorage:', e);
     }
   }, [session]);
-
-  // Sync history to localStorage whenever it changes
-  useEffect(() => {
-    try {
-      localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(sessionHistory));
-    } catch (e) {
-      console.error('Failed to save session history:', e);
-    }
-  }, [sessionHistory]);
 
   const setSessionTitle = (title: string) => {
     setSession((prev) => ({ ...prev, title }));
@@ -193,6 +175,39 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     });
   };
 
+  const setRosterPlayers = (selectedPlayers: Player[]) => {
+    setSession((prev) => {
+      const minRequired =
+        prev.matchFormat === 'doubles' ? MIN_PLAYERS_DOUBLES : MIN_PLAYERS_SINGLES;
+      const targetCount = Math.min(
+        MAX_PLAYERS,
+        Math.max(minRequired, selectedPlayers.length)
+      );
+
+      let updatedPlayers: Player[] = selectedPlayers.slice(0, MAX_PLAYERS).map((p, idx) => ({
+        id: `p-${Date.now()}-${idx}`,
+        name: p.name,
+      }));
+
+      // If selected count is less than minRequired, fill the remainder with blank player slots
+      if (updatedPlayers.length < targetCount) {
+        const additional = Array.from(
+          { length: targetCount - updatedPlayers.length },
+          (_, i) => ({
+            id: `p-${Date.now()}-blank-${i}`,
+            name: '',
+          })
+        );
+        updatedPlayers = [...updatedPlayers, ...additional];
+      }
+
+      return {
+        ...prev,
+        players: updatedPlayers,
+      };
+    });
+  };
+
   const addPlayer = () => {
     setSession((prev) => {
       if (prev.players.length >= MAX_PLAYERS) return prev;
@@ -225,12 +240,110 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     });
   };
 
-  const startSession = () => {
-    const matches = generateAllMatches(session.players, session.matchFormat);
+  // Sync live match scores and session state to PocketBase in the background
+  useEffect(() => {
+    if (
+      !pb.authStore.isValid ||
+      session.matches.length === 0 ||
+      session.id.startsWith('session-') ||
+      session.status === 'completed'
+    ) {
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        await pb.collection('sessions').update(session.id, {
+          title: session.title || 'Tennis Session',
+          players: session.players,
+          matches: session.matches,
+          status: 'in_progress',
+        });
+      } catch (err) {
+        console.warn('Failed to sync live scores to PocketBase:', err);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [session.id, session.matches, session.players, session.title, session.status]);
+
+  const startSession = async () => {
+    const activePlayers = session.players.filter((p) => p.name.trim().length > 0);
+    const matches = generateAllMatches(activePlayers, session.matchFormat);
+
+    let newId = session.id;
+    const hostId = pb.authStore.record?.id;
+
+    if (hostId && pb.authStore.isValid) {
+      try {
+        const record = await pb.collection("sessions").create<SessionRecord>({
+          host: hostId,
+          title: session.title || "Tennis Session",
+          sport: session.sport || "tennis",
+          match_format: session.matchFormat,
+          doubles_mode: session.doublesMode,
+          players: activePlayers,
+          matches,
+          status: "in_progress",
+        });
+        newId = record.id;
+      } catch (err) {
+        console.warn("Could not create live session in PocketBase:", err);
+      }
+    }
+
     setSession((prev) => ({
       ...prev,
+      id: newId,
+      players: activePlayers,
       matches,
+      status: "in_progress",
     }));
+  };
+
+  const ensureLiveSessionSynced = async (): Promise<string> => {
+    const hostId = pb.authStore.record?.id;
+    if (!hostId || !pb.authStore.isValid) {
+      return session.id;
+    }
+
+    if (!session.id.startsWith('session-')) {
+      try {
+        await pb.collection('sessions').update(session.id, {
+          title: session.title || 'Tennis Session',
+          match_format: session.matchFormat,
+          doubles_mode: session.doublesMode,
+          players: session.players,
+          matches: session.matches,
+          status: 'in_progress',
+        });
+        return session.id;
+      } catch {
+        // Fallback to creating a new record
+      }
+    }
+
+    try {
+      const record = await pb.collection('sessions').create<SessionRecord>({
+        host: hostId,
+        title: session.title || 'Tennis Session',
+        sport: session.sport || 'tennis',
+        match_format: session.matchFormat,
+        doubles_mode: session.doublesMode,
+        players: session.players,
+        matches: session.matches,
+        status: 'in_progress',
+      });
+      setSession((prev) => ({
+        ...prev,
+        id: record.id,
+        status: 'in_progress',
+      }));
+      return record.id;
+    } catch (err) {
+      console.warn('Could not sync live session to PocketBase:', err);
+      return session.id;
+    }
   };
 
   const updateMatchScore = (matchId: string, scoreA: string, scoreB: string) => {
@@ -331,20 +444,37 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   /**
-   * Archives the current session into history (auto-evicting the oldest if
-   * already at MAX_HISTORY), then resets the active session.
+   * Archives the current session into PocketBase, then resets the active session.
    */
-  const completeSession = () => {
+  const completeSession = async (): Promise<string | undefined> => {
     const completedSession: SessionConfig = {
       ...session,
       completedAt: new Date().toISOString(),
+      status: 'completed',
     };
 
-    setSessionHistory((prev) => {
-      // Drop the oldest entry when already at capacity
-      const trimmed = prev.length >= MAX_HISTORY ? prev.slice(1) : prev;
-      return [...trimmed, completedSession];
-    });
+    let savedId: string | undefined = session.id;
+    const hostId = pb.authStore.record?.id;
+
+    if (hostId && pb.authStore.isValid) {
+      try {
+        if (!session.id.startsWith('session-')) {
+          const record = await pb.collection('sessions').update<SessionRecord>(session.id, {
+            title: session.title,
+            players: session.players,
+            matches: session.matches,
+            status: 'completed',
+            completed_at: completedSession.completedAt,
+          });
+          savedId = record.id;
+        } else {
+          const record = await createSessionMutation.mutateAsync(completedSession);
+          savedId = record.id;
+        }
+      } catch (e) {
+        console.error('Error saving session to PocketBase:', e);
+      }
+    }
 
     try {
       localStorage.removeItem(ACTIVE_STORAGE_KEY);
@@ -353,12 +483,25 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       console.error('Failed to remove active session from storage:', e);
     }
     setSession(createDefaultSession());
+    return savedId;
   };
 
   /**
    * Discards the current active session without saving to history.
    */
-  const resetSession = () => {
+  const resetSession = async () => {
+    if (
+      pb.authStore.isValid &&
+      session.id &&
+      !session.id.startsWith('session-')
+    ) {
+      try {
+        await pb.collection('sessions').delete(session.id);
+      } catch (err) {
+        console.warn('Failed to delete live session on reset:', err);
+      }
+    }
+
     try {
       localStorage.removeItem(ACTIVE_STORAGE_KEY);
       sessionStorage.removeItem(ACTIVE_STORAGE_KEY);
@@ -366,10 +509,6 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       console.error('Failed to remove session from storage:', e);
     }
     setSession(createDefaultSession());
-  };
-
-  const deleteHistorySession = (sessionId: string) => {
-    setSessionHistory((prev) => prev.filter((s) => s.id !== sessionId));
   };
 
   const addPlayerWithName = (name: string) => {
@@ -390,15 +529,16 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     <SessionContext.Provider
       value={{
         session,
-        sessionHistory,
         setSessionTitle,
         setMatchFormat,
         setDoublesMode,
         setPlayerCount,
+        setRosterPlayers,
         addPlayer,
         removePlayer,
         updatePlayerName,
         startSession,
+        ensureLiveSessionSynced,
         updateMatchScore,
         toggleMatchCompleted,
         reorderMatches,
@@ -407,15 +547,16 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         deleteMatch,
         completeSession,
         resetSession,
-        deleteHistorySession,
         addPlayerWithName,
         hasActiveSession,
+        isSavingSession: createSessionMutation.isPending,
       }}
     >
       {children}
     </SessionContext.Provider>
   );
 };
+
 
 export const useSession = () => {
   const context = useContext(SessionContext);
