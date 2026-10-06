@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { ReactNode } from 'react';
 
 export interface ModalOptions {
@@ -50,52 +51,54 @@ export const ModalProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       {children}
 
       {/* Global Confirmation Modal Dialog */}
-      {modalOptions && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-court-950/70 p-4 backdrop-blur-xs animate-fade-in transition-all">
-          <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl space-y-4 border border-[#ded7c4] animate-modal-in">
-            <div>
-              {modalOptions.title && (
-                <h3 className="text-base font-black text-slate-900 tracking-tight">
-                  {modalOptions.title}
-                </h3>
-              )}
-              {modalOptions.contentBody ? (
-                modalOptions.contentBody
-              ) : (
-                modalOptions.description && (
-                  <p className="text-xs text-slate-500 mt-1.5 leading-relaxed font-medium">
-                    {modalOptions.description}
-                  </p>
-                )
+      {modalOptions &&
+        createPortal(
+          <div className="fixed inset-0 top-0 left-0 right-0 bottom-0 z-[100] w-screen min-w-full h-screen min-h-dvh flex items-center justify-center bg-court-950/70 p-4 backdrop-blur-xs animate-fade-in transition-all overflow-y-auto">
+            <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl space-y-4 border border-[#ded7c4] animate-modal-in my-auto">
+              <div>
+                {modalOptions.title && (
+                  <h3 className="text-base font-black text-slate-900 tracking-tight">
+                    {modalOptions.title}
+                  </h3>
+                )}
+                {modalOptions.contentBody ? (
+                  modalOptions.contentBody
+                ) : (
+                  modalOptions.description && (
+                    <p className="text-xs text-slate-500 mt-1.5 leading-relaxed font-medium">
+                      {modalOptions.description}
+                    </p>
+                  )
+                )}
+              </div>
+
+              {!modalOptions.hideActions && (
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-chalk-200">
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="flex-1 rounded-2xl bg-chalk-100 py-3 text-xs font-bold text-slate-700 hover:bg-chalk-200 active:scale-[0.98] transition cursor-pointer border border-[#ded7c4]"
+                  >
+                    {modalOptions.cancelText || 'Cancel'}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleConfirm}
+                    className={`flex-1 rounded-2xl py-3 text-xs font-black shadow-md active:scale-[0.98] transition cursor-pointer ${
+                      modalOptions.type === 'danger'
+                        ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-rose-600/20'
+                        : 'bg-court-850 hover:bg-court-900 text-volt-300 shadow-court-900/20 border border-court-700/40'
+                    }`}
+                  >
+                    {modalOptions.confirmText || 'Confirm'}
+                  </button>
+                </div>
               )}
             </div>
-
-            {!modalOptions.hideActions && (
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-chalk-200">
-                <button
-                  type="button"
-                  onClick={handleCancel}
-                  className="flex-1 rounded-2xl bg-chalk-100 py-3 text-xs font-bold text-slate-700 hover:bg-chalk-200 active:scale-[0.98] transition cursor-pointer border border-[#ded7c4]"
-                >
-                  {modalOptions.cancelText || 'Cancel'}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleConfirm}
-                  className={`flex-1 rounded-2xl py-3 text-xs font-black shadow-md active:scale-[0.98] transition cursor-pointer ${
-                    modalOptions.type === 'danger'
-                      ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-rose-600/20'
-                      : 'bg-court-850 hover:bg-court-900 text-volt-300 shadow-court-900/20 border border-court-700/40'
-                  }`}
-                >
-                  {modalOptions.confirmText || 'Confirm'}
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </ModalContext.Provider>
   );
 };

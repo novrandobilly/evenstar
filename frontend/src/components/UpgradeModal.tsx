@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useToast } from "../context/ToastContext";
 
 export type UpgradeReason =
@@ -20,6 +21,16 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
   reason = "general",
 }) => {
   const { showToast } = useToast();
+
+  // Prevent background scrolling when modal is active
+  useEffect(() => {
+    if (!isOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -63,9 +74,16 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
     onClose();
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-court-950/75 p-4 backdrop-blur-xs transition-all duration-300">
-      <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl space-y-4 border border-chalk-300 animate-modal-in flex flex-col text-left relative overflow-hidden">
+  return createPortal(
+    <div
+      className="fixed inset-0 top-0 left-0 right-0 bottom-0 z-[100] w-screen min-w-full h-screen min-h-dvh flex items-center justify-center bg-court-950/80 p-4 backdrop-blur-xs transition-all duration-300 overflow-y-auto"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl space-y-4 border border-chalk-300 animate-modal-in flex flex-col text-left relative overflow-hidden my-auto">
         {/* Decorative Top Accent Glow */}
         <div className="absolute -top-12 -right-12 w-32 h-32 bg-volt-400/20 rounded-full blur-2xl pointer-events-none" />
 
@@ -167,7 +185,8 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
