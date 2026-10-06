@@ -1,2 +1,8 @@
 .superpowers/
 .DS_Store
+
+# PocketBase runtime database and storage files
+backend/pb_data/*.db
+backend/pb_data/*.db-shm
+backend/pb_data/*.db-wal
+backend/pb_data/storage/
