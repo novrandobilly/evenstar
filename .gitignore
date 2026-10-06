@@ -1,8 +1,67 @@
-.superpowers/
-.DS_Store
+# Environment & Secrets (High Risk)
+.env
+.env.*
+!.env.example
+!.env.template
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
+*.credentials
+credentials.json
+service-account*.json
 
-# PocketBase runtime database and storage files
+# PocketBase Runtime Databases & User Storage (High Risk)
 backend/pb_data/*.db
 backend/pb_data/*.db-shm
 backend/pb_data/*.db-wal
 backend/pb_data/storage/
+backend/pb_data/backups/
+*.sqlite
+*.sqlite3
+
+# Dependencies & Build Outputs (Unnecessary)
+node_modules/
+dist/
+dist-ssr/
+build/
+.turbo/
+*.tsbuildinfo
+.eslintcache
+
+# Logs & Debugging (Unnecessary)
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# OS System Files (Unnecessary)
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# IDE & Editor Settings (Unnecessary)
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+*.swo
+*~
+
+# Misc
+.superpowers/
