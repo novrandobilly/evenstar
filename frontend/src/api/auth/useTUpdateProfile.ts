@@ -17,6 +17,16 @@ export const useTUpdateProfile = () => {
       if (payload.name !== undefined) formData.append("name", payload.name);
       if (payload.club_name !== undefined) formData.append("club_name", payload.club_name);
       if (payload.avatar instanceof File) formData.append("avatar", payload.avatar);
+      
+      if (payload.club_logo instanceof File) {
+        if (payload.club_logo.size > 1024 * 1024) {
+          throw new Error("Club logo must be smaller than 1MB.");
+        }
+        formData.append("club_logo", payload.club_logo);
+      } else if (payload.club_logo === null) {
+        formData.append("club_logo", "");
+      }
+
       if (payload.password && payload.passwordConfirm) {
         formData.append("password", payload.password);
         formData.append("passwordConfirm", payload.passwordConfirm);

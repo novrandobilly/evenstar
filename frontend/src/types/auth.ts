@@ -8,7 +8,10 @@ export interface HostUser {
   verified: boolean;
   name: string;
   club_name?: string;
+  club_logo?: string;
   avatar?: string;
+  tier?: "free" | "pro";
+  subscription_expires_at?: string;
   created: string;
   updated: string;
 }
@@ -29,6 +32,7 @@ export interface RegisterPayload {
 export interface UpdateProfilePayload {
   name?: string;
   club_name?: string;
+  club_logo?: File | null;
   avatar?: File | null;
   oldPassword?: string;
   password?: string;

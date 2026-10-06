@@ -75,6 +75,8 @@ export const LiveSessionFeature: React.FC = () => {
           isCompleted={isCompleted}
           completedCount={completedCount}
           totalCount={totalCount}
+          hostClubName={session.hostClubName}
+          hostClubLogoUrl={session.hostClubLogoUrl}
           onRefresh={handleManualRefresh}
           isRefreshing={isRefreshing}
         />

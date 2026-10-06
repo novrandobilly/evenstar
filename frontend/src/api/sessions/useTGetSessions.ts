@@ -2,18 +2,28 @@ import { useQuery } from "@tanstack/react-query";
 import { pb } from "../../lib/pocketbase";
 import type { SessionRecord, SessionConfig } from "../../types/session";
 
-export const sessionRecordToConfig = (record: SessionRecord): SessionConfig => ({
-  id: record.id,
-  title: record.title,
-  matchFormat: record.match_format,
-  doublesMode: record.doubles_mode,
-  players: record.players || [],
-  matches: record.matches || [],
-  createdAt: record.created,
-  completedAt: record.completed_at || record.updated,
-  sport: record.sport,
-  status: record.status,
-});
+export const sessionRecordToConfig = (record: SessionRecord): SessionConfig => {
+  const host = record.expand?.host;
+  const isProHost = host?.tier === "pro";
+  const hostClubName = isProHost && host?.club_name ? host.club_name : undefined;
+  const hostClubLogoUrl =
+    isProHost && host?.club_logo ? pb.files.getURL(host, host.club_logo) : undefined;
+
+  return {
+    id: record.id,
+    title: record.title,
+    matchFormat: record.match_format,
+    doublesMode: record.doubles_mode,
+    players: record.players || [],
+    matches: record.matches || [],
+    createdAt: record.created,
+    completedAt: record.completed_at || record.updated,
+    sport: record.sport,
+    status: record.status,
+    hostClubName,
+    hostClubLogoUrl,
+  };
+};
 
 export const useTGetSessions = () => {
   return useQuery<SessionConfig[]>({

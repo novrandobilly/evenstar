@@ -14,7 +14,9 @@ export const useTLiveSession = (sessionId: string | undefined) => {
     queryFn: async () => {
       if (!sessionId) return null;
       try {
-        const record = await pb.collection("sessions").getOne<SessionRecord>(sessionId);
+        const record = await pb
+          .collection("sessions")
+          .getOne<SessionRecord>(sessionId, { expand: "host" });
         return sessionRecordToConfig(record);
       } catch (err: unknown) {
         console.error("Failed to load live session:", err);

@@ -1,4 +1,5 @@
 import React from "react";
+import defaultLogo from "../../../assets/logo-single.svg";
 
 interface LiveSessionHeaderProps {
   sessionTitle: string;
@@ -6,6 +7,8 @@ interface LiveSessionHeaderProps {
   isCompleted: boolean;
   completedCount: number;
   totalCount: number;
+  hostClubName?: string;
+  hostClubLogoUrl?: string;
   onRefresh?: () => void;
   isRefreshing?: boolean;
 }
@@ -16,6 +19,8 @@ export const LiveSessionHeader: React.FC<LiveSessionHeaderProps> = ({
   isCompleted,
   completedCount,
   totalCount,
+  hostClubName,
+  hostClubLogoUrl,
   onRefresh,
   isRefreshing = false,
 }) => {
@@ -26,14 +31,43 @@ export const LiveSessionHeader: React.FC<LiveSessionHeaderProps> = ({
     <div className="space-y-3 pb-3 border-b border-chalk-200">
       {/* Brand & Connection Status Bar */}
       <div className="flex items-center justify-between pt-1">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">🎾</span>
-          <span className="text-xs font-black uppercase tracking-widest text-slate-800">
-            Kickserve <span className="text-court-600">Live</span>
-          </span>
+        <div className="flex items-center gap-2 min-w-0 flex-1 pr-2">
+          {/* Custom Pro Club Logo or Kickserve Default */}
+          <div className="h-7 w-7 rounded-xl bg-court-850 p-1 flex items-center justify-center shrink-0 border border-court-700/50 shadow-2xs overflow-hidden">
+            {hostClubLogoUrl ? (
+              <img
+                src={hostClubLogoUrl}
+                alt={hostClubName || "Club Logo"}
+                className="h-full w-full object-contain rounded-lg"
+              />
+            ) : (
+              <img
+                src={defaultLogo}
+                alt="Kickserve"
+                className="h-full w-full object-contain"
+              />
+            )}
+          </div>
+
+          <div className="min-w-0">
+            <span className="text-xs font-black uppercase tracking-wider text-slate-800 truncate block">
+              {hostClubName ? (
+                <>
+                  {hostClubName}{" "}
+                  <span className="text-[10px] text-court-700 font-bold">
+                    · Live
+                  </span>
+                </>
+              ) : (
+                <>
+                  Kickserve <span className="text-court-600">Live</span>
+                </>
+              )}
+            </span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {/* Real-time SSE indicator */}
           <div className="flex items-center gap-1.5 px-2.5 py-1 bg-court-100/80 rounded-full border border-court-500/20 shadow-2xs">
             <span className="flex h-2 w-2 relative">
@@ -55,7 +89,9 @@ export const LiveSessionHeader: React.FC<LiveSessionHeaderProps> = ({
               className="p-1 text-slate-400 hover:text-slate-700 hover:bg-chalk-100 rounded-lg transition cursor-pointer"
             >
               <svg
-                className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin text-court-600" : ""}`}
+                className={`w-3.5 h-3.5 ${
+                  isRefreshing ? "animate-spin text-court-600" : ""
+                }`}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"

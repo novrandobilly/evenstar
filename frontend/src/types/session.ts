@@ -16,6 +16,8 @@ export interface MatchItem {
   isCompleted: boolean;
 }
 
+import type { HostUser } from "./auth";
+
 export interface SessionConfig {
   id: string;
   title: string;
@@ -27,6 +29,8 @@ export interface SessionConfig {
   completedAt?: string;
   sport?: string;
   status?: "in_progress" | "completed";
+  hostClubName?: string;
+  hostClubLogoUrl?: string;
 }
 
 export interface SessionRecord {
@@ -44,6 +48,9 @@ export interface SessionRecord {
   completed_at?: string;
   created: string;
   updated: string;
+  expand?: {
+    host?: HostUser;
+  };
 }
 
 export const MIN_PLAYERS_DOUBLES = 4;

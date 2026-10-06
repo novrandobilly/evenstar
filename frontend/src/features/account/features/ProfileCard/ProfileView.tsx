@@ -1,5 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import type { HostUser } from "../../../../types/auth";
+import { useTPlan } from "../../../../api/plan/useTPlan";
+import { pb } from "../../../../lib/pocketbase";
+import defaultLogo from "../../../../assets/logo-single.svg";
+import UpgradeModal from "../../../../components/UpgradeModal";
 
 interface ProfileViewProps {
   profile?: HostUser | null;
@@ -12,13 +16,35 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   sessionsCount,
   onStartEdit,
 }) => {
+  const { isPro } = useTPlan();
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+
+  const clubLogoUrl =
+    isPro && profile?.club_logo
+      ? pb.files.getURL(profile, profile.club_logo)
+      : null;
+
   return (
     <>
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-3.5 min-w-0 flex-1">
-          <div className="h-13 w-13 rounded-2xl bg-court-850 text-volt-300 flex items-center justify-center font-black text-xl shadow-md border border-court-700/50 shrink-0">
-            {profile?.name ? profile.name.charAt(0).toUpperCase() : "H"}
+          {/* Club Logo / Default Emblem */}
+          <div className="h-13 w-13 rounded-2xl bg-court-850 text-volt-300 flex items-center justify-center p-2.5 shadow-md border border-court-700/50 shrink-0 overflow-hidden">
+            {clubLogoUrl ? (
+              <img
+                src={clubLogoUrl}
+                alt={profile?.club_name || "Club Logo"}
+                className="h-full w-full object-contain rounded-xl"
+              />
+            ) : (
+              <img
+                src={defaultLogo}
+                alt="Kickserve"
+                className="h-full w-full object-contain"
+              />
+            )}
           </div>
+
           <div className="min-w-0 flex-1">
             <h2 className="text-base font-black text-slate-900 truncate">
               {profile?.name || "Session Host"}
@@ -34,10 +60,28 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 </span>
               </p>
             )}
-            <div className="mt-1.5">
-              <span className="inline-flex text-[10px] font-black uppercase tracking-wider text-court-800 bg-court-100/90 px-2.5 py-0.5 rounded-full border border-court-500/20">
-                Free Version
-              </span>
+
+            <div className="mt-2 flex items-center gap-2">
+              {isPro ? (
+                <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-court-950 bg-gradient-to-r from-amber-300 via-volt-400 to-volt-300 px-2.5 py-0.5 rounded-full border border-amber-400/50 shadow-2xs">
+                  <span>⚡</span>
+                  <span>Pro Host</span>
+                </span>
+              ) : (
+                <>
+                  <span className="inline-flex text-[10px] font-black uppercase tracking-wider text-court-800 bg-court-100/90 px-2.5 py-0.5 rounded-full border border-court-500/20">
+                    Free Version
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setIsUpgradeModalOpen(true)}
+                    className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-amber-900 bg-amber-100 hover:bg-amber-200 px-2.5 py-0.5 rounded-full border border-amber-300 transition cursor-pointer active:scale-95 shadow-2xs"
+                  >
+                    <span>Upgrade</span>
+                    <span>⚡</span>
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -63,6 +107,13 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           </span>
         </div>
       </div>
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        isOpen={isUpgradeModalOpen}
+        onClose={() => setIsUpgradeModalOpen(false)}
+        reason="general"
+      />
     </>
   );
 };

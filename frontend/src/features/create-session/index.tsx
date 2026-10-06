@@ -5,13 +5,13 @@ import { useModal } from "../../context/modal";
 import { useTGetRoster } from "../../api/rosters/useTGetRoster";
 import { useTSaveRoster } from "../../api/rosters/useTSaveRoster";
 import { RosterPickerModal } from "./features/RosterPickerModal";
-import type { Player } from "../../types/session";
-import { MAX_ROSTER_PLAYERS } from "../../types/roster";
 import {
-  MAX_PLAYERS,
+  type Player,
   MIN_PLAYERS_DOUBLES,
   MIN_PLAYERS_SINGLES,
 } from "../../types/session";
+import { useTPlan } from "../../api/plan/useTPlan";
+import UpgradeModal, { type UpgradeReason } from "../../components/UpgradeModal";
 
 export const CreateSessionFeature: React.FC = () => {
   const navigate = useNavigate();
@@ -34,11 +34,16 @@ export const CreateSessionFeature: React.FC = () => {
   const { data: roster } = useTGetRoster();
   const saveRosterMutation = useTSaveRoster();
 
+  const { isPro, limits, features } = useTPlan();
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  const [upgradeReason, setUpgradeReason] = useState<UpgradeReason>("general");
+
   const [isRosterPickerOpen, setIsRosterPickerOpen] = useState(false);
 
   const isDoubles = session.matchFormat === "doubles";
   const minRequired = isDoubles ? MIN_PLAYERS_DOUBLES : MIN_PLAYERS_SINGLES;
   const playerCount = session.players.length;
+  const maxPlayersAllowed = limits.maxSessionPlayers;
   const filledCount = session.players.filter(
     (p) => p.name.trim().length > 0
   ).length;
@@ -52,15 +57,24 @@ export const CreateSessionFeature: React.FC = () => {
   };
 
   const handleIncrement = () => {
-    if (playerCount < MAX_PLAYERS) {
-      setPlayerCount(playerCount + 1);
+    if (playerCount >= maxPlayersAllowed) {
+      setUpgradeReason("players_limit");
+      setIsUpgradeModalOpen(true);
+      return;
     }
+    setPlayerCount(playerCount + 1);
   };
 
   const handleNumberInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseInt(e.target.value, 10);
     if (!isNaN(val)) {
-      setPlayerCount(val);
+      if (val > maxPlayersAllowed) {
+        setPlayerCount(maxPlayersAllowed);
+        setUpgradeReason("players_limit");
+        setIsUpgradeModalOpen(true);
+      } else {
+        setPlayerCount(val);
+      }
     }
   };
 
@@ -70,15 +84,29 @@ export const CreateSessionFeature: React.FC = () => {
   ) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      if (index === playerCount - 1 && playerCount < MAX_PLAYERS) {
-        addPlayer();
-        setTimeout(() => {
-          inputRefs.current[index + 1]?.focus();
-        }, 50);
+      if (index === playerCount - 1) {
+        if (playerCount < maxPlayersAllowed) {
+          addPlayer();
+          setTimeout(() => {
+            inputRefs.current[index + 1]?.focus();
+          }, 50);
+        } else if (!isPro) {
+          setUpgradeReason("players_limit");
+          setIsUpgradeModalOpen(true);
+        }
       } else {
         inputRefs.current[index + 1]?.focus();
       }
     }
+  };
+
+  const handleOpenRosterPicker = () => {
+    if (!features.canSaveRoster) {
+      setUpgradeReason("roster");
+      setIsUpgradeModalOpen(true);
+      return;
+    }
+    setIsRosterPickerOpen(true);
   };
 
   const handleApplySelectedRoster = (selected: Player[]) => {
@@ -86,6 +114,12 @@ export const CreateSessionFeature: React.FC = () => {
   };
 
   const handleSaveCurrentToPool = () => {
+    if (!features.canSaveRoster) {
+      setUpgradeReason("roster");
+      setIsUpgradeModalOpen(true);
+      return;
+    }
+
     const currentNamed = session.players
       .map((p) => p.name.trim())
       .filter((n) => n.length > 0);
@@ -107,13 +141,13 @@ export const CreateSessionFeature: React.FC = () => {
       }
     });
 
-    const isOverLimit = newPool.length > MAX_ROSTER_PLAYERS;
+    const isOverLimit = newPool.length > limits.maxRosterPlayers;
     if (isOverLimit) {
-      newPool = newPool.slice(0, MAX_ROSTER_PLAYERS);
+      newPool = newPool.slice(0, limits.maxRosterPlayers);
     }
 
     const successMessage = isOverLimit
-      ? `Pool capacity is max ${MAX_ROSTER_PLAYERS} players. Saved first ${MAX_ROSTER_PLAYERS} to your pool!`
+      ? `Pool capacity is max ${limits.maxRosterPlayers} players. Saved first ${limits.maxRosterPlayers} to your pool!`
       : "Players saved to your roster pool!";
 
     saveRosterMutation.mutate({
@@ -284,16 +318,23 @@ export const CreateSessionFeature: React.FC = () => {
                 {/* Clean Button: Saved Roster */}
                 <button
                   type="button"
-                  onClick={() => setIsRosterPickerOpen(true)}
+                  onClick={handleOpenRosterPicker}
                   className="inline-flex items-center gap-1.5 bg-court-50 hover:bg-court-100 text-court-850 hover:text-court-950 border border-court-500/30 px-2.5 py-1.5 rounded-xl text-xs font-black transition cursor-pointer active:scale-95 shadow-2xs"
                   title={
-                    hasSavedRoster
-                      ? `Select from ${roster.players.length} players in your saved pool`
-                      : "Pick players from your saved roster pool"
+                    isPro
+                      ? hasSavedRoster
+                        ? `Select from ${roster?.players.length} players in your saved pool`
+                        : "Pick players from your saved roster pool"
+                      : "Upgrade to Pro to save and pick regular community members"
                   }
                 >
-                  <span className="text-xs">⚡</span>
+                  <span className="text-xs">{isPro ? "⚡" : "🔒"}</span>
                   <span>Saved Roster</span>
+                  {!isPro && (
+                    <span className="text-[9px] font-black uppercase text-amber-900 bg-amber-200/80 px-1 py-0.2 rounded">
+                      Pro
+                    </span>
+                  )}
                 </button>
 
                 <div className="h-4 w-px bg-chalk-200" />
@@ -311,7 +352,7 @@ export const CreateSessionFeature: React.FC = () => {
                   <input
                     type="number"
                     min={minRequired}
-                    max={MAX_PLAYERS}
+                    max={maxPlayersAllowed}
                     value={playerCount}
                     onChange={handleNumberInputChange}
                     className="w-10 text-center text-sm font-black text-slate-900 bg-chalk-50 rounded-xl py-1 border border-chalk-300 focus:outline-none focus:border-court-600 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -320,7 +361,7 @@ export const CreateSessionFeature: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleIncrement}
-                    disabled={playerCount >= MAX_PLAYERS}
+                    disabled={playerCount >= maxPlayersAllowed && isPro}
                     className="h-8 w-8 rounded-xl bg-chalk-100 text-sm font-black text-slate-700 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition hover:bg-chalk-200 cursor-pointer flex items-center justify-center border border-chalk-300"
                   >
                     +
@@ -432,6 +473,13 @@ export const CreateSessionFeature: React.FC = () => {
         currentPlayers={session.players}
         onClose={() => setIsRosterPickerOpen(false)}
         onApplySelected={handleApplySelectedRoster}
+      />
+
+      {/* Upgrade to Pro Modal */}
+      <UpgradeModal
+        isOpen={isUpgradeModalOpen}
+        onClose={() => setIsUpgradeModalOpen(false)}
+        reason={upgradeReason}
       />
     </div>
   );

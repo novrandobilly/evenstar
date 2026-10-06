@@ -1,11 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTGetSessions } from "../../api/sessions/useTGetSessions";
+import { useTPlan } from "../../api/plan/useTPlan";
 import BottomNavigation from "../../components/BottomNavigation";
+import UpgradeModal from "../../components/UpgradeModal";
 
 export const HistoryListFeature: React.FC = () => {
   const navigate = useNavigate();
   const { data: sessions, isLoading } = useTGetSessions();
+  const { isPro, isSessionWithinRetention } = useTPlan();
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
 
   const savedSessions = sessions || [];
 
@@ -30,9 +34,16 @@ export const HistoryListFeature: React.FC = () => {
 
         {/* Sessions List */}
         <div className="space-y-2.5">
-          <span className="text-[11px] font-black uppercase tracking-widest text-slate-400 px-1 block">
-            All Sessions
-          </span>
+          <div className="flex items-center justify-between px-1">
+            <span className="text-[11px] font-black uppercase tracking-widest text-slate-400 block">
+              All Sessions
+            </span>
+            {!isPro && savedSessions.length > 0 && (
+              <span className="text-[10px] font-bold text-slate-400">
+                Recent 3 months unblurred
+              </span>
+            )}
+          </div>
 
           {isLoading ? (
             <div className="p-6 text-center text-xs font-bold text-slate-400 animate-pulse bg-white rounded-2xl border border-chalk-200">
@@ -45,59 +56,118 @@ export const HistoryListFeature: React.FC = () => {
                 No session history yet
               </p>
               <p className="text-[11px] text-slate-400 mt-1 max-w-xs mx-auto">
-                Completed matches and standings will be archived here
-                automatically.
+                Completed matches and standings will be archived here automatically.
               </p>
             </div>
           ) : (
             <div className="space-y-2.5">
-              {savedSessions.map((s) => (
-                <button
-                  type="button"
-                  key={s.id}
-                  onClick={() => navigate(`/history/${s.id}`)}
-                  className="w-full text-left rounded-2xl border border-chalk-300 bg-white p-4 shadow-2xs hover:border-court-500/40 hover:bg-chalk-50 transition active:scale-[0.99] cursor-pointer flex items-center justify-between gap-3 group"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <h3 className="text-xs font-black text-slate-900 truncate">
-                        {s.title || "Tennis Session"}
-                      </h3>
-                      <span className="text-[10px] font-bold text-court-700 bg-court-50 px-2 py-0.5 rounded-full shrink-0 border border-court-500/20">
-                        {s.matchFormat === "doubles" ? "Doubles" : "Singles"}
-                      </span>
-                    </div>
+              {savedSessions.map((s) => {
+                const isLocked =
+                  !isPro &&
+                  !isSessionWithinRetention(s.completedAt || s.createdAt);
 
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="text-[11px] font-bold text-slate-600">
-                        {s.players.length} players
-                      </span>
-                      <span className="text-slate-300">·</span>
-                      <span className="text-[11px] font-bold text-slate-600">
-                        {s.matches.length} matches
-                      </span>
-                      <span className="text-slate-300">·</span>
-                      <span className="text-[11px] font-semibold text-slate-400">
-                        {s.completedAt
-                          ? formatDate(s.completedAt)
-                          : formatDate(s.createdAt)}
-                      </span>
-                    </div>
-                  </div>
+                if (isLocked) {
+                  return (
+                    <div
+                      key={s.id}
+                      onClick={() => setIsUpgradeModalOpen(true)}
+                      className="relative w-full text-left rounded-2xl border border-chalk-300 bg-white/90 p-4 shadow-2xs hover:border-amber-400 transition cursor-pointer overflow-hidden group"
+                    >
+                      {/* Blurred Content */}
+                      <div className="filter blur-[2px] opacity-40 select-none pointer-events-none flex items-center justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <h3 className="text-xs font-black text-slate-900 truncate">
+                              {s.title || "Tennis Session"}
+                            </h3>
+                            <span className="text-[10px] font-bold text-court-700 bg-court-50 px-2 py-0.5 rounded-full shrink-0 border border-court-500/20">
+                              {s.matchFormat === "doubles" ? "Doubles" : "Singles"}
+                            </span>
+                          </div>
 
-                  <svg
-                    className="w-4 h-4 text-slate-400 group-hover:text-slate-700 group-hover:translate-x-0.5 transition shrink-0"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                          <div className="flex items-center gap-2 mt-2">
+                            <span className="text-[11px] font-bold text-slate-600">
+                              {s.players.length} players
+                            </span>
+                            <span className="text-slate-300">·</span>
+                            <span className="text-[11px] font-bold text-slate-600">
+                              {s.matches.length} matches
+                            </span>
+                            <span className="text-slate-300">·</span>
+                            <span className="text-[11px] font-semibold text-slate-400">
+                              {s.completedAt
+                                ? formatDate(s.completedAt)
+                                : formatDate(s.createdAt)}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-sm">→</span>
+                      </div>
+
+                      {/* Lock Overlay */}
+                      <div className="absolute inset-0 flex items-center justify-between px-4 bg-white/30 backdrop-blur-[0.5px]">
+                        <div className="flex items-center gap-1.5 text-xs font-black text-amber-950 bg-amber-100/95 border border-amber-300/80 px-2.5 py-1 rounded-xl shadow-xs">
+                          <span>🔒</span>
+                          <span className="text-[10px] uppercase tracking-wider">
+                            3+ mos old · Pro Only
+                          </span>
+                        </div>
+                        <span className="text-[10px] font-black uppercase text-court-850 bg-court-100 px-2.5 py-1 rounded-xl border border-court-500/20 group-hover:scale-105 transition shadow-2xs">
+                          Unlock ⚡
+                        </span>
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <button
+                    type="button"
+                    key={s.id}
+                    onClick={() => navigate(`/history/${s.id}`)}
+                    className="w-full text-left rounded-2xl border border-chalk-300 bg-white p-4 shadow-2xs hover:border-court-500/40 hover:bg-chalk-50 transition active:scale-[0.99] cursor-pointer flex items-center justify-between gap-3 group"
                   >
-                    <polyline points="9 18 15 12 9 6" />
-                  </svg>
-                </button>
-              ))}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <h3 className="text-xs font-black text-slate-900 truncate">
+                          {s.title || "Tennis Session"}
+                        </h3>
+                        <span className="text-[10px] font-bold text-court-700 bg-court-50 px-2 py-0.5 rounded-full shrink-0 border border-court-500/20">
+                          {s.matchFormat === "doubles" ? "Doubles" : "Singles"}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="text-[11px] font-bold text-slate-600">
+                          {s.players.length} players
+                        </span>
+                        <span className="text-slate-300">·</span>
+                        <span className="text-[11px] font-bold text-slate-600">
+                          {s.matches.length} matches
+                        </span>
+                        <span className="text-slate-300">·</span>
+                        <span className="text-[11px] font-semibold text-slate-400">
+                          {s.completedAt
+                            ? formatDate(s.completedAt)
+                            : formatDate(s.createdAt)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <svg
+                      className="w-4 h-4 text-slate-400 group-hover:text-slate-700 group-hover:translate-x-0.5 transition shrink-0"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
@@ -105,6 +175,13 @@ export const HistoryListFeature: React.FC = () => {
 
       {/* 🎾 App Bottom Navigation Bar */}
       <BottomNavigation />
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        isOpen={isUpgradeModalOpen}
+        onClose={() => setIsUpgradeModalOpen(false)}
+        reason="history_locked"
+      />
     </div>
   );
 };
