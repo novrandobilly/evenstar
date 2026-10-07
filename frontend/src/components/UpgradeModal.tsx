@@ -76,7 +76,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 top-0 left-0 right-0 bottom-0 z-[100] w-screen min-w-full h-screen min-h-dvh flex items-center justify-center bg-court-950/80 p-4 backdrop-blur-xs transition-all duration-300 overflow-y-auto"
+      className="fixed inset-0 top-0 left-0 right-0 bottom-0 z-100 w-screen min-w-full h-screen min-h-dvh flex items-center justify-center bg-court-950/80 p-4 backdrop-blur-xs transition-all duration-300 overflow-y-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose();
@@ -186,7 +186,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 };
 
