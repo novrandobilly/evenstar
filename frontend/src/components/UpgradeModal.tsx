@@ -5,6 +5,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "../context/ToastContext";
 import { useTProfile } from "../api/auth/useTProfile";
 import { useTUpgrade } from "../api/payment/useTUpgrade";
+import {
+  useTPlans,
+  FALLBACK_LIFETIME_PLAN,
+  formatIdr,
+  formatBillingCycle,
+} from "../api/plan/useTPlans";
 import { pb } from "../lib/pocketbase";
 
 export type UpgradeReason =
@@ -30,6 +36,8 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
   const { showToast } = useToast();
   const { data: user } = useTProfile();
   const upgradeMutation = useTUpgrade();
+  const { data: plans } = useTPlans();
+  const activePlan = plans?.[0] || FALLBACK_LIFETIME_PLAN;
 
   const [isWaitingPayment, setIsWaitingPayment] = useState(false);
   const [openedUrl, setOpenedUrl] = useState<string | null>(null);
@@ -122,15 +130,18 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
       return;
     }
 
-    upgradeMutation.mutate(undefined, {
-      onSuccess: (data) => {
-        if (data.paymentUrl) {
-          setOpenedUrl(data.paymentUrl);
-          setIsWaitingPayment(true);
-          window.open(data.paymentUrl, "_blank");
-        }
-      },
-    });
+    upgradeMutation.mutate(
+      { planCode: activePlan.code },
+      {
+        onSuccess: (data) => {
+          if (data.paymentUrl) {
+            setOpenedUrl(data.paymentUrl);
+            setIsWaitingPayment(true);
+            window.open(data.paymentUrl, "_blank");
+          }
+        },
+      }
+    );
   };
 
   const handleRefreshCheck = () => {
@@ -235,55 +246,28 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
 
             {/* Features Checklist */}
             <div className="p-3.5 bg-chalk-50 rounded-2xl border border-chalk-300/80 space-y-2.5">
-              <div className="flex items-center gap-2.5 text-xs">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-court-100 text-court-800 text-[10px] font-black">
-                  ✓
-                </span>
-                <span className="text-slate-800 font-bold">
-                  Save 100 players in Roster
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2.5 text-xs">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-court-100 text-court-800 text-[10px] font-black">
-                  ✓
-                </span>
-                <span className="text-slate-800 font-bold">
-                  Up to 32 players per session
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2.5 text-xs">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-court-100 text-court-800 text-[10px] font-black">
-                  ✓
-                </span>
-                <span className="text-slate-800 font-bold">
-                  Unlimited lifetime session history
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2.5 text-xs">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-court-100 text-court-800 text-[10px] font-black">
-                  ✓
-                </span>
-                <span className="text-slate-800 font-bold">
-                  Custom Club Logo branding
-                </span>
-              </div>
+              {(activePlan.features || []).map((featureText, idx) => (
+                <div key={idx} className="flex items-center gap-2.5 text-xs">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-court-100 text-court-800 text-[10px] font-black">
+                    ✓
+                  </span>
+                  <span className="text-slate-800 font-bold">{featureText}</span>
+                </div>
+              ))}
             </div>
 
             {/* Pricing Box */}
             <div className="flex items-center justify-between px-1 pt-1">
               <div>
                 <div className="text-2xl font-black text-slate-900 tracking-tight leading-none">
-                  Rp 499.000
+                  {formatIdr(activePlan.price)}
                 </div>
                 <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-1">
-                  One-time payment
+                  {formatBillingCycle(activePlan.billing_cycle)}
                 </div>
               </div>
               <span className="shrink-0 whitespace-nowrap text-[11px] font-black uppercase tracking-wider text-court-850 bg-court-100 px-3 py-1.5 rounded-full border border-court-500/20 shadow-2xs">
-                Lifetime Access
+                {activePlan.badge_label || "Lifetime Access"}
               </span>
             </div>
 

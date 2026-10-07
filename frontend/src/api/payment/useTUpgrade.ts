@@ -8,11 +8,15 @@ export interface CreatePaymentResponse {
   paymentId: string;
 }
 
+export interface UpgradeParams {
+  planCode?: string;
+}
+
 export const useTUpgrade = () => {
   const { showGeneralErrorToast } = useToast();
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (params?: UpgradeParams) => {
       if (!pb.authStore.isValid) {
         throw new Error("Please log in to upgrade to Kickserve Pro.");
       }
@@ -21,6 +25,7 @@ export const useTUpgrade = () => {
         "/api/mayar/create-payment",
         {
           method: "POST",
+          body: params?.planCode ? { planCode: params.planCode } : undefined,
         }
       );
 

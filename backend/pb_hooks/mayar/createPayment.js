@@ -22,13 +22,50 @@ function handleCreatePayment(e) {
   const userEmail = authRecord.get("email");
   const userName = authRecord.get("name") || authRecord.get("username") || userEmail || "Kickserve Host";
 
+  // Check if client requested a specific plan code, default to lifetime
+  const reqInfo = e.requestInfo();
+  const body = reqInfo.body || {};
+  const requestedPlanCode = body.planCode || "pro_lifetime";
+
+  let planPrice = config.price;
+  let planName = "Kickserve Pro Lifetime";
+
+  try {
+    let planRec = null;
+    if (requestedPlanCode) {
+      try {
+        planRec = $app.findFirstRecordByFilter(
+          "plans",
+          "is_active = true && code = {:code}",
+          { code: requestedPlanCode }
+        );
+      } catch (_) {}
+    }
+    if (!planRec) {
+      try {
+        planRec = $app.findFirstRecordByFilter(
+          "plans",
+          "is_active = true && billing_cycle = 'lifetime'"
+        );
+      } catch (_) {}
+    }
+
+    if (planRec) {
+      planPrice = planRec.getInt("price") || planRec.get("price") || config.price;
+      planName = planRec.getString("name") || planName;
+    }
+  } catch (err) {
+    console.log("[Mayar] Could not find active plan in database, fallback to config:", err);
+  }
+
   const paymentPayload = {
     name: "Kickserve Pro - " + userName + " #" + Math.floor(1000 + Math.random() * 9000),
-    amount: config.price,
+    amount: planPrice,
     email: userEmail,
-    description: "Kickserve Pro Lifetime Host License (32 Players, Rosters & Club Branding)",
+    description: planName + " (32 Players, Rosters & Club Branding)",
     extraData: {
       userId: userId,
+      planCode: requestedPlanCode,
     },
   };
 
@@ -36,7 +73,9 @@ function handleCreatePayment(e) {
     "[Mayar] Requesting payment link for user:",
     userId,
     "amount:",
-    config.price,
+    planPrice,
+    "plan:",
+    planName,
     "endpoint:",
     config.baseUrl + "/hl/v2/payments/create"
   );
@@ -85,7 +124,7 @@ function handleCreatePayment(e) {
       const paymentsCol = $app.findCollectionByNameOrId("payments");
       const paymentRec = new Record(paymentsCol);
       paymentRec.set("user", userId);
-      paymentRec.set("amount", config.price);
+      paymentRec.set("amount", planPrice);
       paymentRec.set("status", "pending");
       paymentRec.set("mayar_payment_id", paymentId);
       paymentRec.set("payload", resData);
