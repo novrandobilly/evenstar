@@ -2,6 +2,10 @@
 migrate((app) => {
   const collection = app.findCollectionByNameOrId("_pb_users_auth_")
 
+  try {
+    if (collection.fields.getByName("club_name")) return;
+  } catch (_) {}
+
   // add club_name field
   collection.fields.addAt(8, new Field({
     "hidden": false,

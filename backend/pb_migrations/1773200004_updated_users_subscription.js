@@ -2,6 +2,10 @@
 migrate((app) => {
   const collection = app.findCollectionByNameOrId("_pb_users_auth_");
 
+  try {
+    if (collection.fields.getByName("tier")) return;
+  } catch (_) {}
+
   // 1. Add tier select field ('free' | 'pro')
   collection.fields.add(new Field({
     "hidden": false,

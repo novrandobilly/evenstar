@@ -1,11 +1,10 @@
 /// <reference path="../pb_data/types.d.ts" />
 migrate((app) => {
-  const collection = app.findCollectionByNameOrId("sessions");
-
-  // Allow public view rule so spectators can load and subscribe to live session by record id
-  collection.viewRule = "";
-
-  return app.save(collection);
+  try {
+    const collection = app.findCollectionByNameOrId("sessions");
+    collection.viewRule = "";
+    return app.save(collection);
+  } catch (_) {}
 }, (app) => {
   const collection = app.findCollectionByNameOrId("sessions");
 
