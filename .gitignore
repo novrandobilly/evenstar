@@ -1,4 +1,5 @@
 # Environment & Secrets (High Risk)
+*/.env
 .env
 .env.*
 !.env.example
