@@ -67,8 +67,7 @@ migrate((app) => {
         "type": "select",
         "values": [
           "lifetime",
-          "yearly",
-          "monthly"
+          "yearly"
         ]
       },
       {

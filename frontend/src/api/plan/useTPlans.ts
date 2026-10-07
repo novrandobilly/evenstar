@@ -5,7 +5,7 @@ export interface DbPlanRecord {
   id: string;
   name: string;
   code: string;
-  billing_cycle: "lifetime" | "yearly" | "monthly";
+  billing_cycle: "lifetime" | "yearly";
   price: number;
   badge_label: string;
   features: string[];
@@ -50,8 +50,6 @@ export const formatBillingCycle = (cycle: string): string => {
       return "One-time payment";
     case "yearly":
       return "Billed annually";
-    case "monthly":
-      return "Billed monthly";
     default:
       return "One-time payment";
   }
