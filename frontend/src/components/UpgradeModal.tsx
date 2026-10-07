@@ -36,11 +36,18 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
   const { showToast } = useToast();
   const { data: user } = useTProfile();
   const upgradeMutation = useTUpgrade();
-  const { data: plans } = useTPlans();
+  const { data: plans, refetch: refetchPlans } = useTPlans();
   const activePlan = plans?.[0] || FALLBACK_LIFETIME_PLAN;
 
   const [isWaitingPayment, setIsWaitingPayment] = useState(false);
   const [openedUrl, setOpenedUrl] = useState<string | null>(null);
+
+  // Refetch latest plan price and details every time modal opens
+  useEffect(() => {
+    if (isOpen) {
+      refetchPlans();
+    }
+  }, [isOpen, refetchPlans]);
 
   // Prevent background scrolling when modal is active
   useEffect(() => {
